@@ -6,7 +6,7 @@ import AppIcon from "../../web/src/components/AppIcon.vue";
 import LandingVideo from "./components/LandingVideo.vue";
 import SiteFooter from "./components/SiteFooter.vue";
 import SiteHeader from "./components/SiteHeader.vue";
-import { BASE, REPO_URL, SETUP_URL } from "./site";
+import { BASE, HOW_URL, REPO_URL, SETUP_URL } from "./site";
 
 const driveTree = [
   { depth: 0, icon: "drive", name: "My Drive" },
@@ -108,7 +108,7 @@ const extras = [
 
     <section id="how-it-works" class="how">
       <h2 class="display">How it works</h2>
-      <p class="lead">There is no Bibliograph service to sign up for. The code is public; you run your own copy of it; your copy keeps your library in your Drive.</p>
+      <p class="lead">Bibliograph isn't a service. It's pre-written code that sets up your own reference manager from scratch, in your own Google account. <a :href="HOW_URL">See the architecture →</a></p>
       <div class="flow" role="list" aria-label="How the pieces fit">
         <div class="node" role="listitem">
           <span class="where"><AppIcon name="link" :size="17" /> The code</span>
@@ -423,6 +423,7 @@ h1 {
 }
 
 .pillars a,
+.lead a,
 .run-cta a.link {
   color: var(--accent);
 }

@@ -5,7 +5,7 @@ including the people who write it, uses their own copy of the app: their own Fir
 database, Google sign-in, and web address. You can change the code however you like.
 
 - **The project website** (<https://jordanlei.github.io/bibliograph/>, GitHub Pages) explains
-  Bibliograph. Its [setup tutorial](https://jordanlei.github.io/bibliograph/setup/) is the friendly
+  Bibliograph. [How it works](https://jordanlei.github.io/bibliograph/how-it-works/) shows the architecture. Its [setup tutorial](https://jordanlei.github.io/bibliograph/setup/) is the friendly
   version of this guide.
 - **Your copy** (`https://<your-id>.web.app`) is just your library behind a sign-in page.
 

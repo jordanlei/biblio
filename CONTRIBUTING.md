@@ -8,7 +8,8 @@ Changes are welcome; please keep the rules below true.
 1. **Two kinds of site, never mixed.**
    - **The project website** is GitHub Pages, built from `apps/site` in this repository
      (<https://jordanlei.github.io/bibliograph/>). It explains Bibliograph and how to run it:
-     features, comparison, the setup tutorial, links to the code. It has no sign-in and no user data.
+     features, comparison, How it works (Bibliograph is code, not a service), the setup tutorial,
+     links to the code. It has no sign-in and no user data.
    - **Each person's copy** of the app is `apps/web`, deployed by its owner to their own Firebase
      project (`<their-id>.web.app` or their own domain). Signed out, it shows only a sign-in page.
      It doesn't advertise, and it isn't the project website.
@@ -21,7 +22,7 @@ Changes are welcome; please keep the rules below true.
    (sign-in, Drive, Picker) and public paper catalogs.
 4. **Setup stays a five-minute, one-command job.** If a change needs new cloud configuration, add it
    to `scripts/setup.mjs` (rerunnable, with a manual fallback), the tutorial (`apps/site/src/SetupPage.vue`),
-   and [docs/SELF_HOSTING.md](docs/SELF_HOSTING.md).
+   the architecture diagram (`apps/site/src/HowItWorksPage.vue`), and [docs/SELF_HOSTING.md](docs/SELF_HOSTING.md).
 5. **No personal data in the repository.** No real emails, local paths, private libraries, or
    project identifiers in code, docs, fixtures, or captures. Test data is made up; captures use the
    emulator's demo account.

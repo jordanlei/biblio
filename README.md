@@ -9,7 +9,7 @@
 
 > Bibliograph can disappear. Your research cannot.
 
-**Two kinds of site.** This repository's [project website](https://jordanlei.github.io/bibliograph/) (GitHub Pages, `apps/site`) explains Bibliograph and how to set it up. Each person's own copy of the app (`apps/web`) runs on their own Firebase site and shows just a sign-in page. See [CONTRIBUTING.md](CONTRIBUTING.md) for the rules that keep it that way.
+**Two kinds of site.** This repository's [project website](https://jordanlei.github.io/bibliograph/) (GitHub Pages, `apps/site`) explains Bibliograph, [how it works](https://jordanlei.github.io/bibliograph/how-it-works/), and how to set it up. Each person's own copy of the app (`apps/web`) runs on their own Firebase site and shows just a sign-in page. See [CONTRIBUTING.md](CONTRIBUTING.md) for the rules that keep it that way.
 
 - Set up your own copy: [tutorial](https://jordanlei.github.io/bibliograph/setup/) · full guide [docs/SELF_HOSTING.md](docs/SELF_HOSTING.md)
 - Current state, verification, and known gaps: [docs/STATUS.md](docs/STATUS.md)

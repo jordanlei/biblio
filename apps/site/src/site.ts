@@ -2,4 +2,5 @@
 export const REPO_URL = "https://github.com/jordanlei/bibliograph";
 export const BASE = import.meta.env.BASE_URL;
 export const SETUP_URL = `${BASE}setup/`;
+export const HOW_URL = `${BASE}how-it-works/`;
 export const docUrl = (name: string) => `${REPO_URL}/blob/main/docs/${name}`;
