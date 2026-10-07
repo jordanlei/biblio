@@ -5,5 +5,4 @@ declare const __BIBLIOGRAPH_CONFIG__: {
   projectId: string;
   appUrl: string;
   firebase: { apiKey: string; authDomain: string; projectId: string; storageBucket?: string; messagingSenderId: string; appId: string };
-  pickerApiKey?: string;
 } | null;

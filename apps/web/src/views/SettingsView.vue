@@ -3,7 +3,9 @@ import { ref } from "vue";
 import { useRouter } from "vue-router";
 import AppIcon from "../components/AppIcon.vue";
 import AppearanceSettings from "../components/AppearanceSettings.vue";
-import { connectDriveFolder, createDriveFolder, DEFAULT_FOLDER_NAME, disconnectDriveFolder, driveFolderUrl, pickDriveFolder, trashLibraryFolder } from "../services/drive";
+import LibraryImport from "../components/LibraryImport.vue";
+import { connectDriveFolder, createDriveFolder, DEFAULT_FOLDER_NAME, disconnectDriveFolder, driveFolderUrl, findOwnLibraries, trashLibraryFolder, type DriveFolderSelection } from "../services/drive";
+import { downloadLibraryZip } from "../services/transfer";
 import { deleteAllUserMetadata, deleteProfileDoc } from "../services/library";
 import { clearLocalCache, deleteCurrentAuthUser, updateProfile, useSession } from "../services/session";
 import { askConfirm, openAdd, toast, toastError } from "../services/ui";
@@ -25,12 +27,20 @@ async function run(label: string, task: () => Promise<unknown>) {
 }
 
 const createFolder = () => run("create", async () => connectDriveFolder(await createDriveFolder(DEFAULT_FOLDER_NAME)));
-const chooseFolder = () =>
+const download = () =>
+  run("download", async () => {
+    const count = await downloadLibraryZip();
+    toast(`Downloaded your library (${count} files).`);
+  });
+
+// Library folders this copy created (the only ones it can open); listed on request.
+const ownLibraries = ref<DriveFolderSelection[] | null>(null);
+const listOwn = () => run("list", async () => (ownLibraries.value = await findOwnLibraries()));
+const reconnect = (folder: DriveFolderSelection) =>
   run("pick", async () => {
-    const folder = await pickDriveFolder();
-    if (!folder) return;
     const { loaded } = await connectLibraryFolder(folder);
     toast(loaded !== null ? `Loaded ${loaded} papers from “${folder.name}”.` : `Your library now lives in “${folder.name}”.`);
+    ownLibraries.value = null;
   });
 
 async function rebuild() {
@@ -110,8 +120,23 @@ async function deleteAccount() {
         <div class="row wrap">
           <button class="btn sm" type="button" :disabled="!!busy" @click="syncNow()">Sync now</button>
           <button class="btn sm" type="button" :disabled="!!busy" @click="rebuild">{{ busy === "rebuild" ? "Rebuilding…" : "Rebuild from Drive" }}</button>
-          <button class="btn sm" type="button" :disabled="!!busy" @click="chooseFolder">{{ busy === "pick" ? "Opening…" : "Change folder…" }}</button>
+          <button class="btn sm" type="button" :disabled="!!busy" @click="download">{{ busy === "download" ? "Preparing…" : "Download library (.zip)" }}</button>
           <button class="btn sm quiet" type="button" @click="disconnectDriveFolder().catch(toastError)">Disconnect</button>
+        </div>
+        <h3 class="sub">Move a library in</h3>
+        <p class="muted small">
+          Bring in a library from another copy of Bibliograph or a backup: its <em>Download library</em> .zip, or the folder downloaded from Google Drive (also a .zip). It's copied
+          into a new folder in your Drive; your current folder stays as it is.
+        </p>
+        <div class="row wrap">
+          <LibraryImport />
+          <button class="link-btn small" type="button" :disabled="!!busy" @click="listOwn">Switch to another library this copy made…</button>
+        </div>
+        <div v-if="ownLibraries" class="row wrap">
+          <template v-for="folder in ownLibraries" :key="folder.id">
+            <button v-if="folder.id !== session.profile.value?.driveRootFolderId" class="btn sm" type="button" :disabled="!!busy" @click="reconnect(folder)">{{ folder.name }}</button>
+          </template>
+          <span v-if="!ownLibraries.some((f) => f.id !== session.profile.value?.driveRootFolderId)" class="muted small">No other libraries found.</span>
         </div>
       </template>
       <template v-else>
@@ -120,7 +145,12 @@ async function deleteAccount() {
           <button class="btn primary" type="button" :disabled="!!busy" @click="createFolder">
             <AppIcon name="folder-plus" /> {{ busy === "create" ? "Creating…" : `Create “${DEFAULT_FOLDER_NAME}” folder` }}
           </button>
-          <button class="btn" type="button" :disabled="!!busy" @click="chooseFolder">{{ busy === "pick" ? "Opening…" : "Use an existing folder or library" }}</button>
+          <LibraryImport />
+          <button class="link-btn small" type="button" :disabled="!!busy" @click="listOwn">Reconnect a library this copy made…</button>
+        </div>
+        <div v-if="ownLibraries" class="row wrap">
+          <button v-for="folder in ownLibraries" :key="folder.id" class="btn sm" type="button" :disabled="!!busy" @click="reconnect(folder)">{{ folder.name }}</button>
+          <span v-if="!ownLibraries.length" class="muted small">None found.</span>
         </div>
       </template>
     </section>
@@ -224,5 +254,11 @@ h1 {
   .settings {
     padding: 16px;
   }
+}
+
+.sub {
+  margin-top: 18px;
+  font-size: calc(14px * var(--text-scale));
+  font-weight: 600;
 }
 </style>

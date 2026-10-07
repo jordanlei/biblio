@@ -94,8 +94,7 @@ Cloud Functions (`semanticScholarSearch`, `fetchPdf`) require upgrading the proj
 `npm run setup` does all of this for a new copy ([docs/SELF_HOSTING.md](docs/SELF_HOSTING.md)):
 
 - Firebase Auth (Google provider), Firestore, Hosting, and rules.
-- **Google Picker key:** the Firebase browser key is restricted to Firebase services, which caused “The API developer key is invalid” in *Use an existing folder*. A separate key, **“Bibliograph Picker (browser)”**, is limited to the Picker API and to the app's origins and localhost. It's stored in `bibliograph.config.json` as `pickerApiKey` (override with `VITE_GOOGLE_PICKER_API_KEY`).
-- Drive access uses the full `drive` scope, so any copy of Bibliograph can open a library folder whoever created its files (the narrower `drive.file` scope ties each file to the copy that created it). The app reads and writes only inside the library folder you choose. Because `drive` is a restricted scope, Google shows an "unverified app" notice to anyone but the copy's owner and test users; see [docs/SELF_HOSTING.md](docs/SELF_HOSTING.md).
+- Drive access uses the narrow `drive.file` scope: a copy sees only the files it created. Google treats it as non-sensitive, so signing in shows no "unverified app" warning and no review is needed. Libraries move between copies as a .zip (*Settings → Download library*, then *Import a library* in the other copy), or from Google Drive's own folder download.
 
 ## License
 

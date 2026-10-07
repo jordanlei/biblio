@@ -47,7 +47,7 @@ Firebase Hosting supports static SPA deployment and rewrites to `index.html`, ma
 Prefer proven open-source packages and existing APIs where they reduce risky custom code:
 
 - Use Firebase client SDKs for Auth and Firestore rather than custom auth/session code.
-- Use Google Picker with the narrow `drive.file` scope for Drive folder/file selection.
+- Use the narrow `drive.file` scope (no "unverified app" warning). A copy sees only files it created; libraries move between copies by .zip export/import, never by opening another copy's files.
 - Use Citation.js or a similarly maintained bibliographic library for BibTeX/CSL parsing and export once the canonical data model is stable.
 - Use Zotero Translate and bundled Zotero translators behind `extractFromCurrentPage()` rather than writing publisher-specific parsers.
 
@@ -1573,12 +1573,12 @@ npm run setup
 **Requirements:**
 
 - **No project in the source.** All per-copy settings live in `bibliograph.config.json` (gitignored), or the `BIBLIOGRAPH_CONFIG` variable in CI. A build without it fails with a pointer to `npm run setup`; it never falls back to someone else's project. Local test mode (`npm run dev:local`) needs no config at all.
-- **One command, safe to rerun.** `npm run setup` signs in through the Firebase CLI (a pinned dev dependency, so `npm install` is enough). It creates or reuses the project and web app, turns on the Firestore, Drive, Picker, and sign-in APIs, creates the database and hosting site, creates a Picker key limited to the Picker API and the app's addresses, writes the config, points the extension at the new address, and deploys. Every step checks what already exists first. `--dry-run` shows the plan without changing anything.
+- **One command, safe to rerun.** `npm run setup` signs in through the Firebase CLI (a pinned dev dependency, so `npm install` is enough). It creates or reuses the project and web app, turns on the Firestore, Drive, and sign-in APIs, creates the database and hosting site, writes the config, points the extension at the new address, and deploys. Every step checks what already exists first. `--dry-run` shows the plan without changing anything.
 - **Be honest about the manual step.** Google offers no API to turn on Google sign-in for a personal project, so setup opens the Firebase console page, waits for the one click, and verifies it. If any automated step is blocked (e.g. by an organization policy), setup prints the console page for that step instead of failing.
 - **Change, try, publish.** `npm run dev` (own project) or `npm run dev:local` (emulators), then `npm run deploy`. Deploy commands always target the project in the config.
 - **Optional push-to-deploy.** `npm run setup -- --github` creates a deploy-only service account (hosting and rules only) and stores its key and the config in the fork's GitHub settings. `.github/workflows/deploy.yml` then tests and deploys every push to `main`, and is skipped in forks without those settings.
 - **Free.** Everything runs on Firebase's Spark plan. Cloud Functions stay optional.
-- **Portable between copies.** Copies share the on-Drive format (section 5 and `docs/LIBRARY_FORMAT.md`), so a library made in one copy opens in another via *Use an existing folder*.
+- **Portable between copies.** Copies share the on-Drive format (section 5 and `docs/LIBRARY_FORMAT.md`), so a library made in one copy moves to another as a .zip: *Download library* in one, *Import a library* in the other, or Google Drive's own folder download. Copies keep the narrow `drive.file` permission, so signing in never shows an "unverified app" warning.
 
 **Two kinds of site, always.** GitHub Pages for the code (the project website: how it works, features, comparison, and a step-by-step setup tutorial at `setup/`); each person's own Firebase site for their own copy (sign-in only when signed out). The project website never signs anyone in, and no copy of the app advertises.
 

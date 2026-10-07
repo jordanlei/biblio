@@ -1,7 +1,6 @@
-import { defaultPdfPath, type Paper, type StoredFile } from "@bibliograph/core";
+import { defaultPdfPath, inspectLibrary, type Paper, type StoredFile } from "@bibliograph/core";
 import {
   GoogleDriveFileStore,
-  MOCK_DRIVE_BASE,
   createFolder,
   deleteFile,
   fileExists,
@@ -11,10 +10,9 @@ import {
   listVisibleFolders,
   openUrl
 } from "../adapters/googleDrive";
-import { firebaseConfig, pickerApiKey } from "../firebase";
 import { updatePaper } from "./library";
 import { downloadPdf, findPdfSources } from "./pdfFetch";
-import { getGoogleAccessToken, hasGoogleAccessToken, updateProfile, useSession } from "./session";
+import { hasGoogleAccessToken, updateProfile, useSession } from "./session";
 
 // App-level Drive actions (connect a library folder, attach/find/remove PDFs). Provider details
 // live in adapters/googleDrive.ts; the library's text files are written by the sync engine.
@@ -25,13 +23,6 @@ export { DriveFileMissingError } from "../adapters/googleDrive";
 export interface DriveFolderSelection {
   id: string;
   name: string;
-}
-
-declare global {
-  interface Window {
-    gapi?: { load: (api: string, callback: () => void) => void };
-    google?: { picker?: any };
-  }
 }
 
 export async function createDriveFolder(name = DEFAULT_FOLDER_NAME): Promise<DriveFolderSelection> {
@@ -46,63 +37,17 @@ export async function disconnectDriveFolder() {
   await updateProfile({ driveConnected: false, driveRootFolderId: null, driveRootFolderName: null });
 }
 
-let pickerLoader: Promise<void> | null = null;
-function loadPickerApi(): Promise<void> {
-  if (window.google?.picker) return Promise.resolve();
-  pickerLoader ??= new Promise((resolve, reject) => {
-    const finish = () => window.gapi?.load("picker", () => resolve());
-    if (window.gapi) return finish();
-    const script = document.createElement("script");
-    script.src = "https://apis.google.com/js/api.js";
-    script.async = true;
-    script.onload = finish;
-    script.onerror = () => reject(new Error("Google Picker could not be loaded."));
-    document.head.appendChild(script);
-  });
-  return pickerLoader;
-}
-
-/** Let the user choose an existing Drive folder (Google Picker; a simple list against the mock Drive). */
-export async function pickDriveFolder(): Promise<DriveFolderSelection | null> {
-  if (MOCK_DRIVE_BASE) {
-    const folders = await listVisibleFolders();
-    if (!folders.length) throw new Error("The mock Drive has no folders yet. Create one instead.");
-    const answer = prompt(`Mock Drive folders:\n${folders.map((f, i) => `${i + 1}. ${f.name} [${f.id}]`).join("\n")}\n\nEnter a number:`, "1");
-    return (answer ? folders[Number(answer) - 1] : undefined) ?? null;
+/**
+ * Library folders this copy created earlier (e.g. before its index was reset), newest first.
+ * drive.file only lets a copy see its own folders, so this never lists anyone else's files.
+ */
+export async function findOwnLibraries(interactive = true): Promise<DriveFolderSelection[]> {
+  const folders = await listVisibleFolders(interactive);
+  const found: DriveFolderSelection[] = [];
+  for (const folder of folders) {
+    if (await inspectLibrary(new GoogleDriveFileStore(folder.id, interactive))) found.push(folder);
   }
-
-  if (!pickerApiKey) throw new Error("Choosing an existing folder needs a Google Picker key, which this copy doesn't have yet. Run `npm run setup` again to create one.");
-  const token = await getGoogleAccessToken();
-  await loadPickerApi();
-  const picker = window.google?.picker;
-  if (!picker) throw new Error("Google Picker is unavailable.");
-  return new Promise((resolve, reject) => {
-    try {
-      const view = new picker.DocsView(picker.ViewId.FOLDERS)
-        .setIncludeFolders(true)
-        .setSelectFolderEnabled(true)
-        .setMimeTypes("application/vnd.google-apps.folder")
-        .setMode(picker.DocsViewMode.LIST);
-      new picker.PickerBuilder()
-        .addView(view)
-        .enableFeature(picker.Feature.NAV_HIDDEN)
-        .setOAuthToken(token)
-        .setDeveloperKey(pickerApiKey)
-        .setAppId(firebaseConfig.messagingSenderId)
-        .setCallback((data: Record<string, any>) => {
-          const action = data[picker.Response.ACTION];
-          if (action === picker.Action.CANCEL) return resolve(null);
-          if (action !== picker.Action.PICKED) return;
-          const [doc] = data[picker.Response.DOCUMENTS] ?? [];
-          if (!doc?.[picker.Document.ID]) return reject(new Error("No folder was selected."));
-          resolve({ id: doc[picker.Document.ID], name: doc[picker.Document.NAME] ?? "Selected folder" });
-        })
-        .build()
-        .setVisible(true);
-    } catch (error) {
-      reject(error);
-    }
-  });
+  return found;
 }
 
 /** The connected library folder as a FileStore, for user-initiated actions (may prompt). */

@@ -3,8 +3,8 @@ import { clearGoogleAccessToken, getGoogleAccessToken } from "../services/sessio
 
 // Google Drive adapter: every Drive REST detail lives here. The rest of the app talks to it
 // through the core FileStore port (library files) or the few helpers below (folders, links).
-// Scope is full Drive (see makeGoogleProvider): any copy of Bibliograph can open a library folder,
-// whoever created its files. The app only reads and writes inside the chosen library folder.
+// Scope is drive.file: this copy sees only the Drive files it created. Libraries made elsewhere
+// come in by import (services/transfer.ts), which copies them into a folder this copy creates.
 
 // VITE_DRIVE_API_BASE points at the mock Drive server in local test mode.
 export const MOCK_DRIVE_BASE = import.meta.env.VITE_DRIVE_API_BASE as string | undefined;
@@ -36,8 +36,7 @@ export async function driveRequest(url: string, init: RequestInit = {}, interact
       throw new StorageAuthError("Your Google Drive session expired. Reconnect to keep syncing.");
     }
     if (response.status === 403 && /insufficient|scope/i.test(await response.clone().text())) {
-      // A token from before the full-Drive permission, or one where the Drive box was unticked
-      // on Google's consent screen: ask again.
+      // The Drive box was unticked on Google's consent screen: ask again.
       clearGoogleAccessToken();
       if (interactive && attempt === 0) continue;
       throw new StorageAuthError("Bibliograph needs permission to your Google Drive. Reconnect and allow Drive access.");
@@ -99,9 +98,9 @@ export function folderUrl(folderId: string): string {
   return MOCK_DRIVE_BASE ? `${BASE}/` : `https://drive.google.com/drive/folders/${folderId}`;
 }
 
-/** List folders the app can see (mock Drive only; real Drive uses the Picker). */
-export async function listVisibleFolders(): Promise<Array<{ id: string; name: string }>> {
-  const response = await driveRequest(`${API}/files?q=${encodeURIComponent(`mimeType='${FOLDER_MIME_TYPE}'`)}&fields=files(id,name,parents)`);
+/** Top-level folders this copy created (with drive.file, the only ones it can see). */
+export async function listVisibleFolders(interactive = true): Promise<Array<{ id: string; name: string }>> {
+  const response = await driveRequest(`${API}/files?q=${encodeURIComponent(`mimeType='${FOLDER_MIME_TYPE}' and trashed = false`)}&fields=files(id,name,parents)`, {}, interactive);
   const { files } = (await response.json()) as { files: Array<{ id: string; name: string; parents?: string[] }> };
   // Only top-level library folders, not their notes/ and papers/ subfolders.
   const ids = new Set(files.map((f) => f.id));
@@ -171,6 +170,10 @@ export class GoogleDriveFileStore implements FileStore {
 
   async readText(file: StoredFile): Promise<string> {
     return (await this.request(`${API}/files/${file.id}?alt=media`)).text();
+  }
+
+  async readBlob(file: StoredFile): Promise<Blob> {
+    return (await this.request(`${API}/files/${file.id}?alt=media`)).blob();
   }
 
   private async upload(path: string, content: Blob, mimeType: string, existing?: StoredFile): Promise<StoredFile> {

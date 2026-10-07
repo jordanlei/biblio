@@ -27,6 +27,13 @@ export class MemoryFileStore implements FileStore {
     return typeof entry.content === "string" ? entry.content : await entry.content.text();
   }
 
+  async readBlob(file: StoredFile) {
+    this.check();
+    const entry = [...this.files.values()].find((e) => e.file.id === file.id);
+    if (!entry) throw new Error(`No file ${file.id}`);
+    return typeof entry.content === "string" ? new Blob([entry.content]) : entry.content;
+  }
+
   private put(path: string, content: string | Blob, existing?: StoredFile): StoredFile {
     this.check();
     this.writes += 1;

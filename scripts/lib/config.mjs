@@ -11,8 +11,7 @@ export const CONFIG_PATH = fileURLToPath(new URL("../../bibliograph.config.json"
  * @typedef {{
  *   projectId: string,
  *   appUrl: string,
- *   firebase: { apiKey: string, authDomain: string, projectId: string, storageBucket?: string, messagingSenderId: string, appId: string },
- *   pickerApiKey?: string
+ *   firebase: { apiKey: string, authDomain: string, projectId: string, storageBucket?: string, messagingSenderId: string, appId: string }
  * }} BibliographConfig
  */
 

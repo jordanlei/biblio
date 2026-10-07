@@ -75,11 +75,6 @@ async function importSample(page: Page) {
 const synced = (page: Page) => expect(page.locator('[data-sync-status][data-phase="saved"]')).toBeVisible({ timeout: 20_000 });
 
 test("Bibliograph can disappear; the library survives in Drive and rebuilds", async ({ page }) => {
-  page.on("dialog", async (dialog) => {
-    // The mock folder picker lists "n. name [id]"; choose our library folder.
-    const line = dialog.message().split("\n").find((l) => l.includes(`[${rootId}]`));
-    await dialog.accept(line ? line.split(".")[0] : undefined);
-  });
   let rootId = "";
 
   await test.step("build a library: papers, tags, status, folder, notes with a link, a PDF", async () => {
@@ -142,7 +137,8 @@ test("Bibliograph can disappear; the library survives in Drive and rebuilds", as
     await page.goto("/library");
     await expect(page.locator(".tour")).toBeVisible(); // a brand-new profile
     await page.getByRole("button", { name: "Start" }).click();
-    await page.getByRole("button", { name: "Use an existing folder" }).click();
+    // The copy can still see the folder it created (drive.file), so it offers to reconnect it.
+    await page.getByRole("button", { name: /Reconnect “Bibliograph Library”/ }).first().click();
     await expect(page.getByText(/Loaded 3 papers/)).toBeVisible();
     if (await page.locator(".tour").count()) await page.getByText("Skip tour").click();
 
@@ -157,6 +153,47 @@ test("Bibliograph can disappear; the library survives in Drive and rebuilds", as
     await page.locator(".folder-row", { hasText: "Dynamics" }).getByRole("link").click();
     await expect(page.locator(".entry")).toHaveCount(1);
     await synced(page);
+  });
+});
+
+test("a library moves to another copy as a .zip: download, then import", async ({ page }) => {
+  await test.step("build a library with a note and a PDF, then download it", async () => {
+    await signIn(page, `mover.${Date.now()}@example.com`);
+    await createLibraryFromTour(page);
+    await importSample(page);
+    await page.locator(".entry", { hasText: "LFADS" }).click();
+    const inspector = page.locator(".inspector");
+    await inspector.locator(".empty-notes").dblclick();
+    await inspector.locator("textarea").pressSequentially("Carried over in a zip.", { delay: 5 });
+    await inspector.getByRole("button", { name: "Done" }).click();
+    await inspector.locator(".pdf input[type=file]").setInputFiles({ name: "lfads.pdf", mimeType: "application/pdf", buffer: pdf });
+    await expect(inspector.getByRole("link", { name: "Open PDF" })).toBeVisible();
+    await synced(page);
+  });
+
+  const zipPath = test.info().outputPath("library.zip");
+  await test.step("Settings → Download library (.zip)", async () => {
+    await page.goto("/settings");
+    const download = page.waitForEvent("download");
+    await page.getByRole("button", { name: "Download library (.zip)" }).click();
+    await (await download).saveAs(zipPath);
+  });
+
+  await test.step("a different account imports it from the first-run tour", async () => {
+    await signIn(page, `newcopy.${Date.now()}@example.com`);
+    await page.getByRole("button", { name: "Start" }).click();
+    await page.getByLabel("Library .zip file").setInputFiles(zipPath);
+    await expect(page.getByText(/Imported 3 papers/)).toBeVisible({ timeout: 20_000 });
+    if (await page.locator(".tour").count()) await page.getByText("Skip tour").click();
+    await expect(page.locator(".entry")).toHaveCount(3);
+    await page.locator(".entry", { hasText: "LFADS" }).click();
+    const inspector = page.locator(".inspector");
+    await expect(inspector.locator(".prose")).toContainText("Carried over in a zip.");
+    await expect(inspector.getByRole("link", { name: "Open PDF" })).toBeVisible();
+    // A new folder this copy created holds the files.
+    const folders = (await driveTree()).filter((f) => /Bibliograph Library \(imported/.test(f.path) && !f.path.includes("/"));
+    expect(folders).toHaveLength(1);
+    expect((await libraryFiles(folders[0].id)).map((f) => f.rel)).toEqual(expect.arrayContaining(["library.json", `notes/${LFADS}.md`, `papers/${LFADS}.pdf`]));
   });
 });
 

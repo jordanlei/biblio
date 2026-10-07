@@ -15,6 +15,7 @@
     "@fontsource-variable/jetbrains-mono": "^5.3.0",
     "@fontsource-variable/literata": "^5.3.0",
     "dompurify": "latest",
+    "fflate": "^0.8.3",
     "firebase": "^12.19.0",
     "marked": "latest",
     "vue": "latest",

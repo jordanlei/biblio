@@ -97,7 +97,7 @@ const lives = [
       <div>
         <h2>Set up once</h2>
         <p>
-          <code>npm run setup</code> signs in as you and creates a Firebase project in your Google account. It turns on the Google APIs the app needs (Firestore, Drive, Picker, sign-in),
+          <code>npm run setup</code> signs in as you and creates a Firebase project in your Google account. It turns on the Google APIs the app needs (Firestore, Drive, sign-in),
           creates the database and site, builds the web app from the code, and deploys it to your address. You make one click to turn on Google sign-in.
         </p>
       </div>
@@ -105,7 +105,7 @@ const lives = [
         <h2>Every day</h2>
         <p>
           You open <code>your-id.web.app</code> and sign in. The app keeps a quick index in your Firestore so search is instant, and saves the library itself to a folder in your Drive.
-          It asks for access to your Drive so it can open a library made by any copy, and it only reads and writes inside the library folder you choose.
+          It can only see the Drive files it creates, so Google shows no warning when you sign in.
         </p>
       </div>
     </section>
@@ -127,7 +127,8 @@ const lives = [
         </table>
       </div>
       <p class="aside">
-        Your Drive folder is what matters. Delete the Firebase project and the library is still there. Point any copy of Bibliograph at the folder and everything comes back.
+        Your Drive folder is what matters. Delete the Firebase project and the library is still there. To move it to another copy, download it as a .zip (from the app, or
+        straight from Google Drive) and import it there.
         <a :href="docUrl('STORAGE.md')">How storage works</a>
       </p>
     </section>

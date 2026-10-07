@@ -8,7 +8,7 @@ Bibliograph is a static Vue app talking directly to Firebase (Auth, Firestore) a
  ┌──────────── browser ────────────┐        ┌────────── Google ──────────┐
  │ Vue app (apps/web)              │──Auth──▶│ Firebase Auth (Google)     │
  │   session ─ library store ─ UI  │──data──▶│ Firestore users/{uid}/…    │
- │   drive / pdfFetch / lookup     │──PDFs──▶│ Drive (full drive scope)   │
+ │   drive / pdfFetch / lookup     │──PDFs──▶│ Drive (drive.file scope)   │
  │        ▲  window.postMessage    │──meta──▶│ OpenAlex · Crossref ·      │
  │        ▼                        │         │ DataCite (public APIs)     │
  │ Extension bridge.js ⇄ background│──fetch─▶│ any PDF host (cookies ok)  │
@@ -33,7 +33,7 @@ Bibliograph is a static Vue app talking directly to Firebase (Auth, Firestore) a
 
 | File | Role |
 | --- | --- |
-| `firebase.ts` | Firebase init (`ignoreUndefinedProperties`), emulator wiring, Picker key. |
+| `firebase.ts` | Firebase init (`ignoreUndefinedProperties`), emulator wiring, the Drive scope. |
 | `services/session.ts` | Auth state; publishes the user only after the profile exists (fixes onboarding/reload races). Caches the Google access token for ~50 min in memory + `sessionStorage` (never Firestore) so Drive actions don't re-prompt. |
 | `services/library.ts` | The Firestore materialized view: live `onSnapshot` stores for papers, folders, and Research Notes shared by every view; all writes; contextual backlinks; `replaceLibrary()` for rebuilds; the **undo stack**. |
 | `adapters/googleDrive.ts` | All Drive REST: `driveRequest` (maps failures to `StorageUnavailableError` / `StorageAuthError`), folders, and `GoogleDriveFileStore` (the core `FileStore` port). |
@@ -72,6 +72,10 @@ Three static Vue pages published to GitHub Pages (`.github/workflows/site.yml`):
 ## Running a copy (`scripts/setup.mjs`, `bibliograph.config.json`)
 
 Each copy of the app is configured by a gitignored `bibliograph.config.json` read at build time (`apps/web/vite.config.ts`); nothing in the source names a Firebase project. `npm run setup` creates and fills it; `npm run deploy` targets it. See [SELF_HOSTING.md](SELF_HOSTING.md).
+
+## Moving a library (`services/transfer.ts`, core `library/transfer.ts`)
+
+A copy only sees Drive files it created (`drive.file`), so libraries move by copying files: *Download library* zips the library folder (fflate, in the browser); *Import a library* takes that .zip, Google Drive's own folder download (also a .zip, with extra wrapping folders), or an unzipped folder, finds `library.json`, checks it, writes the files into a new folder this copy creates (`library.json` last), and switches to it. *Reconnect* lists library folders this copy made earlier, for when its index was reset.
 
 ## Extension (`apps/extension`)
 

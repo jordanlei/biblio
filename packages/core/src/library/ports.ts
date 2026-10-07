@@ -17,6 +17,8 @@ export interface FileStore {
   /** Files directly inside a directory ("" is the root). */
   list(dir: string): Promise<StoredFile[]>;
   readText(file: StoredFile): Promise<string>;
+  /** Raw contents (PDFs), e.g. for exporting the library. */
+  readBlob(file: StoredFile): Promise<Blob>;
   /** Create or overwrite the file at `path`, or update the given file (renaming it to `path` if that differs). */
   writeText(path: string, content: string, mimeType: string, existing?: StoredFile): Promise<StoredFile>;
   writeBlob(path: string, content: Blob, mimeType: string, existing?: StoredFile): Promise<StoredFile>;

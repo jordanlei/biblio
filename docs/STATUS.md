@@ -33,8 +33,11 @@ each person's copy of the app runs on their own Firebase site ([SELF_HOSTING.md]
 - **Two sites:** the project website (`apps/site`, GitHub Pages: a home page, a How it works page with the
   architecture diagram at `how-it-works/`, and a step-by-step setup tutorial at `setup/`); each copy of the app
   (`apps/web`) shows only a sign-in page when signed out.
+- **Moving a library:** *Download library (.zip)* and *Import a library* (a .zip, Google Drive's own
+  folder download, or an unzipped folder) move a library between copies; *Reconnect* reopens a
+  library folder the same copy made. Drive access is `drive.file` only: no unverified-app warning.
 - **Run your own copy:** `npm run setup` creates and configures a new Firebase project (web app,
-  Firestore, APIs, Picker key, hosting) and deploys; config lives in gitignored
+  Firestore, APIs, hosting) and deploys; config lives in gitignored
   `bibliograph.config.json`, with no project hardcoded in source. Optional push-to-deploy via
   GitHub Actions. See [SELF_HOSTING.md](SELF_HOSTING.md).
 - **Appearance and onboarding:** guided first-run tour, settings, themes, accents, font choices, and
@@ -56,9 +59,8 @@ each person's copy of the app runs on their own Firebase site ([SELF_HOSTING.md]
 
 ## Known Gaps
 
-- `npm run setup` has been dry-run against an existing and a new project ID, but the steps that create
-  a project, call Google's APIs, and set up GitHub deploys haven't yet been run end to end on a fresh
-  account.
+- `npm run setup` has run end to end on a fresh project on the free plan; the GitHub deploy option
+  (`--github`) hasn't been run for real yet.
 
 - No full-text PDF search yet.
 - No Zotero JSON import yet; BibTeX import is the current path.

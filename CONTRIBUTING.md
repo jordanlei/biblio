@@ -19,7 +19,7 @@ Changes are welcome; please keep the rules below true.
 3. **Everything belongs to the person running it.** Their copy runs in their Google Cloud project,
    and their library is plain files in their Google Drive ([docs/LIBRARY_FORMAT.md](docs/LIBRARY_FORMAT.md)).
    Don't add a central server, accounts, analytics, or telemetry. Outside calls are limited to Google
-   (sign-in, Drive, Picker) and public paper catalogs.
+   (sign-in, Drive) and public paper catalogs.
 4. **Setup stays a five-minute, one-command job.** If a change needs new cloud configuration, add it
    to `scripts/setup.mjs` (rerunnable, with a manual fallback), the tutorial (`apps/site/src/SetupPage.vue`),
    the architecture diagram (`apps/site/src/HowItWorksPage.vue`), and [docs/SELF_HOSTING.md](docs/SELF_HOSTING.md).

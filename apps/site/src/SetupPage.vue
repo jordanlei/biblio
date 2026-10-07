@@ -79,7 +79,7 @@ Project ID: [bibliograph-ada-3f2c] <u>⏎</u>
 <b>3. Web app registration</b>
    <i>✓</i> Web app Bibliograph
 
-<b>4. Google APIs (Firestore, Drive, Picker, sign-in)</b>
+<b>4. Google APIs (Firestore, Drive, sign-in)</b>
    <i>✓</i> APIs on
 
 <b>5. Firestore database</b>
@@ -90,10 +90,8 @@ Location: [nam5] <u>⏎</u>
 <b>6. Hosting site</b>
    <i>✓</i> https://bibliograph-ada-3f2c.web.app
 
-<b>7. Google Picker key (for “Use an existing folder”)</b>
-   <i>✓</i> Key ready (limited to the Picker API and bibliograph-ada-3f2c.web.app)
 
-<b>8. Save bibliograph.config.json</b>
+<b>7. Save bibliograph.config.json</b>
    <i>✓</i> Saved (gitignored: it describes this copy only)</pre>
         <p class="aside">
           Setup uses the Firebase command-line tool, signed in as you, on your own computer. If a step can't be done automatically (for example, an organization policy), setup prints a link to do that step by hand and carries on.
@@ -109,11 +107,11 @@ Location: [nam5] <u>⏎</u>
           <li>Switch on <strong>Enable</strong>, pick your email as the <strong>support email</strong>, and click <strong>Save</strong>.</li>
           <li>Back in the terminal, press <kbd>Enter</kbd>. Setup checks it worked.</li>
         </ol>
-        <pre class="terminal transcript"><b>9. Google sign-in</b>
+        <pre class="terminal transcript"><b>8. Google sign-in</b>
    Press Enter once it's saved. <u>⏎</u>
    <i>✓</i> Google sign-in is on
 
-<b>10. Build and deploy</b>
+<b>9. Build and deploy</b>
    ✔  Deploy complete!
 Deployed: https://bibliograph-ada-3f2c.web.app
 
@@ -123,11 +121,11 @@ Deployed: https://bibliograph-ada-3f2c.web.app
       <li>
         <h2>Sign in and pick your library folder</h2>
         <p>
-          Open your address and click <strong>Continue with Google</strong>. Google asks you to let your copy see and edit your Drive. That lets any copy open your library folder, even one made by another copy; your copy only ever touches the folder you choose. Then choose
-          <strong>Create “Bibliograph Library”</strong> (or <strong>Use an existing folder</strong> to open a library you already have). A short tour shows you around.
+          Open your address and click <strong>Continue with Google</strong>. Bibliograph asks for one Drive permission: to see only the files it creates. Then choose
+          <strong>Create “Bibliograph Library”</strong>, or <strong>Import a library (.zip)</strong> if you already have one. A short tour shows you around.
         </p>
         <p class="aside">
-          If Google blocks sign-in or warns that the app isn't verified, open <strong>Google Auth Platform → Audience</strong> in the Cloud console for your project and add yourself as a test user, or publish the app.
+          Nothing to approve: Google treats this permission as low-risk, so there's no warning screen and nothing to verify.
         </p>
       </li>
 
@@ -154,7 +152,7 @@ npm run deploy     <span class="faint"># publish to your-id.web.app</span></pre>
         <dt>What if I stop using Bibliograph?</dt>
         <dd>Your library is still in your Drive as PDFs, Markdown, CSL-JSON, and BibTeX that other tools read. Delete the Firebase project and nothing in your Drive changes.</dd>
         <dt>Can I move to another copy, or a newer version?</dt>
-        <dd>Yes. Every copy reads the same <a :href="docUrl('LIBRARY_FORMAT.md')">library format</a>. Sign in to the other copy and choose <strong>Use an existing folder</strong>.</dd>
+        <dd>Yes. In the old copy, <strong>Settings → Download library (.zip)</strong>; in the new one, <strong>Import a library</strong>. No app at hand? Download the library folder from Google Drive (it comes as a .zip) and import that. Every copy reads the same <a :href="docUrl('LIBRARY_FORMAT.md')">library format</a>.</dd>
         <dt>Can I try it without a Google account?</dt>
         <dd>Yes: <code>npm run dev:local</code> runs everything on your computer with stand-ins for Google (needs Java 11+).</dd>
         <dt>Something went wrong.</dt>

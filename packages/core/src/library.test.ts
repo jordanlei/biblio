@@ -7,6 +7,10 @@ import {
   noteToMarkdown,
   parseLibrary,
   parseNoteMarkdown,
+  exportLibraryFiles,
+  findLibraryRoot,
+  importLibraryFiles,
+  libraryEntries,
   parseResearchNoteMarkdown,
   researchNotePath,
   researchNoteToMarkdown,
@@ -310,6 +314,32 @@ describe("sync engine", () => {
     const writes = files.writes;
     await engine.syncNow();
     expect(files.writes).toBe(writes);
+  });
+
+  it("moves a whole library between copies as a set of files", async () => {
+    const { files, view, engine } = setup();
+    view.researchNotes = [sampleResearchNote()];
+    await engine.syncNow();
+    const exported = await exportLibraryFiles(files);
+    expect(exported.map((e) => e.path)).toEqual(expect.arrayContaining(["library.json", "bibliograph.json", "references.bib", "README.md", "research-notes/Credit assignment.md"]));
+
+    // As Google Drive's folder download would: wrapped in folders, with a stray file.
+    const archive = [...exported.map((e) => ({ ...e, path: `Bibliograph Library-2026/Bibliograph Library/${e.path}` })), { path: "Bibliograph Library-2026/.DS_Store", data: new Blob(["x"]) }];
+    expect(findLibraryRoot(archive.map((e) => e.path))).toBe("Bibliograph Library-2026/Bibliograph Library/");
+    const entries = libraryEntries(archive);
+    expect(entries.map((e) => e.path).sort()).toEqual(exported.map((e) => e.path).sort());
+
+    const target = new MemoryFileStore();
+    const result = await importLibraryFiles(target, entries);
+    expect(result.papers).toBe(view.papers.length);
+    const freshView = new MemoryView([], []);
+    await new SyncEngine({ files: target, view: freshView, state: new MemoryState(), now: () => NOW }).rebuild();
+    expect(freshView.papers.map((p) => p.citationKey).sort()).toEqual(view.papers.map((p) => p.citationKey).sort());
+    expect(freshView.researchNotes).toEqual(view.researchNotes);
+  });
+
+  it("refuses an archive without a library", () => {
+    expect(() => libraryEntries([{ path: "photos/cat.jpg", data: new Blob(["x"]) }])).toThrow(/no library.json/);
   });
 
   it("moves research notes from an older manifest into files", async () => {

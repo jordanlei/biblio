@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue";
-import { DEFAULT_FOLDER_NAME, connectDriveFolder, createDriveFolder, pickDriveFolder } from "../services/drive";
+import { DEFAULT_FOLDER_NAME, connectDriveFolder, createDriveFolder, findOwnLibraries, type DriveFolderSelection } from "../services/drive";
 import { connectLibraryFolder } from "../sync/librarySync";
 import { useLibrary } from "../services/library";
 import { useSession } from "../services/session";
 import { openAdd, toast as toastInfo, toastError } from "../services/ui";
 import AppIcon from "./AppIcon.vue";
+import LibraryImport from "./LibraryImport.vue";
 
 // First-run tour: a spotlight on one part of the UI at a time, a pointer callout beside it, and Skip.
 // Steps whose target isn't on screen are skipped automatically.
@@ -32,7 +33,7 @@ const steps: Step[] = [
     id: "drive",
     target: "drive",
     title: "First, choose where your library lives",
-    body: "Your papers, notes, and PDFs are saved as ordinary files in a Google Drive folder you own — readable even without Bibliograph. Pick a folder with an existing library to load it.",
+    body: "Your papers, notes, and PDFs are saved as ordinary files in a Google Drive folder you own — readable even without Bibliograph. Have a library already? Import its .zip, or the folder downloaded from Google Drive.",
     when: () => !session.profile.value?.driveRootFolderId
   },
   { id: "add", target: "add", title: "Add papers", body: "Search by topic, title, or author; paste DOIs or arXiv links; or import a .bib from Zotero or Mendeley. Shortcut: A." },
@@ -126,17 +127,26 @@ async function createFolder() {
   }
 }
 
-async function chooseFolder() {
-  busy.value = "pick";
+// Libraries this copy made before (e.g. its index was reset): offered as "Reconnect". Checked
+// quietly, without a sign-in popup; if there's no Drive token yet, the option just isn't shown.
+const ownLibraries = ref<DriveFolderSelection[]>([]);
+watch(
+  () => step.value.id,
+  async (id) => {
+    if (id !== "drive" || ownLibraries.value.length) return;
+    ownLibraries.value = await findOwnLibraries(false).catch(() => []);
+  },
+  { immediate: true }
+);
+
+async function reconnect(folder: DriveFolderSelection) {
+  busy.value = "reconnect";
   try {
-    const folder = await pickDriveFolder();
-    if (folder) {
-      const { loaded } = await connectLibraryFolder(folder);
-      if (loaded !== null) toastInfo(`Loaded ${loaded} papers from “${folder.name}”.`);
-      await go(1);
-    }
+    const { loaded } = await connectLibraryFolder(folder, () => true);
+    if (loaded !== null) toastInfo(`Loaded ${loaded} papers from “${folder.name}”.`);
+    await go(1);
   } catch (error) {
-    toastError(error, "Couldn't open the Drive folder picker.");
+    toastError(error, "Couldn't open that library.");
   } finally {
     busy.value = "";
   }
@@ -198,7 +208,10 @@ watch(() => papers.value.length, () => nextTick(measure));
         <button class="btn primary" type="button" :disabled="!!busy" @click="createFolder">
           <AppIcon name="folder-plus" /> {{ busy === "create" ? "Creating…" : `Create “${DEFAULT_FOLDER_NAME}”` }}
         </button>
-        <button class="btn" type="button" :disabled="!!busy" @click="chooseFolder">{{ busy === "pick" ? "Opening…" : "Use an existing folder" }}</button>
+        <button v-for="folder in ownLibraries" :key="folder.id" class="btn" type="button" :disabled="!!busy" @click="reconnect(folder)">
+          Reconnect “{{ folder.name }}”
+        </button>
+        <LibraryImport @imported="go(1)" />
       </div>
 
       <footer>

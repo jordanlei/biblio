@@ -22,8 +22,7 @@ const option = (name) => {
   return at === -1 ? undefined : args[at + 1];
 };
 const DRY = flag("dry-run");
-const PICKER_KEY_NAME = "Bibliograph Picker (browser)";
-const REQUIRED_APIS = ["firestore.googleapis.com", "drive.googleapis.com", "picker.googleapis.com", "identitytoolkit.googleapis.com", "apikeys.googleapis.com"];
+const REQUIRED_APIS = ["firestore.googleapis.com", "drive.googleapis.com", "identitytoolkit.googleapis.com"];
 
 const rl = createInterface({ input: stdin, output: stdout });
 const ask = async (question, fallback = "") => (await rl.question(`${question}${fallback ? ` [${fallback}]` : ""} `)).trim() || fallback;
@@ -63,8 +62,7 @@ function openInBrowser(url) {
 }
 
 // --- Google Cloud REST, as the account you signed in to the Firebase CLI with ----------------
-// A few things have no Firebase CLI command (turning on the Drive API, making the Picker key,
-// checking Google sign-in). Setup calls Google's APIs for those using the Firebase CLI's own
+// A few things have no Firebase CLI command (turning on the Drive API, checking Google sign-in). Setup calls Google's APIs for those using the Firebase CLI's own
 // sign-in on this machine; nothing is sent anywhere else. If that isn't possible, setup prints the
 // console page for each step instead.
 
@@ -195,7 +193,7 @@ async function webApp(projectId) {
 }
 
 async function enableApis(projectId) {
-  step("Google APIs (Firestore, Drive, Picker, sign-in)");
+  step("Google APIs (Firestore, Drive, sign-in)");
   if (DRY) return would(`turn on ${REQUIRED_APIS.join(", ")}`);
   try {
     const op = await google("POST", `https://serviceusage.googleapis.com/v1/projects/${projectId}/services:batchEnable`, { serviceIds: REQUIRED_APIS });
@@ -204,11 +202,9 @@ async function enableApis(projectId) {
     return true;
   } catch (error) {
     note(`Couldn't turn them on automatically (${error.message}).`);
-    console.log(`   Turn on the Google Drive API and Google Picker API here, then come back:`);
-    for (const api of ["drive.googleapis.com", "picker.googleapis.com"]) {
-      console.log(`     https://console.cloud.google.com/apis/library/${api}?project=${projectId}`);
-    }
-    await ask("Press Enter when both say “API enabled”.");
+    console.log("   Turn on the Google Drive API here, then come back:");
+    console.log(`     https://console.cloud.google.com/apis/library/drive.googleapis.com?project=${projectId}`);
+    await ask("Press Enter when it says “API enabled”.");
     return false;
   }
 }
@@ -227,43 +223,6 @@ async function firestore(projectId) {
   if (DRY) return would(`create the (default) database in ${location}`);
   firebase("firestore:databases:create", "(default)", "--location", location, "--project", projectId);
   ok(`Database created (${location})`);
-}
-
-async function pickerKey(projectId, appUrl, previous) {
-  step("Google Picker key (for “Use an existing folder”)");
-  if (DRY) return would(`create or reuse the API key “${PICKER_KEY_NAME}”, limited to the Picker API and your app's addresses`);
-  const origin = "https://apikeys.googleapis.com/v2";
-  const parent = `projects/${projectId}/locations/global`;
-  try {
-    const { keys = [] } = await google("GET", `${origin}/${parent}/keys`);
-    let key = keys.find((k) => k.displayName === PICKER_KEY_NAME);
-    if (!key) {
-      const host = new URL(appUrl).host;
-      const op = await google("POST", `${origin}/${parent}/keys`, {
-        displayName: PICKER_KEY_NAME,
-        restrictions: {
-          apiTargets: [{ service: "picker.googleapis.com" }],
-          browserKeyRestrictions: {
-            allowedReferrers: [`https://${host}/*`, `https://${projectId}.firebaseapp.com/*`, "http://localhost:5173/*", "http://127.0.0.1:5173/*"]
-          }
-        }
-      });
-      key = op.done ? op.response : await finished(origin, op);
-    }
-    const { keyString } = await google("GET", `${origin}/${key.name}/keyString`);
-    ok(`Key ready (limited to the Picker API and ${new URL(appUrl).host})`);
-    return keyString;
-  } catch (error) {
-    note(`Couldn't make the key automatically (${error.message}).`);
-    if (previous) {
-      note("Keeping the key already in bibliograph.config.json.");
-      return previous;
-    }
-    console.log("   Optional: create an API key restricted to the Google Picker API and your app's address at");
-    console.log(`     https://console.cloud.google.com/apis/credentials?project=${projectId}`);
-    const typed = await ask("Paste it here (or press Enter to skip; you can rerun setup later):");
-    return typed || undefined;
-  }
 }
 
 async function googleSignIn(projectId) {
@@ -384,16 +343,14 @@ async function main() {
 
   const email = await signIn();
   const projectId = await chooseProject(email);
-  const previous = readConfig();
   const firebaseConfig = await webApp(projectId);
   const apisOn = await enableApis(projectId);
   await firestore(projectId);
   const appUrl = hostingSite(projectId);
-  const pickerApiKey = await pickerKey(projectId, appUrl, previous?.projectId === projectId ? previous.pickerApiKey : undefined);
 
   if (!DRY && firebaseConfig) {
     step("Save bibliograph.config.json");
-    writeConfig({ projectId, appUrl, firebase: firebaseConfig, ...(pickerApiKey ? { pickerApiKey } : {}) });
+    writeConfig({ projectId, appUrl, firebase: firebaseConfig });
     ok("Saved (gitignored: it describes this copy only)");
     run("scripts/configure-extension.mjs");
   }

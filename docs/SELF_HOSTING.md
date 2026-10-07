@@ -38,11 +38,10 @@ npm run setup
 2. **Pick a project ID**, e.g. `bibliograph-ada-3f2c`. It becomes your address: `https://<id>.web.app`.
    Setup creates the Firebase project, or reuses one you already have.
 3. **Register a web app** in the project and read its settings.
-4. **Turn on the Google APIs** the app uses: Firestore, Drive, Picker, and sign-in.
+4. **Turn on the Google APIs** the app uses: Firestore, Drive, and sign-in.
 5. **Create the Firestore database.** Setup asks where to put it (`nam5` = United States,
    `eur3` = Europe, or a single region).
-6. **Create the hosting site** and a **Google Picker key** limited to the Picker API and your app's
-   addresses (used by *Use an existing folder*).
+6. **Create the hosting site.**
 7. **Save `bibliograph.config.json`**, the one file that says which project this copy uses, and
    build the Chrome extension for your address (`apps/extension/dist`).
 8. **Turn on Google sign-in.** This is the one step Google doesn't allow tools to do for you. Setup
@@ -90,8 +89,7 @@ The service account can deploy hosting and Firestore rules, and nothing else. To
 {
   "projectId": "bibliograph-ada-3f2c",
   "appUrl": "https://bibliograph-ada-3f2c.web.app",
-  "firebase": { "apiKey": "…", "authDomain": "…", "projectId": "…", "storageBucket": "…", "messagingSenderId": "…", "appId": "…" },
-  "pickerApiKey": "…"
+  "firebase": { "apiKey": "…", "authDomain": "…", "projectId": "…", "storageBucket": "…", "messagingSenderId": "…", "appId": "…" }
 }
 ```
 
@@ -104,17 +102,15 @@ The service account can deploy hosting and Firestore rules, and nothing else. To
 
 ## Good to know
 
-- **Signing in.** Bibliograph asks for access to your Google Drive (the `drive` scope), so your copy
-  can open a library folder made by any copy, or by hand. It reads and writes only inside the library
-  folder you choose. Google treats `drive` as a restricted scope: your copy is an unverified app, which
-  is fine for you and up to 100 people you add. If Google blocks sign-in or shows "Google hasn't
-  verified this app", open *Google Auth Platform → Audience* in the Cloud console for your project and
-  add yourself (and anyone you share your copy with) as a test user, then choose *Advanced → Go to …*
-  on the warning.
+- **Signing in.** Bibliograph asks Google only for the Drive files it creates (`drive.file`). Google
+  treats that as low-risk, so there's no "unverified app" warning and nothing to get verified.
 - **Your own domain.** Add it under *Hosting* in the Firebase console, then add it to
-  *Authentication → Settings → Authorized domains* and to the Picker key's allowed websites.
+  *Authentication → Settings → Authorized domains*.
 - **Cloud Functions** (`functions/`) are optional and need the paid Blaze plan; the app works without them.
 - **The Chrome extension:** setup builds it for your address into `apps/extension/dist`
   (`npm run build:extension` to rebuild). Load that folder unpacked (see its README).
-- **Moving between copies.** Your library is the Drive folder. Sign in to another copy, choose
-  *Use an existing folder*, and pick it.
+- **Moving between copies.** Your copy only sees the Drive files it created, so a library moves as
+  files: in the old copy, *Settings → Download library (.zip)*; in the new one, *Import a library*.
+  No app at hand (say you deleted the old Firebase project)? Download the library folder from Google
+  Drive (it arrives as a .zip) and import that. The import goes into a new folder; the original is
+  left as it is.
