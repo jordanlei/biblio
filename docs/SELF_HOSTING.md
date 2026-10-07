@@ -1,11 +1,13 @@
 # Run your own copy
 
-Bibliograph is meant to be yours all the way down. You can also run *your own copy of the app*:
-your own Firebase project, your own database, your own Google sign-in, your own web address. And
-you can change the code however you like.
+Bibliograph is open-source software you run yourself. There's no Bibliograph service: everyone,
+including the people who write it, uses their own copy of the app: their own Firebase project,
+database, Google sign-in, and web address. You can change the code however you like.
 
-The project website (<https://jordanlei.github.io/bibliograph/>) describes Bibliograph; your copy of
-the app is just your library behind a sign-in page.
+- **The project website** (<https://jordanlei.github.io/bibliograph/>, GitHub Pages) explains
+  Bibliograph. Its [setup tutorial](https://jordanlei.github.io/bibliograph/setup/) is the friendly
+  version of this guide.
+- **Your copy** (`https://<your-id>.web.app`) is just your library behind a sign-in page.
 
 Your copy is completely separate from anyone else's. Your account, your Firestore index, and your
 site live in a Google Cloud project you own. Your library still lives in your Google Drive, in the

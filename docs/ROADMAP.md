@@ -31,6 +31,10 @@ organization, and comprehension in the same workflow.
    a reading list. Papers connect organically through `@[key]` links, not a rigid membership list.
 8. **Drive remains the durable library.** Firestore is a fast view. Papers, notes, folders, shelves,
    Research Notes, PDFs, CSL-JSON, and BibTeX must rebuild from user-owned files.
+9. **You run it; it's yours.** Bibliograph is open-source software, not a service. The project
+   website is GitHub Pages; each person runs their own copy on their own Firebase site, with their
+   library in their own Drive. Setup stays a five-minute, one-command job. Nothing belongs to anyone
+   but the person running it: no central server, accounts, or analytics.
 
 ## Current Focus
 

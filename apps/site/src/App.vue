@@ -1,13 +1,12 @@
 <script setup lang="ts">
-// Bibliograph's project website: what it is, how it compares, and how to run your own copy.
-// It has no sign-in: every copy of the app is run by its owner (docs/SELF_HOSTING.md).
+// Bibliograph's project website (GitHub Pages). Bibliograph isn't a hosted service: this page
+// explains the software, and everyone runs their own copy (see setup/ and docs/SELF_HOSTING.md).
 // Images and videos are captures of the real app (scripts/capture-landing.mjs).
 import AppIcon from "../../web/src/components/AppIcon.vue";
-import BrandMark from "../../web/src/components/BrandMark.vue";
 import LandingVideo from "./components/LandingVideo.vue";
-
-const REPO_URL = "https://github.com/jordanlei/bibliograph";
-const base = import.meta.env.BASE_URL;
+import SiteFooter from "./components/SiteFooter.vue";
+import SiteHeader from "./components/SiteHeader.vue";
+import { BASE, REPO_URL, SETUP_URL } from "./site";
 
 const driveTree = [
   { depth: 0, icon: "drive", name: "My Drive" },
@@ -19,14 +18,44 @@ const driveTree = [
   { depth: 2, icon: "quote", name: "references.bib" }
 ];
 
+const pillars = [
+  {
+    icon: "settings",
+    title: "Open-source code you run",
+    text: "Bibliograph is software, not a service. You run your own copy, host it, and change any part of it. MIT licensed."
+  },
+  {
+    icon: "clock",
+    title: "Five-minute setup",
+    text: "Clone the code and run one command. It creates your Firebase project, database, and site, then deploys.",
+    link: { label: "Follow the tutorial", href: SETUP_URL }
+  },
+  {
+    icon: "drive",
+    title: "Your data is in your Drive",
+    text: "Papers, notes, PDFs, and the links between them are plain files in your Google Drive: CSL-JSON, Markdown, BibTeX, PDF."
+  },
+  {
+    icon: "user",
+    title: "Nothing belongs to anyone else",
+    text: "There's no central server and no Bibliograph account. The people who write Bibliograph never see your copy or your library."
+  }
+];
+
 const compareColumns = ["Bibliograph", "Zotero", "EndNote", "Paperpile"];
 // Rows are what Bibliograph adds; the other columns say what each product offers for the same need.
 // Facts from each product's own documentation and support forums, October 2026.
 const compareRows = [
   {
-    label: "Organize by idea",
-    ours: "Research notes: freeform Markdown that connects any papers you link with @[",
-    cells: ["Collections and tags", "Groups", "Folders and labels"]
+    label: "Who runs it",
+    ours: "You: your own copy, in your own Google Cloud project",
+    cells: ["Desktop app; sync through Zotero's servers", "Clarivate (desktop app and EndNote Web)", "Paperpile's servers"]
+  },
+  { label: "Open source", ours: "Yes (MIT)", cells: ["Yes (AGPL)", "No", "No"] },
+  {
+    label: "Where your library lives",
+    ours: "Your Google Drive, as plain files you can open anywhere",
+    cells: ["Local database, synced via Zotero", "Local .enl library", "Paperpile's cloud; only PDFs in Drive"]
   },
   {
     label: "Links and backlinks",
@@ -34,67 +63,40 @@ const compareRows = [
     cells: ["Manual “Related” links, kept apart from notes", "Citing articles via Web of Science", "No links between papers"]
   },
   {
-    label: "Everything in your Drive",
-    ours: "Papers, notes, PDFs, and the links between them, as plain files you can open anywhere.",
-    cells: ["Local database, synced via Zotero", "Local .enl library", "Paperpile's cloud; only PDFs in Drive"]
-  },
-  {
     label: "Triage what to read",
     ours: "New papers land in an Inbox; one key moves each to a reading shelf.",
     cells: ["No reading status", "Read / unread", "No reading status"]
   },
-  { label: "Price", ours: "Free", cells: ["Free; paid storage over 300 MB", "One-time license", "Subscription"] }
+  { label: "Price", ours: "Free (Firebase's free plan)", cells: ["Free; paid storage over 300 MB", "One-time license", "Subscription"] }
 ];
 
-const setupSteps = [
-  { title: "Fork or clone the repository", text: "You need a Google account, Node.js 20+, and git." },
-  { title: "Run npm install && npm run setup", text: "It creates your Firebase project, database, and site, turns on the Google APIs, and deploys." },
-  { title: "Turn on Google sign-in", text: "The one click Google doesn't allow tools to do. Setup opens the page and checks it worked." },
-  { title: "Sign in at your-id.web.app", text: "Your copy, your address. Your library goes to a folder in your Drive." }
-];
-
-const reasons = [
-  {
-    icon: "drive",
-    title: "Your library is plain files",
-    text: "Papers, notes, PDFs, and the links between them are saved to your Google Drive as CSL-JSON, Markdown, BibTeX, and PDF."
-  },
-  { icon: "folder", title: "It only sees its own folder", text: "Bibliograph can open the files it creates in your Drive, and nothing else." },
-  { icon: "note", title: "It keeps the why", text: "Why you saved a paper, the notes that tie it to others, and the sentence around every link." },
-  {
-    icon: "link",
-    title: "It works with your other tools",
-    text: "references.bib stays current for LaTeX and Overleaf, pandoc reads library.json directly, and notes edited in other apps flow back in."
-  },
-  { icon: "settings", title: "You run it", text: "Your own copy in your own Google Cloud project, set up with one command. Change the code however you like." },
-  { icon: "clock", title: "Fast, and fine offline", text: "Search as you type, ⌘K to jump, one key to shelve. Edits work offline and sync when you're back." }
+const extras = [
+  { icon: "search", text: "Search 250 million papers" },
+  { icon: "upload", text: "Import from Zotero or Mendeley" },
+  { icon: "quote", text: "references.bib for LaTeX, always current" },
+  { icon: "clock", text: "Works offline, syncs when you're back" }
 ];
 </script>
 
 <template>
   <main class="landing">
-    <header class="top">
-      <span class="brand"><BrandMark :size="30" /> Bibliograph</span>
-      <span class="spacer" />
-      <a class="btn sm quiet" :href="REPO_URL">GitHub</a>
-      <a class="btn sm" href="#run-your-own">Run your own</a>
-    </header>
+    <SiteHeader />
 
     <section class="hero">
       <div class="pitch">
         <h1 class="display">Finally, a reference manager that's actually yours.</h1>
-        <p class="lede">Your papers, notes, and PDFs are plain files in your own Google Drive, and the app runs in your own Google Cloud project. Stop using Bibliograph and everything is still there.</p>
+        <p class="lede">Bibliograph is open-source software you run yourself. Set up your own copy in five minutes. Your library lives in your own Google Drive, and nothing belongs to anyone but you.</p>
         <div class="cta">
           <div class="row">
-            <a class="btn primary lg" href="#run-your-own">Run your own copy</a>
-            <a class="btn lg" :href="REPO_URL">View on GitHub</a>
+            <a class="btn primary lg" :href="SETUP_URL">Set it up in 5 minutes</a>
+            <a class="btn lg" :href="REPO_URL">View the code</a>
           </div>
-          <p class="fine">Free and open source (MIT). Your data always belongs to you.</p>
+          <p class="fine">Free and open source (MIT).</p>
         </div>
       </div>
       <figure class="hero-visual">
         <div class="shot">
-          <img :src="`${base}landing/library.jpg`" width="2560" height="1600" alt="The Bibliograph library with one paper open." />
+          <img :src="`${BASE}landing/library.jpg`" width="2560" height="1600" alt="The Bibliograph library with one paper open." />
         </div>
         <ul class="tree" aria-label="The same library as files in Google Drive">
           <li v-for="item in driveTree" :key="item.name" :style="{ paddingLeft: `${14 + item.depth * 16}px` }">
@@ -104,38 +106,35 @@ const reasons = [
       </figure>
     </section>
 
-    <section class="why">
-      <h2 class="display">Why Bibliograph</h2>
-      <p class="thesis">Other reference managers keep a list of references. Bibliograph also keeps your thinking about them, in files you own.</p>
-      <ul class="reasons">
-        <li v-for="reason in reasons" :key="reason.title">
-          <AppIcon :name="reason.icon" :size="20" class="reason-icon" />
-          <h3>{{ reason.title }}</h3>
-          <p>{{ reason.text }}</p>
+    <section id="how-it-works" class="how">
+      <h2 class="display">How it works</h2>
+      <p class="lead">There is no Bibliograph service to sign up for. The code is public; you run your own copy of it; your copy keeps your library in your Drive.</p>
+      <div class="flow" role="list" aria-label="How the pieces fit">
+        <div class="node" role="listitem">
+          <span class="where"><AppIcon name="link" :size="17" /> The code</span>
+          <p>On GitHub, open source. Fork it and change anything.</p>
+        </div>
+        <span class="arrow" aria-hidden="true">→</span>
+        <div class="node yours" role="listitem">
+          <span class="where"><AppIcon name="settings" :size="17" /> Your copy</span>
+          <p>Your own Firebase project and sign-in, at <code>your-id.web.app</code>. Only you can get in.</p>
+        </div>
+        <span class="arrow" aria-hidden="true">→</span>
+        <div class="node yours" role="listitem">
+          <span class="where"><AppIcon name="drive" :size="17" /> Your library</span>
+          <p>A folder of plain files in your Google Drive. It outlives any copy of the app.</p>
+        </div>
+      </div>
+      <ul class="pillars">
+        <li v-for="pillar in pillars" :key="pillar.title">
+          <AppIcon :name="pillar.icon" :size="20" />
+          <h3>{{ pillar.title }}</h3>
+          <p>
+            {{ pillar.text }}
+            <template v-if="pillar.link"> <a :href="pillar.link.href">{{ pillar.link.label }} →</a></template>
+          </p>
         </li>
       </ul>
-    </section>
-
-    <section class="compare">
-      <h2 class="display">Next to Zotero, EndNote, and Paperpile</h2>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th scope="col"><span class="sr-only">Feature</span></th>
-              <th v-for="name in compareColumns" :key="name" scope="col" :class="{ us: name === 'Bibliograph' }">{{ name }}</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="row in compareRows" :key="row.label">
-              <th scope="row">{{ row.label }}</th>
-              <td class="us"><AppIcon name="check" :size="15" class="tick" /> {{ row.ours }}</td>
-              <td v-for="cell in row.cells" :key="cell">{{ cell }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <p class="fine">Where the others are ahead: citation plugins for Word and Google Docs, PDF annotation, and desktop and mobile apps. Based on each product's documentation, October 2026.</p>
     </section>
 
     <section class="feature">
@@ -171,38 +170,49 @@ const reasons = [
       </figure>
     </section>
 
-    <section id="run-your-own" class="run">
-      <div class="run-head">
-        <p class="eyebrow">Run your own</p>
-        <h2 class="display">Your own copy in about five minutes.</h2>
-        <p>Bibliograph isn't a service you sign up for. You run your own copy: your Firebase project, your sign-in, your address. It fits in Firebase's free plan.</p>
-      </div>
-      <ol class="steps">
-        <li v-for="(item, i) in setupSteps" :key="item.title">
-          <span class="num">{{ i + 1 }}</span>
-          <div>
-            <h3>{{ item.title }}</h3>
-            <p>{{ item.text }}</p>
-          </div>
-        </li>
-      </ol>
-      <pre class="terminal"><span class="faint"># once</span>
-git clone {{ REPO_URL }}.git
-cd bibliograph
-npm install
-npm run setup
+    <div class="extras">
+      <span v-for="item in extras" :key="item.text"><AppIcon :name="item.icon" :size="16" /> {{ item.text }}</span>
+    </div>
 
-<span class="faint"># then, whenever you change something</span>
-npm run dev        <span class="faint"># try it</span>
-npm run deploy     <span class="faint"># publish it</span></pre>
-      <p class="run-links">
-        <a :href="`${REPO_URL}/blob/main/docs/SELF_HOSTING.md`">Full setup guide</a> ·
-        <a :href="`${REPO_URL}/blob/main/docs/ARCHITECTURE.md`">How it's built</a> ·
-        <a :href="`${REPO_URL}/blob/main/docs/LIBRARY_FORMAT.md`">The library format</a>
-      </p>
+    <section class="compare">
+      <h2 class="display">Next to Zotero, EndNote, and Paperpile</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col"><span class="sr-only">Feature</span></th>
+              <th v-for="name in compareColumns" :key="name" scope="col" :class="{ us: name === 'Bibliograph' }">{{ name }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="row in compareRows" :key="row.label">
+              <th scope="row">{{ row.label }}</th>
+              <td class="us"><AppIcon name="check" :size="15" class="tick" /> {{ row.ours }}</td>
+              <td v-for="cell in row.cells" :key="cell">{{ cell }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="fine">Where the others are ahead: citation plugins for Word and Google Docs, PDF annotation, and desktop and mobile apps. Based on each product's documentation, October 2026.</p>
     </section>
 
-    <footer class="foot faint small"><BrandMark :size="18" /> Bibliograph · <a :href="REPO_URL">GitHub</a></footer>
+    <section class="run">
+      <div class="run-head">
+        <p class="eyebrow">Get your own</p>
+        <h2 class="display">Your copy, in about five minutes.</h2>
+        <p>You need a Google account, Node.js, and git. Setup does the rest, and the tutorial walks through every screen.</p>
+      </div>
+      <pre class="terminal">git clone {{ REPO_URL }}.git
+cd bibliograph
+npm install
+npm run setup</pre>
+      <div class="run-cta">
+        <a class="btn primary lg" :href="SETUP_URL">Open the setup tutorial</a>
+        <a class="link" :href="`${REPO_URL}/fork`">Or fork it on GitHub first →</a>
+      </div>
+    </section>
+
+    <SiteFooter />
   </main>
 </template>
 
@@ -214,22 +224,7 @@ npm run deploy     <span class="faint"># publish it</span></pre>
   overflow-x: hidden;
 }
 
-.top {
-  display: flex;
-  align-items: center;
-  max-width: var(--max);
-  margin: 0 auto;
-  padding: 22px 32px;
-}
 
-.brand {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  font-family: var(--font-serif);
-  font-size: calc(20px * var(--text-scale));
-  font-weight: 650;
-}
 
 .hero {
   display: grid;
@@ -318,7 +313,7 @@ h1 {
   font-weight: 600;
 }
 
-.why,
+.how,
 .compare {
   max-width: var(--max);
   margin: 0 auto;
@@ -326,7 +321,7 @@ h1 {
   border-top: 1px solid var(--border);
 }
 
-.why h2,
+.how h2,
 .compare h2,
 .feature h2 {
   margin: 8px 0 22px;
@@ -334,39 +329,132 @@ h1 {
   line-height: 1.15;
 }
 
-.thesis {
-  max-width: 46ch;
-  margin-bottom: 36px;
+
+
+
+
+
+.lead {
+  max-width: 60ch;
+  margin-bottom: 32px;
   font-family: var(--font-serif);
   font-size: calc(19px * var(--text-scale));
   line-height: 1.5;
   color: var(--text-2);
 }
 
-.reasons {
+/* Code → your copy → your Drive. */
+.flow {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 36px 40px;
+  grid-template-columns: 1fr auto 1fr auto 1fr;
+  align-items: stretch;
+  gap: 12px;
+  margin-bottom: 44px;
+}
+
+.node {
+  padding: 16px 18px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.node.yours {
+  border-color: var(--accent);
+  background: var(--select);
+}
+
+.node .where {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text);
+  font-family: var(--font-serif);
+  font-size: calc(17px * var(--text-scale));
+  font-weight: 650;
+}
+
+.node .where :deep(svg) {
+  color: var(--accent);
+}
+
+.node p {
+  margin-top: 6px;
+  color: var(--text-2);
+  font-size: calc(14px * var(--text-scale));
+  line-height: 1.5;
+}
+
+.node code {
+  font-size: 0.85em;
+}
+
+.arrow {
+  align-self: center;
+  color: var(--text-3);
+  font-size: 22px;
+}
+
+.pillars {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 32px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.reason-icon {
+.pillars :deep(svg) {
   color: var(--accent);
 }
 
-.reasons h3 {
+.pillars h3 {
   margin: 10px 0 6px;
   font-family: var(--font-serif);
   font-size: calc(18px * var(--text-scale));
   font-weight: 650;
 }
 
-.reasons p {
+.pillars p {
   font-size: calc(15px * var(--text-scale));
   line-height: 1.55;
   color: var(--text-2);
+}
+
+.pillars a,
+.run-cta a.link {
+  color: var(--accent);
+}
+
+.extras {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px 28px;
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: 0 32px 72px;
+  color: var(--text-2);
+  font-size: calc(14.5px * var(--text-scale));
+}
+
+.extras span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.extras :deep(svg) {
+  color: var(--accent);
+}
+
+.run-cta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 20px;
+  margin-top: 24px;
 }
 
 .table-wrap {
@@ -477,9 +565,6 @@ code {
   color: var(--text);
 }
 
-.top .btn + .btn {
-  margin-left: 8px;
-}
 
 .cta .row {
   display: flex;
@@ -510,44 +595,10 @@ code {
   color: var(--text-2);
 }
 
-.steps {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 24px;
-  margin: 36px 0 28px;
-  padding: 0;
-  list-style: none;
-}
 
-.steps li {
-  display: flex;
-  gap: 12px;
-}
 
-.num {
-  display: grid;
-  flex: none;
-  place-items: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: var(--accent);
-  color: var(--accent-text);
-  font-weight: 650;
-}
 
-.steps h3 {
-  font-family: var(--font-serif);
-  font-size: calc(16px * var(--text-scale));
-  font-weight: 650;
-}
 
-.steps p {
-  margin-top: 4px;
-  color: var(--text-2);
-  font-size: calc(14.5px * var(--text-scale));
-  line-height: 1.5;
-}
 
 .terminal {
   margin: 0;
@@ -562,44 +613,12 @@ code {
   line-height: 1.7;
 }
 
-.run-links {
-  margin-top: 18px;
-  color: var(--text-3);
-}
 
-.run-links a,
-.foot a {
-  color: var(--accent);
-}
 
-.closing {
-  display: grid;
-  justify-items: center;
-  gap: 18px;
-  padding: 96px 32px;
-  border-top: 1px solid var(--border);
-  text-align: center;
-}
 
-.closing h2 {
-  font-size: calc(clamp(28px, 3.4vw, 42px) * var(--text-scale));
-}
 
-.foot {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 28px;
-  text-align: center;
-  border-top: 1px solid var(--border);
-}
 
 @media (max-width: 900px) {
-  .top {
-    padding: 16px 16px;
-  }
-
   .hero,
   .feature,
   .feature.reverse {
@@ -612,19 +631,20 @@ code {
     order: 0;
   }
 
-  .why,
+  .how,
   .compare,
   .run {
     padding: 40px 16px;
   }
 
-  .steps {
+
+  .pillars,
+  .flow {
     grid-template-columns: 1fr 1fr;
   }
 
-  .reasons {
-    grid-template-columns: 1fr 1fr;
-    gap: 28px 24px;
+  .flow .arrow {
+    display: none;
   }
 
   .tree {
@@ -633,8 +653,8 @@ code {
 
 }
 @media (max-width: 560px) {
-  .reasons,
-  .steps {
+  .pillars,
+  .flow {
     grid-template-columns: 1fr;
   }
 }

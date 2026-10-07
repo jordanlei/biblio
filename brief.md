@@ -1550,6 +1550,8 @@ These are scope creep.
 
 **Import/export is part of data ownership, not an afterthought.**
 
+**You run it; it's yours.** Bibliograph is open-source software that each person runs themselves, not a service. The project website (GitHub Pages, `apps/site`) explains it and how to set it up; each person's copy of the app runs on their own Firebase site and shows only a sign-in page. Nothing belongs to anyone but the person running it. See section 35 and `CONTRIBUTING.md`.
+
 **Keep the product fast and boring underneath.** This is a personal library containing thousands or perhaps tens of thousands of small metadata records, not a distributed scientific-computing system.
 
 And one final instruction to the agent: **do not attempt to implement the whole brief in one giant pass.** Treat each phase above as a working checkpoint with its tests passing before moving to the next. The most important early milestone is not Zotero extraction—it is proving that `Google login → Firestore paper → Drive PDF → library UI → BibTeX export` works cleanly end-to-end. Once that spine works, every other ingestion mechanism is just another adapter.
@@ -1578,5 +1580,7 @@ npm run setup
 - **Free.** Everything runs on Firebase's Spark plan. Cloud Functions stay optional.
 - **Portable between copies.** Copies share the on-Drive format (section 5 and `docs/LIBRARY_FORMAT.md`), so a library made in one copy opens in another via *Use an existing folder*.
 
-Documentation for users: `docs/SELF_HOSTING.md`.
+**Two kinds of site, always.** GitHub Pages for the code (the project website: how it works, features, comparison, and a step-by-step setup tutorial at `setup/`); each person's own Firebase site for their own copy (sign-in only when signed out). The project website never signs anyone in, and no copy of the app advertises.
+
+Documentation for users: the setup tutorial on the project website, and `docs/SELF_HOSTING.md`.
 

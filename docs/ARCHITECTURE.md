@@ -67,7 +67,7 @@ Bibliograph is a static Vue app talking directly to Firebase (Auth, Firestore) a
 
 ## Project website (`apps/site`)
 
-A static Vue page published to GitHub Pages (`.github/workflows/site.yml`): what Bibliograph is, the comparison, captures of the app (`public/landing/`, made by `scripts/capture-landing.mjs`, see [CAPTURES.md](CAPTURES.md)), and how to run your own copy. It has no Firebase and no sign-in. It reuses the app's `styles.css`, `AppIcon`, and `BrandMark` by relative import, so the two look the same.
+Two static Vue pages published to GitHub Pages (`.github/workflows/site.yml`): the home page (`src/App.vue`: how it works, features, the comparison) and the setup tutorial (`src/SetupPage.vue`, served at `setup/`; keep it in step with `scripts/setup.mjs`). Captures of the app (`public/landing/`, made by `scripts/capture-landing.mjs`, see [CAPTURES.md](CAPTURES.md)),. It has no Firebase and no sign-in. Each person's copy of the app (`apps/web`) is deployed separately, to their own Firebase project; see [CONTRIBUTING.md](../CONTRIBUTING.md) for the rules that keep the two apart. It reuses the app's `styles.css`, `AppIcon`, and `BrandMark` by relative import, so the two look the same.
 
 ## Running a copy (`scripts/setup.mjs`, `bibliograph.config.json`)
 

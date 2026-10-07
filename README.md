@@ -1,17 +1,24 @@
 # Bibliograph
 
-**Finally, a reference manager that's yours.** A browser-native research library that you own. Your papers, folders, tags, shelves, notes, research notes, saved reasons, and PDFs live as ordinary files in a Google Drive folder — CSL-JSON, Markdown, BibTeX, PDF — readable without Bibliograph. Bibliograph keeps a fast index on top for search and browsing.
+**Finally, a reference manager that's actually yours.** Bibliograph is open-source software you run yourself: there's no Bibliograph service to sign up for.
+
+- **You run it.** Your own copy, in your own Firebase project, at your own address. Change any of the code.
+- **Five-minute setup.** `npm install && npm run setup`: [setup tutorial](https://jordanlei.github.io/bibliograph/setup/).
+- **Your data is in your Google Drive.** Papers, notes, research notes, PDFs, and the links between them are ordinary files (CSL-JSON, Markdown, BibTeX, PDF), readable without Bibliograph.
+- **Nothing belongs to anyone else.** No central server, no accounts, no analytics. The people who write Bibliograph never see your copy or your library.
 
 > Bibliograph can disappear. Your research cannot.
 
-- Project website: <https://jordanlei.github.io/bibliograph/>
-- **Run your own copy** (your own Firebase project, sign-in, and site; change the code freely): [docs/SELF_HOSTING.md](docs/SELF_HOSTING.md)
+**Two kinds of site.** This repository's [project website](https://jordanlei.github.io/bibliograph/) (GitHub Pages, `apps/site`) explains Bibliograph and how to set it up. Each person's own copy of the app (`apps/web`) runs on their own Firebase site and shows just a sign-in page. See [CONTRIBUTING.md](CONTRIBUTING.md) for the rules that keep it that way.
+
+- Set up your own copy: [tutorial](https://jordanlei.github.io/bibliograph/setup/) · full guide [docs/SELF_HOSTING.md](docs/SELF_HOSTING.md)
 - Current state, verification, and known gaps: [docs/STATUS.md](docs/STATUS.md)
 - Storage architecture (what's canonical, sync, rebuild): [docs/STORAGE.md](docs/STORAGE.md)
 - The on-Drive library format: [docs/LIBRARY_FORMAT.md](docs/LIBRARY_FORMAT.md)
 - How it's built: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 - Where it could go: [docs/ROADMAP.md](docs/ROADMAP.md)
-- How the home-page screenshots and videos are made: [docs/CAPTURES.md](docs/CAPTURES.md)
+- How the website's screenshots and videos are made: [docs/CAPTURES.md](docs/CAPTURES.md)
+- Contributing and the rules that always hold: [CONTRIBUTING.md](CONTRIBUTING.md)
 - Original product brief: [brief.md](brief.md)
 
 ## What it does

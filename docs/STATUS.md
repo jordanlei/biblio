@@ -6,7 +6,9 @@ Bibliograph is a browser-native reference manager whose canonical library lives 
 Drive. Firestore is a fast materialized view; the durable library is ordinary files: CSL-JSON,
 BibTeX, Markdown notes and research notes, PDFs, and a manifest for folders.
 
-Project website: <https://jordanlei.github.io/bibliograph/>. Each person runs their own copy of the app ([SELF_HOSTING.md](SELF_HOSTING.md)).
+Bibliograph is open-source software that each person runs themselves. The project website is
+GitHub Pages (<https://jordanlei.github.io/bibliograph/>, with a [setup tutorial](https://jordanlei.github.io/bibliograph/setup/));
+each person's copy of the app runs on their own Firebase site ([SELF_HOSTING.md](SELF_HOSTING.md)).
 
 ## Implemented
 
@@ -28,8 +30,9 @@ Project website: <https://jordanlei.github.io/bibliograph/>. Each person runs th
 - **Contextual backlinks:** paper pages and inspectors show where a paper is mentioned (paper notes
   and research notes), with the paragraph or bullet around the link.
 - **PDFs:** Find PDF, auto-grab after adding, drag/drop attach, replace, unlink, and delete from Drive.
-- **Two sites:** the project website (`apps/site`, GitHub Pages) carries the features, comparison,
-  and setup guide; each copy of the app (`apps/web`) shows only a sign-in page when signed out.
+- **Two sites:** the project website (`apps/site`, GitHub Pages: a home page explaining how it works,
+  features, and comparison, plus a step-by-step setup tutorial at `setup/`); each copy of the app
+  (`apps/web`) shows only a sign-in page when signed out.
 - **Run your own copy:** `npm run setup` creates and configures a new Firebase project (web app,
   Firestore, APIs, Picker key, hosting) and deploys; config lives in gitignored
   `bibliograph.config.json`, with no project hardcoded in source. Optional push-to-deploy via
