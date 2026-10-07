@@ -8,7 +8,7 @@ Bibliograph is a static Vue app talking directly to Firebase (Auth, Firestore) a
  ┌──────────── browser ────────────┐        ┌────────── Google ──────────┐
  │ Vue app (apps/web)              │──Auth──▶│ Firebase Auth (Google)     │
  │   session ─ library store ─ UI  │──data──▶│ Firestore users/{uid}/…    │
- │   drive / pdfFetch / lookup     │──PDFs──▶│ Drive (drive.file scope)   │
+ │   drive / pdfFetch / lookup     │──PDFs──▶│ Drive (full drive scope)   │
  │        ▲  window.postMessage    │──meta──▶│ OpenAlex · Crossref ·      │
  │        ▼                        │         │ DataCite (public APIs)     │
  │ Extension bridge.js ⇄ background│──fetch─▶│ any PDF host (cookies ok)  │

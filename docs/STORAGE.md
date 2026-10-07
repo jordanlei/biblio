@@ -118,7 +118,7 @@ User-facing behavior is otherwise unchanged.
 
 ## Known limits
 
-- Drive `drive.file` scope: Bibliograph sees files it created or that the user picked. Edits to those files made elsewhere are picked up; brand-new files dropped into `papers/` by hand are not (yet).
+- Drive `drive` scope: any copy can read and write a library folder whatever created its files, so a library moves between copies (and survives deleting the Firebase project that made it). Edits made elsewhere are picked up; brand-new files dropped into `papers/` by hand are visible but not yet adopted as papers.
 - Conflicts on `library.json` are resolved at file level (outside copy kept), not merged field by field.
 - Firestore's local cache isn't persisted across reloads; offline *Drive* outages are fully supported, full offline use of the app is not.
 - Firestore documents still store a full copy of notes (needed for instant search). Very large libraries may want notes moved to a separate collection later.

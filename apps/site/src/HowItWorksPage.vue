@@ -105,7 +105,7 @@ const lives = [
         <h2>Every day</h2>
         <p>
           You open <code>your-id.web.app</code> and sign in. The app keeps a quick index in your Firestore so search is instant, and saves the library itself to a folder in your Drive.
-          It can only see the Drive files it creates or that you pick.
+          It asks for access to your Drive so it can open a library made by any copy, and it only reads and writes inside the library folder you choose.
         </p>
       </div>
     </section>

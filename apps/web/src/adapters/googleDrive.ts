@@ -3,7 +3,8 @@ import { clearGoogleAccessToken, getGoogleAccessToken } from "../services/sessio
 
 // Google Drive adapter: every Drive REST detail lives here. The rest of the app talks to it
 // through the core FileStore port (library files) or the few helpers below (folders, links).
-// Scope is drive.file: we can see only files Bibliograph created or the user picked.
+// Scope is full Drive (see makeGoogleProvider): any copy of Bibliograph can open a library folder,
+// whoever created its files. The app only reads and writes inside the chosen library folder.
 
 // VITE_DRIVE_API_BASE points at the mock Drive server in local test mode.
 export const MOCK_DRIVE_BASE = import.meta.env.VITE_DRIVE_API_BASE as string | undefined;
@@ -33,6 +34,13 @@ export async function driveRequest(url: string, init: RequestInit = {}, interact
       clearGoogleAccessToken();
       if (interactive && attempt === 0) continue;
       throw new StorageAuthError("Your Google Drive session expired. Reconnect to keep syncing.");
+    }
+    if (response.status === 403 && /insufficient|scope/i.test(await response.clone().text())) {
+      // A token from before the full-Drive permission, or one where the Drive box was unticked
+      // on Google's consent screen: ask again.
+      clearGoogleAccessToken();
+      if (interactive && attempt === 0) continue;
+      throw new StorageAuthError("Bibliograph needs permission to your Google Drive. Reconnect and allow Drive access.");
     }
     if (response.status === 404) throw new DriveFileMissingError("That file is no longer in Google Drive.");
     if (response.status === 429 || response.status >= 500) throw new StorageUnavailableError(`Google Drive is temporarily unavailable (${response.status}).`);

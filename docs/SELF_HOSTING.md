@@ -104,10 +104,13 @@ The service account can deploy hosting and Firestore rules, and nothing else. To
 
 ## Good to know
 
-- **Signing in.** Bibliograph asks Google only for permission to see the Drive files it creates or
-  you pick (`drive.file`). If Google blocks sign-in, or warns that the app isn't verified, open
-  *Google Auth Platform → Audience* in the Cloud console for your project. There you can either add
-  yourself (and anyone you share your copy with) as a test user, or publish the app.
+- **Signing in.** Bibliograph asks for access to your Google Drive (the `drive` scope), so your copy
+  can open a library folder made by any copy, or by hand. It reads and writes only inside the library
+  folder you choose. Google treats `drive` as a restricted scope: your copy is an unverified app, which
+  is fine for you and up to 100 people you add. If Google blocks sign-in or shows "Google hasn't
+  verified this app", open *Google Auth Platform → Audience* in the Cloud console for your project and
+  add yourself (and anyone you share your copy with) as a test user, then choose *Advanced → Go to …*
+  on the warning.
 - **Your own domain.** Add it under *Hosting* in the Firebase console, then add it to
   *Authentication → Settings → Authorized domains* and to the Picker key's allowed websites.
 - **Cloud Functions** (`functions/`) are optional and need the paid Blaze plan; the app works without them.

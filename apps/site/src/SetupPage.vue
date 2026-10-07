@@ -123,7 +123,7 @@ Deployed: https://bibliograph-ada-3f2c.web.app
       <li>
         <h2>Sign in and pick your library folder</h2>
         <p>
-          Open your address and click <strong>Continue with Google</strong>. Bibliograph asks for one Drive permission: to see only the files it creates or that you pick. Then choose
+          Open your address and click <strong>Continue with Google</strong>. Google asks you to let your copy see and edit your Drive. That lets any copy open your library folder, even one made by another copy; your copy only ever touches the folder you choose. Then choose
           <strong>Create “Bibliograph Library”</strong> (or <strong>Use an existing folder</strong> to open a library you already have). A short tour shows you around.
         </p>
         <p class="aside">

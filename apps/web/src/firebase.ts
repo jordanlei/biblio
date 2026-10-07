@@ -38,11 +38,17 @@ if (usingEmulators) {
   connectFirestoreEmulator(db, "127.0.0.1", 8080);
 }
 
+export const DRIVE_SCOPE = "https://www.googleapis.com/auth/drive";
+
 export function makeGoogleProvider(): GoogleAuthProvider {
   const provider = new GoogleAuthProvider();
   provider.addScope("email");
   provider.addScope("profile");
-  provider.addScope("https://www.googleapis.com/auth/drive.file");
+  // Full Drive access, not drive.file. With drive.file, Google ties each file to the copy of the
+  // app that created it, so a library made by one copy (or by hand, or by an older install) would
+  // be invisible and read-only to any other copy. Every copy is its owner's own app, and it only
+  // ever touches the library folder the owner chose.
+  provider.addScope(DRIVE_SCOPE);
   provider.setCustomParameters({ prompt: "select_account" });
   return provider;
 }
