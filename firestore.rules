@@ -1,0 +1,30 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedInAs(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+
+    match /users/{uid} {
+      allow read, create, update, delete: if signedInAs(uid);
+
+      match /papers/{paperId} {
+        allow read, create, update, delete: if signedInAs(uid);
+      }
+
+      match /folders/{folderId} {
+        allow read, create, update, delete: if signedInAs(uid);
+      }
+
+      match /researchNotes/{noteId} {
+        allow read, create, update, delete: if signedInAs(uid);
+      }
+
+      // Derived sync bookkeeping (file ids, versions, hashes) for the Drive library.
+      match /sync/{docId} {
+        allow read, create, update, delete: if signedInAs(uid);
+      }
+    }
+  }
+}

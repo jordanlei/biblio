@@ -1,0 +1,46 @@
+# Publish the project website (apps/site) to GitHub Pages on every push to main.
+# Runs only in the main repository (not forks), once Pages is set to "GitHub Actions"
+# under Settings → Pages.
+name: Website
+
+on:
+  push:
+    branches: [main]
+    paths: ["apps/site/**", "apps/web/src/styles.css", "apps/web/src/components/AppIcon.vue", "apps/web/src/components/BrandMark.vue", ".github/workflows/site.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    if: github.event.repository.fork == false
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run site:build
+        env:
+          SITE_BASE: /${{ github.event.repository.name }}/
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: apps/site/dist
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

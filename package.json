@@ -1,0 +1,41 @@
+{
+  "name": "bibliograph",
+  "private": true,
+  "license": "MIT",
+  "version": "0.1.0",
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "functions"
+  ],
+  "scripts": {
+    "dev": "npm --workspace apps/web run dev",
+    "build": "npm --workspace packages/core run build && npm --workspace apps/web run build",
+    "test": "npm run test:core",
+    "test:core": "node scripts/check-boundaries.mjs && npm --workspace packages/core run test",
+    "test:final": "npm run test:core && npm run typecheck && npm run build && npm run test:e2e",
+    "typecheck": "npm --workspace packages/core run build && npm --workspace apps/web run typecheck && npm --workspace apps/site run typecheck",
+    "bench:latency": "vitest run scripts/bench-latency.test.ts --pool=forks --reporter=dot",
+    "preview": "npm --workspace apps/web run preview",
+    "firebase:emulators": "firebase emulators:start --project demo-bibliograph",
+    "setup": "node scripts/setup.mjs",
+    "deploy": "node scripts/deploy.mjs",
+    "firebase": "node scripts/firebase.mjs",
+    "build:extension": "node scripts/configure-extension.mjs",
+    "dev:local": "node scripts/dev-local.mjs",
+    "site:dev": "npm --workspace apps/site run dev",
+    "site:build": "npm --workspace apps/site run build",
+    "test:e2e": "playwright test",
+    "test:boundaries": "node scripts/check-boundaries.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "@vitejs/plugin-vue": "latest",
+    "firebase-tools": "^15.32.1",
+    "typescript": "5.9.3",
+    "vite": "latest",
+    "vitest": "latest",
+    "vue-tsc": "latest"
+  }
+}

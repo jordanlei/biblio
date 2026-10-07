@@ -1,0 +1,23 @@
+node_modules/
+dist/
+dist-*/
+.firebase/
+.firebaserc
+.firebaserc.local
+# This copy's Firebase project (written by `npm run setup`; per copy, never shared via git)
+bibliograph.config.json
+
+.env
+.env.*
+!.env.example
+
+coverage/
+playwright-report/
+test-results/
+*.tsbuildinfo
+*.d.ts.map
+
+.DS_Store
+*.log
+!.env.emulator
+.dev-drive*/
