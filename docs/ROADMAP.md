@@ -17,12 +17,12 @@ organization, and comprehension in the same workflow.
 
 1. **Capture should be cheap.** DOI, arXiv, URL, PDF, browser capture, OpenAlex search, and BibTeX
    import should all land in one deduped paper flow.
-2. **New papers should enter an inbox.** Saving a paper should not imply a commitment to read it.
-   Inbox is a triage surface, not a guilt pile.
+2. **Saving is not a commitment to read.** New papers land on "To read", a queue rather than a
+   guilt pile.
 3. **Folders and tags both matter.** Folders provide coarse, durable organization; tags handle
    cross-cutting labels. Tags alone will sprawl.
-4. **Shelves describe attention.** Inbox, Read next, Skimming, Reading, Read, Reference, and Parked
-   are exclusive states for how much attention a paper deserves now.
+4. **Three shelves, no more.** To read, Skimming, and Read say how much attention a paper needs.
+   Anything finer (reference, parked, to cite) is a tag, which can be combined and renamed.
 5. **Every save should be allowed to answer "why?"** A short saved-because field is often more useful
    than another tag.
 6. **Notes should keep citation context visible.** `@[citationKey]` links should show the surrounding
@@ -40,9 +40,9 @@ organization, and comprehension in the same workflow.
 
 The near-term surface is now:
 
-- **Paper Inbox:** imported, searched, manually added, and captured papers default to Inbox.
-- **Reading shelves:** keyboard and filters support Inbox, Read next, Skimming, Reading, Read,
-  Reference, and Parked, while old `tbr`, `skimmed`, and `read` data still loads.
+- **Reading shelves:** To read, Skimming, Read, on keys 1–3, with filter chips to match. New papers
+  default to To read; older values (inbox, readNext, reading, reference, parked, tbr, skimmed) map
+  onto the three when an existing library loads.
 - **Saved because:** search results and manual add can record why a paper is being saved; rows and
   paper pages show and edit that context.
 - **Folders remain prominent:** folder creation, nesting, collapse, and paper drag/drop remain in the
@@ -59,7 +59,7 @@ The near-term surface is now:
 | --- | --- | --- |
 | Capture is split | Search tools, browser tabs, PDFs, and reference managers all have separate save flows. | One add dialog and extension capture, with dedupe and Inbox as the default landing zone. |
 | Organization gets noisy | Tags become too numerous; folders become too rigid; reading status is too coarse. | Use folders for coarse placement, tags for labels, shelves for attention, and saved-because for local intent. |
-| Reading state is unclear | Everything marked "to read" competes equally. | Separate untriaged Inbox from Read next, active Skimming/Reading, durable Read, quiet Reference, and Parked. |
+| Reading state is unclear | Everything marked "to read" competes equally. | Three shelves — To read, Skimming, Read — and tags for everything else. |
 | Notes are isolated | A note on one paper rarely explains why it mattered to a project. | Keep paper notes, and add freeform research notes whose `@[` links connect papers in both directions. |
 | Backlinks lack context | "Mentioned in" is useful, but often forces tab-hopping. | Show the paragraph around each citation link. |
 | Discovery ignores the local library | Alerts and recommendation tools do not know what the user already saved, read, or parked. | Future discovery should weight shelves, folders, tags, saved reasons, and Research Notes. |

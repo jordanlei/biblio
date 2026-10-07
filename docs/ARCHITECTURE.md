@@ -17,7 +17,7 @@ Biblio is a static Vue app talking directly to Firebase (Auth, Firestore) and Go
 
 ## Data model (`packages/core`)
 
-- `Paper` (`users/{uid}/papers/{uuid}`): biblioic fields with structured `Creator`s, persistent `citationKey`, `tags`, `folderIds`, `notesMarkdown`, `readingStatus` (`inbox | readNext | skimming | reading | read | reference | parked`, plus legacy `tbr | skimmed`), optional `savedBecause`, optional `pdf` (Drive file ID + filename only), `openAccessPdfUrl`, `source`, timestamps.
+- `Paper` (`users/{uid}/papers/{uuid}`): bibliographic fields with structured `Creator`s, persistent `citationKey`, `tags`, `folderIds`, `notesMarkdown`, `readingStatus` (`inbox | readNext | skimming | reading | read | reference | parked`, plus legacy `tbr | skimmed`), optional `savedBecause`, optional `pdf` (Drive file ID + filename only), `openAccessPdfUrl`, `source`, timestamps.
 - `Folder` (`users/{uid}/folders/{uuid}`): `name`, `parentId`. Papers can be in many folders; deleting a folder never deletes papers.
 - `ResearchNote` (`users/{uid}/researchNotes/{uuid}`): a freeform Markdown note (title, body, timestamps). Papers are connected by `@[key]` links in the body. Notes stored in the old structured shape (question, saved search, papers with roles) are folded into Markdown on read by `migrateResearchNote` and saved in the new shape on their next edit.
 - Profile (`users/{uid}`): Drive folder ID/name, `onboardingCompleted`.
@@ -94,7 +94,7 @@ The source points at local test mode; `npm run build:extension` writes `apps/ext
 - `e2e/walkthrough.spec.ts` — the new-user journey against emulators + mock Drive: tour + Drive setup, two imports, keyboard delete/undo/status, search qualifiers, folders + drag, a research note that links a paper (file in Drive, backlink on the paper), notes links + contextual backlinks, PDF upload, edit keeps key, deep link, export, delete with PDF, sign-out guard.
 - Manual/scripted checks done for this release (see STATUS): live OpenAlex search quality and latency, author mode, PDF grabbing direct (arXiv) and via the loaded extension (NeurIPS), `extract.js` on arXiv, `/capture` save + PDF + duplicate.
 
-### Remaining test gaps for inbox and Research Notes
+### Remaining test gaps
 
 - E2E and capture recording need the Firebase emulator stack, which requires Java 11+ on `PATH`.
 - Future tests should cover research note deletion trashing the file (end to end) and rebuild behavior for very large note sets.

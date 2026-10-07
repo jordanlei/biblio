@@ -9,7 +9,7 @@ const shortcuts: Array<[string[], string]> = [
   [["↑", "↓"], "Move through papers"],
   [["Enter"], "Open paper"],
   [["Space"], "Select for bulk actions"],
-  [["1", "2", "3", "4", "5", "6", "7"], "Inbox · Read next · Skimming · Reading · Read · Reference · Parked"],
+  [["1", "2", "3"], "To read · Skimming · Read"],
   [["⌫"], "Delete"],
   [["⌘", "Z"], "Undo"],
   [["A"], "Add papers"]

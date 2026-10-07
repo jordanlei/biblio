@@ -8,7 +8,7 @@ This is **not** a Zotero clone. Do not implement word-processor citation inserti
 
 The application should do one job extremely well:
 
-> Capture papers from the web or external sources, store their biblioic metadata and personal organization in Firestore, store their PDFs exclusively in the user's Google Drive, make the library fast to browse/search/organize, allow Markdown notes with links between papers, and export the library as `references.bib`.
+> Capture papers from the web or external sources, store their bibliographic metadata and personal organization in Firestore, store their PDFs exclusively in the user's Google Drive, make the library fast to browse/search/organize, allow Markdown notes with links between papers, and export the library as `references.bib`.
 
 The initial implementation is single-user/private, but the database must be user-scoped so that multi-user support does not require a rewrite.
 
@@ -48,7 +48,7 @@ Prefer proven open-source packages and existing APIs where they reduce risky cus
 
 - Use Firebase client SDKs for Auth and Firestore rather than custom auth/session code.
 - Use the narrow `drive.file` scope (no "unverified app" warning). A copy sees only files it created; libraries move between copies by .zip export/import, never by opening another copy's files.
-- Use Citation.js or a similarly maintained biblioic library for BibTeX/CSL parsing and export once the canonical data model is stable.
+- Use Citation.js or a similarly maintained bibliographic library for BibTeX/CSL parsing and export once the canonical data model is stable.
 - Use Zotero Translate and bundled Zotero translators behind `extractFromCurrentPage()` rather than writing publisher-specific parsers.
 
 Security constraints for dependencies and plugins:
@@ -175,7 +175,7 @@ Store the chosen Drive folder ID in the user profile.
 
 There are two independent objects:
 
-**Biblioic record → Firestore**
+**Bibliographic record → Firestore**
 
 **PDF file → Google Drive**
 
@@ -212,7 +212,7 @@ interface Paper {
   // Stable human-facing identifier
   citationKey: string;
 
-  // Biblioic type
+  // Bibliographic type
   type:
     | "article"
     | "conferencePaper"
@@ -870,7 +870,7 @@ Support at minimum:
 1. Zotero JSON
 2. BibTeX
 
-Prefer Zotero JSON because it preserves richer Zotero metadata. Zotero supports JSON-based API records and numerous biblioic export formats, including BibTeX, BibLaTeX, CSL JSON and RIS. [Zotero](https://www.zotero.org/support/dev/web_api/v3/basics?utm_source=chatgpt.com)
+Prefer Zotero JSON because it preserves richer Zotero metadata. Zotero supports JSON-based API records and numerous bibliographic export formats, including BibTeX, BibLaTeX, CSL JSON and RIS. [Zotero](https://www.zotero.org/support/dev/web_api/v3/basics?utm_source=chatgpt.com)
 
 Import flow:
 
@@ -898,7 +898,7 @@ Preview:
 
 Map:
 
-- Zotero biblioic metadata → Paper
+- Zotero bibliographic metadata → Paper
 - Zotero tags → tags
 - Zotero collections → folders
 - nested Zotero collections → nested folders
@@ -970,7 +970,7 @@ Tags may optionally become BibTeX `keywords`.
 Add round-trip tests:
 
 ```text
-Paper → BibTeX → parser → equivalent biblioic metadata
+Paper → BibTeX → parser → equivalent bibliographic metadata
 ```
 
 for every supported paper type.
@@ -1331,7 +1331,7 @@ Verify every mapped field.
 
 Then export imported library to `references.bib`.
 
-Verify stable citation keys and biblioic correctness.
+Verify stable citation keys and bibliographic correctness.
 
 ---
 

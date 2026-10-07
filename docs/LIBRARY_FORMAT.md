@@ -35,7 +35,7 @@ A Biblio library is an ordinary folder (today: in the user's Google Drive). Ever
 
 ## `library.json`
 
-A JSON array of [CSL-JSON](https://citeproc-js.readthedocs.io/en/latest/csl-json/markup.html) items, sorted by `id`. It is directly usable as a biblioy by pandoc (`pandoc --citeproc --biblioy library.json`), citeproc, and Zotero's CSL-JSON import.
+A JSON array of [CSL-JSON](https://citeproc-js.readthedocs.io/en/latest/csl-json/markup.html) items, sorted by `id`. It is directly usable as a bibliography by pandoc (`pandoc --citeproc --bibliography library.json`), citeproc, and Zotero's CSL-JSON import.
 
 | CSL field | Meaning |
 | --- | --- |

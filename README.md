@@ -26,7 +26,7 @@
 
 | Area | What you get |
 | --- | --- |
-| **Library** | Sidebar with All papers / Recently added, recent research notes, folders, and tags. Biblioy-style list with year in the margin, relevance-ranked search with highlights, and filter chips: shelf (Inbox / Read next / Skimming / Reading / Read / Reference / Parked), Has PDF / No PDF, Has notes, Untagged. A preview pane shows abstract, PDF, cite key, folders, tags, saved reason, and notes. |
+| **Library** | Sidebar with All papers / Recently added, recent research notes, folders, and tags. Bibliography-style list with year in the margin, relevance-ranked search with highlights, and filter chips: shelf (Inbox / Read next / Skimming / Reading / Read / Reference / Parked), Has PDF / No PDF, Has notes, Untagged. A preview pane shows abstract, PDF, cite key, folders, tags, saved reason, and notes. |
 | **Keyboard** | `↑ ↓` select (`⇧` extends), `Enter` open, `Space` check, `⌘A` check all, `1`-`7` shelf, `⌫` delete, `⌘Z` undo (15 steps), `/` search, `A` add, `?` help. |
 | **Library search** | Every word must match; title and author hits rank above abstract, notes, and saved-because text. Qualifiers: `author:` `title:` `#tag` `key:` `year:2015-2020` `"phrase"`. |
 | **Adding papers** | One dialog: **Search** (Topic / Title / Author modes over OpenAlex's 250M works, blended relevance + citations, author pages, year range), **DOIs & arXiv IDs** (bulk paste), **Import .bib** (keeps citation keys; previews new vs. duplicate), **Enter manually** (last resort). New papers land in Inbox by default; search/manual add can set a shelf and saved-because reason. |

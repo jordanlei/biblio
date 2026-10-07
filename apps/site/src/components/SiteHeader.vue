@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import BrandMark from "../../../web/src/components/BrandMark.vue";
-import { BASE, HOW_URL, REPO_URL, SETUP_URL } from "../site";
+import { BASE, REPO_URL, SETUP_URL } from "../site";
 </script>
 
 <template>
@@ -8,7 +8,7 @@ import { BASE, HOW_URL, REPO_URL, SETUP_URL } from "../site";
     <a class="brand" :href="BASE"><BrandMark :size="30" /> Biblio</a>
     <span class="spacer" />
     <nav class="links">
-      <a :href="HOW_URL">How it works</a>
+      <a :href="`${BASE}#how-it-works`">How it works</a>
       <a :href="SETUP_URL">Setup tutorial</a>
       <a :href="REPO_URL">GitHub</a>
     </nav>

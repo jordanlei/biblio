@@ -7,7 +7,7 @@ import PaperInspector from "../components/PaperInspector.vue";
 import { attachPdf, driveOpenUrl, grabPdf } from "../services/drive";
 import { citeCommand, downloadBibtex, familyName, setPaperTag, updatePaper, useLibrary } from "../services/library";
 import { highlight, isEmptyQuery, parseLocalQuery, scorePaper } from "../services/librarySearch";
-import { filtersFromQuery, isQuietShelf, matchesFilters, readingStatusLabel, readingStatuses, scopeFromQuery, type ListFilters } from "../services/scope";
+import { filtersFromQuery, matchesFilters, normalizeReadingStatus, readingStatusLabel, readingStatuses, scopeFromQuery, type ListFilters } from "../services/scope";
 import { useSession } from "../services/session";
 import { askConfirm, copyText, isTypingTarget, openAdd, toast, toastError, ui, undoAction } from "../services/ui";
 import { deletePapersEverywhere } from "../services/deletion";
@@ -464,7 +464,7 @@ const scopeEyebrow = computed(() => (scope.value.kind === "folder" ? "Folder" : 
             :key="paper.id"
             :data-id="paper.id"
             class="entry"
-            :class="{ selected: ui.selectedId === paper.id, checked: checked.has(paper.id), quiet: isQuietShelf(paper.readingStatus), 'pdf-drop': pdfDropTarget === paper.id }"
+            :class="{ selected: ui.selectedId === paper.id, checked: checked.has(paper.id), 'pdf-drop': pdfDropTarget === paper.id }"
             role="option"
             :aria-selected="ui.selectedId === paper.id"
             draggable="true"
@@ -498,7 +498,7 @@ const scopeEyebrow = computed(() => (scope.value.kind === "folder" ? "Folder" : 
             </div>
             <div class="side">
               <span class="marks">
-                <span v-if="paper.readingStatus" class="status-mark" :class="paper.readingStatus">{{ statusLabel(paper) }}</span>
+                <span v-if="normalizeReadingStatus(paper.readingStatus)" class="status-mark" :class="normalizeReadingStatus(paper.readingStatus)">{{ statusLabel(paper) }}</span>
                 <AppIcon v-if="paper.notesMarkdown?.trim()" name="note" :size="14" />
                 <AppIcon v-if="paper.pdf" name="pdf" :size="14" class="has-pdf" />
               </span>
@@ -620,7 +620,7 @@ const scopeEyebrow = computed(() => (scope.value.kind === "folder" ? "Folder" : 
   color: var(--text-3);
 }
 
-.status-mark.tbr {
+.status-mark.toRead {
   color: var(--accent-ink);
 }
 
@@ -668,7 +668,7 @@ const scopeEyebrow = computed(() => (scope.value.kind === "folder" ? "Folder" : 
   width: 130px;
 }
 
-/* Biblioy-style entries: year in the margin, title in the serif, a hairline between. */
+/* Bibliography-style entries: year in the margin, title in the serif, a hairline between. */
 .papers {
   margin: 8px -12px 0;
   padding: 0;
@@ -699,9 +699,6 @@ const scopeEyebrow = computed(() => (scope.value.kind === "folder" ? "Folder" : 
   background: var(--accent-soft);
 }
 
-.entry.quiet:not(.selected):not(.checked) {
-  opacity: 0.68;
-}
 
 .entry.pdf-drop {
   outline: 2px dashed var(--accent);

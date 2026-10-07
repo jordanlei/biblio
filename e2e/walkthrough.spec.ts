@@ -67,7 +67,7 @@ test("new researcher: sign in, set up, import, organize, annotate, export", asyn
     await expect(page.locator(".entry")).toHaveCount(8);
   });
 
-  await test.step("keyboard delete, undo, and inbox shelves", async () => {
+  await test.step("keyboard delete, undo, and reading shelves", async () => {
     await page.locator(".entry", { hasText: "LFADS" }).click();
     await page.keyboard.press("Backspace");
     await expect(page.getByRole("dialog", { name: "Delete this paper?" })).toBeVisible();
@@ -77,9 +77,9 @@ test("new researcher: sign in, set up, import, organize, annotate, export", asyn
     await expect(page.locator(".entry")).toHaveCount(8);
     await page.locator(".entry", { hasText: "LFADS" }).click();
     await page.keyboard.press("2");
-    await page.locator(".filters").getByRole("button", { name: "Read next" }).click();
+    await page.locator(".filters").getByRole("button", { name: "Skimming" }).click();
     await expect(page.locator(".entry")).toHaveCount(1);
-    await page.locator(".filters").getByRole("button", { name: "Read next" }).click();
+    await page.locator(".filters").getByRole("button", { name: "Skimming" }).click();
     await expect(page.locator(".entry")).toHaveCount(8);
   });
 
@@ -116,7 +116,7 @@ test("new researcher: sign in, set up, import, organize, annotate, export", asyn
     await expect(page.locator(".backlinks")).toContainText("Credit assignment");
     await expect(page.locator(".backlinks")).toContainText("Start with Sussillo");
 
-    await page.goto("/library?status=readNext");
+    await page.goto("/library?status=skimming");
     await expect(page.locator(".entry")).toHaveCount(1);
     await page.goto("/library");
     await expect(page.locator(".entry")).toHaveCount(8);

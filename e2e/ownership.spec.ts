@@ -83,7 +83,7 @@ test("Biblio can disappear; the library survives in Drive and rebuilds", async (
     await importSample(page);
 
     await page.locator(".entry", { hasText: "LFADS" }).click();
-    await page.keyboard.press("5"); // Read
+    await page.keyboard.press("3"); // Read
     const inspector = page.locator(".inspector");
     await inspector.getByLabel("Add tag").fill("favorite");
     await inspector.getByLabel("Add tag").press("Enter");

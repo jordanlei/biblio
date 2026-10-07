@@ -65,7 +65,7 @@ function toCandidate(c: Captured): PaperCandidate {
     abstract: c.abstract || undefined,
     url: c.url,
     openAccessPdfUrl: c.pdfUrl || undefined,
-    readingStatus: "inbox",
+    readingStatus: "toRead",
     source: "extension"
   };
 }

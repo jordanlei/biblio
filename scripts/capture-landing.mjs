@@ -234,43 +234,40 @@ await findPdf("Attention Is All You Need");
 await page.locator('[data-sync-status][data-phase="saved"]').waitFor({ timeout: 30_000 });
 await page.locator("a.nav-item", { hasText: "All papers" }).click();
 
-// --- Video: triage the inbox with number keys -------------------------------------------------
+// --- Video: organize — shelve with one key, then file into a folder ---------------------------
 // Wider window so titles fit beside the inspector; the video keeps only the paper list.
 await page.setViewportSize({ width: 1440, height: 860 });
-await page.locator(".filters").getByRole("button", { name: "Inbox", exact: true }).click();
 await top();
 await row("Attention Is All You Need").click();
 await noToasts();
-const inboxRegion = await listRegion(640);
+const listArea = await listRegion(640);
 await record(
-  "inbox",
+  "organize",
   async () => {
-    await pause(1000);
-    // Each paper leaves the inbox as it's shelved.
-    const moves = [
-      ["Attention Is All You Need", "5", "Read"],
-      ["Human-level control", "3", "Skimming"],
-      ["Conflict monitoring", "6", "Reference"],
-      ["Reinforcement Learning", "6", "Reference"],
-      ["Planning as Inference", "7", "Parked"],
-      ["Recurrent Switching", "2", "Read next"]
-    ];
-    for (const [title, key, label] of moves) {
+    await pause(900);
+    for (const [title, key, label] of [
+      ["Attention Is All You Need", "3", "Read"],
+      ["Human-level control", "2", "Skimming"],
+      ["Conflict monitoring", "1", "To read"],
+      ["Recurrent Switching", "1", "To read"]
+    ]) {
       await row(title).click();
-      await pause(500);
+      await pause(450);
       await page.keyboard.press(key);
-      await keycap(key, label, inboxRegion);
-      await pause(1100);
+      await keycap(key, label, listArea);
+      await pause(1000);
     }
-    await pause(600);
-    await page.locator(".filters").getByRole("button", { name: "Inbox", exact: true }).click(); // back to everything
-    await top();
-    await pause(2200); // quiet shelves (Reference, Parked) render dimmed
+    await pause(400);
+    // Filter down to one shelf, then back.
+    await page.locator(".filters").getByRole("button", { name: "To read", exact: true }).click();
+    await pause(1600);
+    await page.locator(".filters").getByRole("button", { name: "To read", exact: true }).click();
+    await pause(1500);
   },
-  { width: 1440, height: 860, crop: inboxRegion }
+  { width: 1440, height: 860, crop: listArea }
 );
 await page.setViewportSize({ width: 1280, height: 800 });
-for (const [title, key] of [["Inferring single-trial", "4"], ["LFADS", "5"]]) {
+for (const [title, key] of [["Inferring single-trial", "2"], ["LFADS", "3"]]) {
   await row(title).click();
   await page.keyboard.press(key);
 }
@@ -280,6 +277,60 @@ await noToasts();
 await row("LFADS").click();
 await top();
 await shot("library");
+
+// --- Video: search — find a paper online, save it with a reason ------------------------------
+await page.setViewportSize({ width: 1280, height: 800 });
+await page.keyboard.press("a");
+await page.getByRole("tab", { name: "Search" }).click();
+const addPanel = await page.locator(".add-panel").evaluate((el) => {
+  const box = el.getBoundingClientRect();
+  return { x: box.x, y: box.y, width: box.width, height: box.height };
+});
+await record(
+  "search",
+  async () => {
+    await pause(700);
+    await page.getByLabel("Search for papers").pressSequentially("neural population dynamics", { delay: 55 });
+    await page.locator(".candidate").nth(3).waitFor({ timeout: 30_000 });
+    await pause(1500);
+    const reason = page.locator(".candidate").first().getByPlaceholder("Useful for…");
+    await reason.click();
+    await reason.pressSequentially("Classic result for the background section", { delay: 28 });
+    await pause(1800);
+  },
+  { crop: addPanel }
+);
+await page.keyboard.press("Escape");
+await noToasts();
+
+// --- Video: review — read the paper, write notes beside it ------------------------------------
+await page.goto(`${APP}/library`);
+await row("Recurrent Switching").click();
+await top();
+// The inspector is a tall column; a page needs something closer to landscape, so the capture
+// takes the paper list and the inspector together.
+const reviewArea = await page.locator(".inspector").evaluate((el) => {
+  const box = el.getBoundingClientRect();
+  return { x: Math.max(0, box.x - 470), y: 0, width: innerWidth - Math.max(0, box.x - 470), height: 700 };
+});
+await record(
+  "review",
+  async () => {
+    await pause(900);
+    await inspector().locator(".empty-notes").dblclick();
+    await pause(500);
+    const area = inspector().locator("textarea");
+    await area.pressSequentially("Switching linear dynamics, so each regime is readable on its own.", { delay: 26 });
+    await pause(700);
+    await area.pressSequentially("\n\nUse for the multi-region comparison.", { delay: 26 });
+    await pause(800);
+    await inspector().getByText("Saved", { exact: true }).waitFor();
+    await inspector().getByRole("button", { name: "Done" }).click();
+    await pause(2200);
+  },
+  { crop: reviewArea }
+);
+await noToasts();
 
 // --- Video: write a note that links another paper, then follow the link -----------------------
 await page.goto(`${APP}/library`);
@@ -326,8 +377,9 @@ await page.goto(`${APP}/research-notes`);
 await page.getByRole("button", { name: "New note" }).first().waitFor();
 await page.setViewportSize({ width: 1180, height: 800 });
 const notePane = await page.locator(".notes-list").evaluate((el) => {
-  const right = el.getBoundingClientRect().right;
-  return { x: right, y: 0, width: innerWidth - right, height: innerHeight };
+  // Start a little left of the pane edge so the title's own padding isn't shaved off.
+  const right = el.getBoundingClientRect().right - 8;
+  return { x: right, y: 0, width: innerWidth - right, height: 620 };
 });
 await record(
   "research-notes",

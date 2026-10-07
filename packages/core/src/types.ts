@@ -8,7 +8,12 @@ export type PaperType =
   | "report"
   | "other";
 
-export type ReadingStatus = "inbox" | "readNext" | "skimming" | "reading" | "read" | "reference" | "parked" | "tbr" | "skimmed";
+/**
+ * How much attention a paper needs. Three states, deliberately: anything finer (reference,
+ * parked, to cite) is a tag, which can be combined and renamed. The rest are older values that
+ * still load from existing libraries; see readingStatusLabel in the web app.
+ */
+export type ReadingStatus = "toRead" | "skimming" | "read" | "inbox" | "readNext" | "reading" | "reference" | "parked" | "tbr" | "skimmed";
 
 export interface Creator {
   given?: string;

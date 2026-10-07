@@ -20,7 +20,7 @@ const busy = ref(false);
 const pdfState = ref<"idle" | "saving" | "saved" | "failed">("idle");
 const pdfStep = ref("");
 const expanded = ref(false);
-const shelf = ref("inbox");
+const shelf = ref("toRead");
 const savedBecause = ref("");
 
 const added = computed(() => (addedId.value ? paperById.value.get(addedId.value) ?? null : null));

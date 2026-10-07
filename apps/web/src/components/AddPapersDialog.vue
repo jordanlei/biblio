@@ -47,7 +47,7 @@ async function resolveIdentifiers() {
 const idAddable = computed(() => idResults.value.filter((r) => r.candidate && checkDuplicate(r.candidate).kind === "none"));
 
 async function addAllIdentifiers() {
-  const candidates = idAddable.value.map((r) => ({ ...r.candidate!, folderIds: [], readingStatus: "inbox" as const }));
+  const candidates = idAddable.value.map((r) => ({ ...r.candidate!, folderIds: [], readingStatus: "toRead" as const }));
   try {
     const created = await importPapers(candidates);
     toast(`Added ${created.length} paper${created.length === 1 ? "" : "s"}.`);
@@ -93,7 +93,7 @@ async function runImport() {
   const chosen = [...parsed.value.fresh, ...(skipProbable.value ? [] : parsed.value.probable)];
   importing.value = true;
   try {
-    const created = await importPapers(chosen.map((c) => ({ ...c, tags: importKeywords.value ? c.tags ?? [] : [], folderIds: [], readingStatus: "inbox" as const })));
+    const created = await importPapers(chosen.map((c) => ({ ...c, tags: importKeywords.value ? c.tags ?? [] : [], folderIds: [], readingStatus: "toRead" as const })));
     toast(`Imported ${created.length} paper${created.length === 1 ? "" : "s"}.`, {
       action: { label: "View", run: () => router.push({ path: "/library", query: { view: "recent" } }) }
     });
@@ -120,7 +120,7 @@ async function addManual() {
       doi: manual.doi || undefined,
       url: manual.url || undefined,
       folderIds: [],
-      readingStatus: "inbox",
+      readingStatus: "toRead",
       savedBecause: manual.savedBecause || undefined,
       source: "manual"
     });

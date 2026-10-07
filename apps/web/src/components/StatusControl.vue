@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import type { Paper, ReadingStatus } from "@biblio/core";
 import { updatePaper } from "../services/library";
-import { readingStatuses } from "../services/scope";
+import { normalizeReadingStatus, readingStatuses } from "../services/scope";
 import { toastError } from "../services/ui";
 
 const props = defineProps<{ paper: Paper }>();
 
 function set(status: ReadingStatus) {
-  const next = props.paper.readingStatus === status ? undefined : status;
+  const next = normalizeReadingStatus(props.paper.readingStatus) === status ? undefined : status;
   updatePaper(props.paper.id, { readingStatus: next }, "Change reading status").catch(toastError);
 }
 </script>
@@ -18,8 +18,8 @@ function set(status: ReadingStatus) {
       v-for="s in readingStatuses"
       :key="s.id"
       type="button"
-      :class="[s.id, { on: paper.readingStatus === s.id }]"
-      :aria-pressed="paper.readingStatus === s.id"
+      :class="[s.id, { on: normalizeReadingStatus(paper.readingStatus) === s.id }]"
+      :aria-pressed="normalizeReadingStatus(paper.readingStatus) === s.id"
       :title="`${s.label} (${s.key})`"
       @click="set(s.id)"
     >

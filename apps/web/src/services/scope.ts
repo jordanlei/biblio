@@ -17,27 +17,32 @@ export interface ListFilters {
   status: "" | ReadingStatus;
 }
 
-export const readingStatuses: Array<{ id: ReadingStatus; label: string; key: string; quiet?: boolean }> = [
-  { id: "inbox", label: "Inbox", key: "1" },
-  { id: "readNext", label: "Read next", key: "2" },
-  { id: "skimming", label: "Skimming", key: "3" },
-  { id: "reading", label: "Reading", key: "4" },
-  { id: "read", label: "Read", key: "5" },
-  { id: "reference", label: "Reference", key: "6", quiet: true },
-  { id: "parked", label: "Parked", key: "7", quiet: true }
+/** The three shelves. Anything more specific is a tag. */
+export const readingStatuses: Array<{ id: ReadingStatus; label: string; key: string }> = [
+  { id: "toRead", label: "To read", key: "1" },
+  { id: "skimming", label: "Skimming", key: "2" },
+  { id: "read", label: "Read", key: "3" }
 ];
 
-export const legacyReadingStatusLabels: Partial<Record<ReadingStatus, string>> = {
-  tbr: "To read",
-  skimmed: "Skimmed"
+/** Older statuses map onto the three; a library written before the change still reads cleanly. */
+const legacyReadingStatus: Partial<Record<ReadingStatus, ReadingStatus | undefined>> = {
+  inbox: "toRead",
+  readNext: "toRead",
+  tbr: "toRead",
+  reading: "skimming",
+  skimmed: "skimming",
+  reference: undefined,
+  parked: undefined
 };
 
-export function readingStatusLabel(status?: ReadingStatus) {
-  return readingStatuses.find((r) => r.id === status)?.label ?? (status ? legacyReadingStatusLabels[status] : undefined);
+/** The shelf a stored value belongs to now (undefined = no shelf). */
+export function normalizeReadingStatus(status?: ReadingStatus): ReadingStatus | undefined {
+  if (!status) return undefined;
+  return readingStatuses.some((r) => r.id === status) ? status : legacyReadingStatus[status];
 }
 
-export function isQuietShelf(status?: ReadingStatus) {
-  return status === "reference" || status === "parked";
+export function readingStatusLabel(status?: ReadingStatus) {
+  return readingStatuses.find((r) => r.id === normalizeReadingStatus(status))?.label;
 }
 
 export function filtersFromQuery(query: LocationQuery): ListFilters {
@@ -51,7 +56,7 @@ export function matchesFilters(paper: Paper, f: ListFilters): boolean {
   if (f.pdf === "missing" && paper.pdf) return false;
   if (f.notes && !paper.notesMarkdown?.trim()) return false;
   if (f.untagged && paper.tags.length) return false;
-  if (f.status && paper.readingStatus !== f.status) return false;
+  if (f.status && normalizeReadingStatus(paper.readingStatus) !== f.status) return false;
   return true;
 }
 

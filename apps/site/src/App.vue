@@ -2,10 +2,11 @@
 // Biblio's home page (GitHub Pages). Biblio isn't a hosted service: this page makes the case,
 // shows the features, and sends people to setup/. Captures come from scripts/capture-landing.mjs.
 import AppIcon from "../../web/src/components/AppIcon.vue";
+import FaqItem from "./components/FaqItem.vue";
 import LandingVideo from "./components/LandingVideo.vue";
 import SiteFooter from "./components/SiteFooter.vue";
 import SiteHeader from "./components/SiteHeader.vue";
-import { BASE, HOW_URL, REPO_URL, SETUP_URL } from "./site";
+import { BASE, REPO_URL, SETUP_URL, docUrl } from "./site";
 
 const driveTree = [
   { depth: 0, icon: "drive", name: "My Drive" },
@@ -17,61 +18,75 @@ const driveTree = [
   { depth: 2, icon: "quote", name: "references.bib" }
 ];
 
-// What a reference manager ought to be. These are the argument; everything else is detail.
-const benefits = [
-  { icon: "link", title: "Open source", text: "Every line is public and MIT licensed. Read it, fork it, change it." },
-  { icon: "check", title: "Free, forever", text: "No subscription, no storage tier, no company that can start charging. Your copy fits in Google's free plan." },
-  {
-    icon: "settings",
-    title: "Fault-tolerant",
-    text: "If your hosting breaks, or this project disappears, your papers are still in your Drive. Fork the code and rebuild your whole library from a .zip."
-  },
-  {
-    icon: "user",
-    title: "Yours, all of it",
-    text: "Not just the PDFs: your notes, tags, shelves, and the links you draw between papers. Saved as files named for what they are — not hVSZF.md — so you can read and grep them without Biblio."
-  },
-  { icon: "note", title: "Built on relationships", text: "Papers cite papers; notes cite papers. Type @[ to link one, and every paper shows the notes that mention it, in context." },
-  { icon: "search", title: "Search that works", text: "Find papers across 250 million from inside the app, and search your own library by title, author, tag, note, or the reason you saved it." },
-  { icon: "quote", title: "Exports to .bib", text: "references.bib stays current in your Drive, ready for LaTeX and Overleaf. library.json works with pandoc and Zotero." }
-];
-
+// What a reference manager ought to do, and who actually does it.
+// From each product's own documentation and support forums, October 2026.
 const compareColumns = ["Biblio", "Zotero", "EndNote", "Paperpile"];
-// Facts from each product's own documentation and support forums, October 2026.
 const compareRows = [
-  { label: "Open source", ours: "Yes (MIT)", cells: ["Yes (AGPL)", "No", "No"] },
-  { label: "Who runs it", ours: "You, in your own Google Cloud project", cells: ["Desktop app; sync via Zotero", "Clarivate", "Paperpile's servers"] },
-  { label: "Where your library lives", ours: "Your Google Drive, as plain files", cells: ["Local database", "Local .enl library", "Paperpile's cloud"] },
-  { label: "Links between papers and notes", ours: "@[ links, with backlinks in context", cells: ["Manual “Related”, outside notes", "Web of Science citations", "Not built in"] },
-  { label: "Price", ours: "Free", cells: ["Free; paid storage over 300 MB", "One-time license", "Subscription"] }
+  { label: "Be open source", ours: "Yes, MIT — read it, fork it, change it", cells: ["Yes (AGPL)", "No", "No"] },
+  { label: "Be free, forever", ours: "No subscription, no storage tier", cells: ["Free; paid storage over 300 MB", "One-time license", "Subscription"] },
+  {
+    label: "Survive its own vendor",
+    ours: "Your copy and your files keep working; rebuild from a .zip",
+    cells: ["Library is local, sync is Zotero's", "Library is local", "Library is Paperpile's"]
+  },
+  { label: "Let you own the app", ours: "You host it and change it", cells: ["Desktop app you can patch", "No", "No"] },
+  {
+    label: "Let you own the data",
+    ours: "Everything — notes, tags, shelves, links — in your Drive",
+    cells: ["PDFs and a local database", "Local .enl library", "Only PDFs in your Drive"]
+  },
+  { label: "Store it readably", ours: "Files named for what they are, not hVSZF", cells: ["SQLite + opaque storage keys", "Proprietary .enl", "Cloud records"] },
+  { label: "Connect papers to each other", ours: "@[ links in any note, with backlinks in context", cells: ["Manual “Related”, outside notes", "Web of Science citations", "Not built in"] },
+  { label: "Find new papers natively", ours: "250M papers, searched in the app", cells: ["Via connectors and the browser plugin", "Online search", "Google Scholar button"] },
+  { label: "Export to .bib", ours: "references.bib, always current in your Drive", cells: ["Yes, on export", "Yes, on export", "Yes, on export"] }
 ];
 
+// Each one has a demo below.
 const features = [
-  { icon: "inbox", title: "Inbox and shelves", text: "New papers land in an Inbox. One key shelves each: Read next, Skimming, Reading, Read, Reference, Parked." },
-  { icon: "note", title: "Research notes", text: "Freeform Markdown for a question or project. Link papers with @[ and they connect both ways." },
-  { icon: "search", title: "Add from anywhere", text: "Search 250M papers, paste a DOI or arXiv link, import a .bib from Zotero or Mendeley, or capture from the browser." },
-  { icon: "pdf", title: "PDFs in your Drive", text: "Open-access PDFs are fetched automatically and stored in your own folder." },
-  { icon: "folder", title: "Folders and tags", text: "Folders for stable projects, tags for cross-cutting labels, and a note on why you saved each paper." },
-  { icon: "clock", title: "Fast, and fine offline", text: "Search as you type, ⌘K to jump anywhere. Edits work offline and sync when you're back." }
+  {
+    id: "search",
+    eyebrow: "Search",
+    title: "Find papers without leaving.",
+    text: "Search 250 million papers by topic, title, or author, and note why you're saving one as you add it. Or paste a DOI, an arXiv link, or a .bib from Zotero.",
+    video: { name: "search", width: 600, height: 230 }
+  },
+  {
+    id: "organize",
+    eyebrow: "Organize",
+    title: "Three shelves, one keypress.",
+    text: "To read, Skimming, Read — press 1, 2, 3. That's the whole reading model; anything more specific is a tag. Folders hold stable projects.",
+    video: { name: "organize", width: 600, height: 507 }
+  },
+  {
+    id: "review",
+    eyebrow: "Review",
+    title: "Notes beside the paper.",
+    text: "Write in Markdown next to the abstract and the PDF, without opening another app. Notes save as you type, into your own Drive.",
+    video: { name: "review", width: 600, height: 525 }
+  },
+  {
+    id: "link",
+    eyebrow: "Link",
+    title: "Papers that know each other.",
+    text: "Type @[ to link a paper from any note. The linked paper then lists every note that mentions it, with the sentence around the link.",
+    video: { name: "linking", width: 552, height: 740 }
+  },
+  {
+    id: "write",
+    eyebrow: "Write",
+    title: "Think across papers.",
+    text: "A research note is freeform Markdown for a question or a project. Link the papers that bear on it and they gather themselves.",
+    video: { name: "research-notes", width: 600, height: 585 }
+  }
 ];
 
-const faqs = [
-  {
-    q: "Is this really free?",
-    a: "Yes. Biblio is MIT-licensed code, and your copy runs on Google's free Spark plan. There's no paid tier, because there's nobody to pay — you're hosting it yourself."
-  },
-  {
-    q: "What happens if this project is abandoned?",
-    a: "Nothing, for you. Your copy keeps running in your Google account, your library stays in your Drive as plain files, and you have the code. That's the point of the design."
-  },
-  { q: "Do I need to know how to code?", a: "No. Setup is one command, and the tutorial walks through every screen. Knowing how to code just means you can also change things." },
-  {
-    q: "Can I move my library between copies?",
-    a: "Yes. Download it as a .zip from Settings and import it into the other copy. If you have no working copy at all, download the folder from Google Drive — that's a .zip too — and import that."
-  },
-  { q: "What does Biblio see of my Drive?", a: "Only the files it creates. That's Google's narrowest Drive permission, which is also why signing in shows no scary warning screen." },
-  { q: "Who can see my library?", a: "You. There's no Biblio server, no accounts, and no analytics. Paper lookups go straight from your browser to public catalogs like OpenAlex and Crossref." },
-  { q: "Can I use it on my phone?", a: "It's a web app, so it opens on a phone, but it's built for a desk. There's no mobile app, and no PDF annotation or Word plugin yet." }
+const extras = [
+  { icon: "quote", text: "references.bib stays current for LaTeX and Overleaf" },
+  { icon: "pdf", text: "Open-access PDFs fetched automatically" },
+  { icon: "clock", text: "Works offline; syncs when you're back" },
+  { icon: "search", text: "⌘K to jump anywhere" },
+  { icon: "upload", text: "Import from Zotero, Mendeley, or a .bib" },
+  { icon: "settings", text: "Themes, fonts, and text size" }
 ];
 </script>
 
@@ -105,18 +120,12 @@ const faqs = [
 
     <section class="why">
       <h2 class="display">A better way to manage references</h2>
-      <ul class="benefits">
-        <li v-for="item in benefits" :key="item.title">
-          <AppIcon :name="item.icon" :size="19" />
-          <h3>{{ item.title }}</h3>
-          <p>{{ item.text }}</p>
-        </li>
-      </ul>
+      <p class="lead">What a reference manager ought to do — and who actually does it.</p>
       <div class="table-wrap">
         <table>
           <thead>
             <tr>
-              <th scope="col"><span class="sr-only">Feature</span></th>
+              <th scope="col"><span class="sr-only">What it ought to do</span></th>
               <th v-for="name in compareColumns" :key="name" scope="col" :class="{ us: name === 'Biblio' }">{{ name }}</th>
             </tr>
           </thead>
@@ -129,74 +138,79 @@ const faqs = [
           </tbody>
         </table>
       </div>
-      <p class="fine">Where the others are ahead: Word and Google Docs plugins, PDF annotation, and mobile apps. From each product's documentation, October 2026.</p>
+      <p class="fine">Where the others are ahead: Word and Google Docs plugins, PDF annotation, and mobile apps.</p>
     </section>
 
-    <section class="how">
+    <section id="how-it-works" class="how">
       <h2 class="display">How it works</h2>
-      <p class="lead">Biblio isn't a service you sign up for. It's code that sets up your own reference manager, in your own Google account.</p>
-      <div class="flow" role="list">
-        <div class="node" role="listitem">
-          <span class="where"><AppIcon name="link" :size="17" /> The code</span>
-          <p>Public and MIT licensed. Fork it and change anything.</p>
+      <p class="lead">Biblio isn't a service you sign up for. It's code that sets up your own reference manager, inside your own Google account.</p>
+
+      <div class="arch">
+        <div class="computer">
+          <span class="label"><AppIcon name="link" :size="15" /> Your computer, once</span>
+          <p><strong>This code</strong>, cloned from GitHub. You run <code>npm run setup</code>.</p>
         </div>
-        <span class="arrow" aria-hidden="true">→</span>
-        <div class="node yours" role="listitem">
-          <span class="where"><AppIcon name="settings" :size="17" /> Your copy</span>
-          <p>Your own project and sign-in at <code>your-id.web.app</code>.</p>
-        </div>
-        <span class="arrow" aria-hidden="true">→</span>
-        <div class="node yours" role="listitem">
-          <span class="where"><AppIcon name="drive" :size="17" /> Your library</span>
-          <p>Plain files in your Drive. They outlive any copy of the app.</p>
-        </div>
-      </div>
-      <p class="more"><a :href="HOW_URL">See the full architecture →</a></p>
-    </section>
+        <div class="setup-arrow" aria-hidden="true"><span>creates &amp; deploys</span></div>
 
-    <section class="feature">
-      <div class="copy">
-        <p class="eyebrow">Inbox</p>
-        <h2 class="display">Sort new papers with one key.</h2>
-        <p>Everything you save lands in the Inbox. Press a number to shelve it.</p>
-      </div>
-      <figure class="shot">
-        <LandingVideo name="inbox" :width="758" :height="640" label="Pressing number keys moves each paper out of the Inbox onto a shelf." />
-      </figure>
-    </section>
-
-    <section class="feature reverse">
-      <div class="copy">
-        <p class="eyebrow">Research notes</p>
-        <h2 class="display">Write across papers.</h2>
-        <p>A question, a project, a draft: just Markdown. Link papers with <code>@[</code> and they're connected.</p>
-      </div>
-      <figure class="shot">
-        <LandingVideo name="research-notes" :width="588" :height="800" label="Writing a research note that links three papers with @[." />
-      </figure>
-    </section>
-
-    <section class="feature">
-      <div class="copy">
-        <p class="eyebrow">Linked notes</p>
-        <h2 class="display">Link papers as you write.</h2>
-        <p>Every paper shows the notes that mention it, with the sentence around the link.</p>
-      </div>
-      <figure class="shot">
-        <LandingVideo name="linking" :width="552" :height="740" label="Typing @[ to link a paper, then opening that paper to see the mention." />
-      </figure>
-    </section>
-
-    <section class="built-in">
-      <h2 class="display">Built-in features</h2>
-      <ul class="grid">
-        <li v-for="item in features" :key="item.title">
-          <AppIcon :name="item.icon" :size="18" />
-          <div>
-            <h3>{{ item.title }}</h3>
-            <p>{{ item.text }}</p>
+        <div class="account">
+          <span class="label"><AppIcon name="user" :size="15" /> Your Google account</span>
+          <div class="services">
+            <div class="panel">
+              <span class="panel-title">Your Firebase project</span>
+              <ul class="chips">
+                <li><AppIcon name="settings" :size="15" /><div><strong>Hosting</strong><small>Serves the app at your-id.web.app</small></div></li>
+                <li><AppIcon name="user" :size="15" /><div><strong>Authentication</strong><small>Google sign-in. Only you</small></div></li>
+                <li><AppIcon name="search" :size="15" /><div><strong>Firestore</strong><small>A search index, rebuilt from Drive</small></div></li>
+              </ul>
+            </div>
+            <div class="panel drive">
+              <span class="panel-title">Your Google Drive</span>
+              <ul class="tree-mini">
+                <li><AppIcon name="folder" :size="14" /> Biblio Library</li>
+                <li class="in"><AppIcon name="library" :size="14" /> library.json</li>
+                <li class="in"><AppIcon name="quote" :size="14" /> references.bib</li>
+                <li class="in"><AppIcon name="note" :size="14" /> notes/*.md</li>
+                <li class="in"><AppIcon name="pdf" :size="14" /> papers/*.pdf</li>
+              </ul>
+              <small>The real copy of your library.</small>
+            </div>
           </div>
-        </li>
+        </div>
+
+        <ol class="wires" aria-label="What the web app does">
+          <li><span class="n">1</span> loads from Hosting</li>
+          <li><span class="n">2</span> signs you in</li>
+          <li><span class="n">3</span> searches the index</li>
+          <li><span class="n">4</span> reads &amp; writes your files</li>
+        </ol>
+
+        <div class="browser">
+          <span class="label"><AppIcon name="search" :size="15" /> Your browser, every day</span>
+          <p><strong>The web app you spun up.</strong> It talks straight to your Firebase project and your Drive — there's no server in between, and nobody else's machine is involved.</p>
+        </div>
+      </div>
+
+      <p class="aside">
+        Looking up a paper asks public catalogs (OpenAlex, Crossref, arXiv) directly from your browser. The people who write Biblio never see your copy or your library.
+        <a :href="docUrl('STORAGE.md')">How storage works →</a>
+      </p>
+    </section>
+
+    <section class="features">
+      <h2 class="display">Built-in features</h2>
+      <div v-for="(item, i) in features" :key="item.id" class="feature" :class="{ reverse: i % 2 === 1 }">
+        <div class="copy">
+          <p class="eyebrow">{{ item.eyebrow }}</p>
+          <h3 class="display">{{ item.title }}</h3>
+          <p>{{ item.text }}</p>
+        </div>
+        <figure class="shot">
+          <LandingVideo :name="item.video.name" :width="item.video.width" :height="item.video.height" :label="item.text" />
+        </figure>
+      </div>
+
+      <ul class="extras">
+        <li v-for="item in extras" :key="item.text"><AppIcon :name="item.icon" :size="16" /> {{ item.text }}</li>
       </ul>
     </section>
 
@@ -218,12 +232,35 @@ npm run setup</pre>
 
     <section class="faq-section">
       <h2 class="display">Questions</h2>
-      <dl class="faq">
-        <template v-for="item in faqs" :key="item.q">
-          <dt>{{ item.q }}</dt>
-          <dd>{{ item.a }}</dd>
-        </template>
-      </dl>
+      <div class="faq">
+        <FaqItem question="Is this really free?">
+          Yes. Biblio is MIT-licensed code, and your copy runs on Google's free Spark plan. There's no paid tier, because there's nobody to pay — you're hosting it yourself.
+        </FaqItem>
+        <FaqItem question="What happens if this project is abandoned?">
+          Nothing, for you. Your copy keeps running in your Google account, your library stays in your Drive as plain files, and you have the code. That's the point of the design.
+        </FaqItem>
+        <FaqItem question="Do I need to know how to code?">
+          No. Setup is one command, and the <a :href="SETUP_URL">tutorial</a> walks through every screen. Knowing how to code just means you can also change things.
+        </FaqItem>
+        <FaqItem question="Can I move my library between copies?">
+          Yes. Download it as a .zip from Settings and import it into the other copy. If you have no working copy at all, download the folder from Google Drive — that's a .zip too — and import that.
+        </FaqItem>
+        <FaqItem question="What does Biblio see of my Drive?">
+          Only the files it creates. That's Google's narrowest Drive permission, which is also why signing in shows no warning screen.
+        </FaqItem>
+        <FaqItem question="Who can see my library?">
+          You. There's no Biblio server, no accounts, and no analytics. Paper lookups go straight from your browser to public catalogs.
+        </FaqItem>
+        <FaqItem question="Why only three reading shelves?">
+          Because more shelves become a filing problem of their own. To read, Skimming, and Read cover how much attention a paper needs; everything else — reference, parked, to cite — is a tag, which you can combine and rename.
+        </FaqItem>
+        <FaqItem question="Can I add my own features?">
+          Yes, and keep them through updates. Your code goes in <code>apps/web/src/custom/</code>, which upstream never touches, and can add pages, sidebar links, and panels. See <a :href="docUrl('EXTENDING.md')">EXTENDING.md</a>.
+        </FaqItem>
+        <FaqItem question="Can I use it on my phone?">
+          It's a web app, so it opens on a phone, but it's built for a desk. There's no mobile app, and no PDF annotation or Word plugin yet.
+        </FaqItem>
+      </div>
     </section>
 
     <SiteFooter />
@@ -329,7 +366,8 @@ h1 {
 
 .how,
 .why,
-.built-in,
+.features,
+.run,
 .faq-section {
   max-width: var(--max);
   margin: 0 auto;
@@ -339,7 +377,6 @@ h1 {
 
 .how h2,
 .why h2,
-.built-in h2,
 .faq-section h2,
 .feature h2 {
   margin: 8px 0 22px;
@@ -362,57 +399,13 @@ h1 {
 }
 
 /* Code → your copy → your Drive. */
-.flow {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr auto 1fr;
-  align-items: stretch;
-  gap: 12px;
-  margin-bottom: 44px;
-}
 
-.node {
-  padding: 16px 18px;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  background: var(--surface);
-  box-shadow: var(--shadow);
-}
 
-.node.yours {
-  border-color: var(--accent);
-  background: var(--select);
-}
 
-.node .where {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--text);
-  font-family: var(--font-serif);
-  font-size: calc(17px * var(--text-scale));
-  font-weight: 650;
-}
 
-.node .where :deep(svg) {
-  color: var(--accent);
-}
 
-.node p {
-  margin-top: 6px;
-  color: var(--text-2);
-  font-size: calc(14px * var(--text-scale));
-  line-height: 1.5;
-}
 
-.node code {
-  font-size: 0.85em;
-}
 
-.arrow {
-  align-self: center;
-  color: var(--text-3);
-  font-size: 22px;
-}
 
 
 
@@ -430,34 +423,9 @@ h1 {
   margin-top: 24px;
 }
 
-.benefits {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 30px 34px;
-  margin: 0 0 44px;
-  padding: 0;
-  list-style: none;
-}
 
-.benefits :deep(svg),
-.built-in :deep(svg) {
-  color: var(--accent);
-}
 
-.benefits h3,
-.built-in h3 {
-  margin: 10px 0 5px;
-  font-family: var(--font-serif);
-  font-size: calc(17px * var(--text-scale));
-  font-weight: 650;
-}
 
-.benefits p,
-.built-in p {
-  font-size: calc(14.5px * var(--text-scale));
-  line-height: 1.55;
-  color: var(--text-2);
-}
 
 .lead a,
 .more a,
@@ -469,28 +437,9 @@ h1 {
   margin-top: 18px;
 }
 
-.built-in .grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 26px 32px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
 
-.built-in .grid li {
-  display: flex;
-  gap: 12px;
-}
 
-.built-in .grid :deep(svg) {
-  flex: none;
-  margin-top: 3px;
-}
 
-.built-in h3 {
-  margin-top: 0;
-}
 
 .faq {
   display: grid;
@@ -511,6 +460,270 @@ h1 {
   font-size: calc(15.5px * var(--text-scale));
   line-height: 1.6;
   color: var(--text-2);
+}
+
+/* The architecture diagram, shared with the How it works page. */
+.label,
+.panel-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: calc(12.5px * var(--text-scale));
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.label :deep(svg) {
+  color: var(--accent);
+}
+
+.computer,
+.browser {
+  padding: 14px 18px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.computer p,
+.browser p {
+  margin-top: 4px;
+}
+
+.computer {
+  justify-self: center;
+  width: min(520px, 100%);
+  text-align: center;
+}
+
+.setup-arrow {
+  position: relative;
+  justify-self: center;
+  width: 2px;
+  height: 54px;
+  margin: 4px 0;
+  background: var(--accent);
+}
+
+.setup-arrow::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: -5px;
+  border: 6px solid transparent;
+  border-top: 8px solid var(--accent);
+  border-bottom: 0;
+}
+
+.setup-arrow span {
+  position: absolute;
+  top: 50%;
+  left: 14px;
+  transform: translateY(-50%);
+  white-space: nowrap;
+  font-size: calc(13px * var(--text-scale));
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.account {
+  padding: 14px 16px 16px;
+  border: 2px dashed var(--accent);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--select) 55%, transparent);
+}
+
+.services {
+  display: grid;
+  grid-template-columns: 3fr 1.6fr;
+  gap: 14px;
+  margin-top: 10px;
+}
+
+.panel {
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+}
+
+.chips {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chips li {
+  display: flex;
+  gap: 8px;
+  padding: 10px;
+  border-radius: 8px;
+  background: var(--surface-2);
+}
+
+.chips :deep(svg),
+.tree-mini :deep(svg) {
+  flex: none;
+  margin-top: 3px;
+  color: var(--accent);
+}
+
+.chips div {
+  display: grid;
+  gap: 2px;
+}
+
+.chips small,
+.drive small {
+  color: var(--text-3);
+  font-size: calc(12.5px * var(--text-scale));
+  line-height: 1.4;
+}
+
+.tree-mini {
+  margin: 10px 0 8px;
+  padding: 0;
+  list-style: none;
+}
+
+.tree-mini li {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 2px 0;
+  font-size: calc(13.5px * var(--text-scale));
+  color: var(--text);
+}
+
+.tree-mini li.in {
+  padding-left: 18px;
+  color: var(--text-2);
+}
+
+.wires {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) 1.6fr;
+  gap: 14px;
+  margin: 0;
+  padding: 0 16px;
+  list-style: none;
+}
+
+.wires li {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 64px;
+  font-size: calc(13px * var(--text-scale));
+  font-weight: 600;
+  color: var(--accent);
+  text-align: center;
+}
+
+.wires li::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  border-left: 2px solid var(--accent);
+  opacity: 0.35;
+}
+
+.wires .n {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--accent-text);
+  font-size: 11.5px;
+}
+
+.wires li {
+  background: linear-gradient(var(--bg), var(--bg)) center / 100% 24px no-repeat;
+}
+
+.browser {
+  padding: 14px 18px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.arch {
+  display: grid;
+  gap: 0;
+}
+
+.arch {
+  margin: 28px 0 18px;
+}
+
+.features .feature {
+  padding: 56px 0;
+  border-top: 1px solid var(--border);
+}
+
+.features .feature:first-of-type {
+  padding-top: 36px;
+  border-top: 0;
+}
+
+.features > h2 {
+  margin-bottom: 0;
+}
+
+.extras {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 32px;
+  margin: 8px 0 0;
+  padding: 24px 0 0;
+  border-top: 1px solid var(--border);
+  list-style: none;
+}
+
+.extras li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-2);
+  font-size: calc(14.5px * var(--text-scale));
+}
+
+.extras :deep(svg) {
+  flex: none;
+  color: var(--accent);
+}
+
+.faq {
+  max-width: 820px;
+  border-top: 1px solid var(--border);
+}
+
+.lead a,
+.aside a,
+.run-cta a.link {
+  color: var(--accent);
+}
+
+.aside {
+  margin-top: 20px;
+  color: var(--text-3);
+  font-size: calc(14.5px * var(--text-scale));
+  line-height: 1.6;
 }
 
 .table-wrap {
@@ -582,13 +795,9 @@ td.us {
 
 .feature {
   display: grid;
-  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
-  gap: 64px;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+  gap: 56px;
   align-items: center;
-  max-width: var(--max);
-  margin: 0 auto;
-  padding: 72px 32px;
-  border-top: 1px solid var(--border);
 }
 
 .feature.reverse {
@@ -629,10 +838,7 @@ code {
 }
 
 .run {
-  max-width: var(--max);
-  margin: 0 auto;
-  padding: 72px 32px 96px;
-  border-top: 1px solid var(--border);
+  padding-bottom: 96px;
 }
 
 .run-head {
@@ -689,17 +895,39 @@ code {
 
   .how,
   .why,
-  .built-in,
+  .features,
   .faq-section,
   .run {
     padding: 40px 16px;
   }
 
 
-  .benefits,
-  .built-in .grid,
-  .flow {
-    grid-template-columns: 1fr 1fr;
+  .extras {
+    grid-template-columns: 1fr;
+  }
+
+  .services,
+  .chips {
+    grid-template-columns: 1fr;
+  }
+
+  .wires {
+    grid-template-columns: 1fr;
+    gap: 6px;
+    margin: 14px 0;
+    padding: 0 0 0 18px;
+    border-left: 2px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  }
+
+  .wires li {
+    justify-content: flex-start;
+    min-height: 0;
+    background: none;
+    text-align: left;
+  }
+
+  .wires li::before {
+    display: none;
   }
 
   .flow .arrow {
@@ -711,11 +939,5 @@ code {
   }
 
 }
-@media (max-width: 560px) {
-  .benefits,
-  .built-in .grid,
-  .flow {
-    grid-template-columns: 1fr;
-  }
-}
+
 </style>

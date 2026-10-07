@@ -30,8 +30,8 @@ each person's copy of the app runs on their own Firebase site ([SELF_HOSTING.md]
 - **Contextual backlinks:** paper pages and inspectors show where a paper is mentioned (paper notes
   and research notes), with the paragraph or bullet around the link.
 - **PDFs:** Find PDF, auto-grab after adding, drag/drop attach, replace, unlink, and delete from Drive.
-- **Two sites:** the project website (`apps/site`, GitHub Pages: a home page, a How it works page with the
-  architecture diagram at `how-it-works/`, and a step-by-step setup tutorial at `setup/`); each copy of the app
+- **Two sites:** the project website (`apps/site`, GitHub Pages: a home page carrying the argument,
+  the architecture diagram, five feature demos and a drop-down FAQ, plus a setup tutorial at `setup/`); each copy of the app
   (`apps/web`) shows only a sign-in page when signed out.
 - **Moving a library:** *Download library (.zip)* and *Import a library* (a .zip, Google Drive's own
   folder download, or an unzipped folder) move a library between copies; *Reconnect* reopens a

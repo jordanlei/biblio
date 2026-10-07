@@ -38,7 +38,7 @@ const steps: Step[] = [
   },
   { id: "add", target: "add", title: "Add papers", body: "Search by topic, title, or author; paste DOIs or arXiv links; or import a .bib from Zotero or Mendeley. Shortcut: A." },
   { id: "search", target: "search", title: "Find anything in your library", body: "Search titles, authors, abstracts, and notes. Narrow with author:, year:2015-2020, or #tag." },
-  { id: "filters", target: "filters", title: "Shelves and filters", body: "Move papers through Inbox, Read next, Skimming, Reading, Read, Reference, or Parked, then filter by shelf, PDF, or notes." },
+  { id: "filters", target: "filters", title: "Shelves and filters", body: "Move papers between To read, Skimming, and Read with 1, 2, 3, then filter by shelf, PDF, or notes. Anything more specific is a tag." },
   { id: "list", target: "list", title: "Move with the keyboard", body: "↑ ↓ select · Enter opens · Space checks for bulk actions · ⌫ deletes · ⌘Z undoes. Double-click notes in the preview to edit them." },
   { id: "tags", title: "Organize by tags", body: "Use tags for topics, projects, methods, and questions. A paper can sit in several constellations without being duplicated." },
   { id: "finish", title: "You're ready", body: "Start by bringing in the papers you already have." }

@@ -32,10 +32,13 @@ node scripts/capture-landing.mjs http://localhost:5391
 A full run takes about two minutes and prints one line per output:
 
 ```
-✓ inbox.webm (273 frames)
+✓ first-run.webm (148 frames)
+✓ organize.webm (208 frames)
 ✓ library.jpg
+✓ search.webm (161 frames)
+✓ review.webm (164 frames)
 ✓ linking.webm (233 frames)
-✓ research-notes.webm (281 frames)
+✓ research-notes.webm (283 frames)
 ```
 
 Afterwards, open a poster or two and a frame from the middle of each video before committing. To
@@ -61,7 +64,10 @@ Stop the stack before running `npx playwright test`, which starts its own stack 
 | Output | Crop | What it shows |
 | --- | --- | --- |
 | `library.jpg` | Whole window | Hero: the library with LFADS open in the inspector |
-| `inbox.webm` | Paper list | Inbox filter on; each paper shelved with a number key (5, 3, 6, 6, 7, 2), with a keycap showing the key |
+| `first-run.webm` | Whole window | Signing in and creating the library folder (for the setup tutorial) |
+| `search.webm` | Add-papers panel | Searching 250M papers and noting why one is being saved |
+| `review.webm` | List + inspector | Writing notes beside the abstract and PDF |
+| `organize.webm` | Paper list | Shelving with keys 1–3, a keycap showing each one, then filtering to one shelf |
 | `research-notes.webm` | Note pane | A new note: title, a question, bullets linking three papers with `@[`, then the preview and "Papers in this note" |
 | `linking.webm` | Notes column | Typing `@[sus` in a note, picking the paper, following the link, then "Mentioned in notes" |
 
@@ -72,11 +78,11 @@ The page shows the poster until the video scrolls into view.
 column is unreadable. `record(name, steps, { width, height, crop })` takes a region in CSS pixels,
 usually measured from the DOM just before recording:
 
-- `listRegion(height)`: between the sidebar and the inspector (the inbox).
+- `listRegion(height)`: between the sidebar and the inspector (the paper list).
 - The `.notes-editor` column, padded (linking).
 - Everything right of `.notes-list` (research notes).
 
-The inbox is recorded in a wider 1440×860 window so titles aren't cut off beside the inspector.
+The organize clip is recorded in a wider 1440×860 window so titles aren't cut off beside the inspector.
 
 **Key presses are shown with a keycap.** `keycap(key, label, region)` flashes a small "5 Read"
 badge at the bottom of the region, because a key press is otherwise invisible in a video. It is
