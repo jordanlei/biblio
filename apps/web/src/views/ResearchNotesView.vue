@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { extractCitationLinks, type Paper } from "@bibliograph/core";
+import { extractCitationLinks, type Paper } from "@biblio/core";
 import { computed, nextTick, ref, watch } from "vue";
 import { RouterLink, useRoute, useRouter } from "vue-router";
 import AppIcon from "../components/AppIcon.vue";
@@ -11,7 +11,7 @@ import { askConfirm, toastError } from "../services/ui";
 
 // Research notes are freeform Markdown: a question, a project, a related-work draft. Papers are
 // connected by writing @[key] in the text; nothing else to set up. Each note is a .md file in
-// research-notes/ in the user's Drive.
+// notes/ in the user's Drive, beside the papers' own notes.
 
 const route = useRoute();
 const router = useRouter();

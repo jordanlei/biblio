@@ -1,4 +1,4 @@
-import type { SyncState, SyncStateStore } from "@bibliograph/core";
+import type { SyncState, SyncStateStore } from "@biblio/core";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "../firebase";
 

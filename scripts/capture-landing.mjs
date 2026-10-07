@@ -63,7 +63,7 @@ function jpegWidth(buf) {
  * `crop` ({x, y, width, height} in CSS px) keeps only the part of the screen the demo is about.
  */
 async function record(name, steps, { width = 1180, height = 740, crop } = {}) {
-  const frames = mkdtempSync(join(tmpdir(), `bibliograph-${name}-`));
+  const frames = mkdtempSync(join(tmpdir(), `biblio-${name}-`));
   await page.setViewportSize({ width, height });
   const region = crop ?? { x: 0, y: 0, width, height };
   const r = Object.fromEntries(Object.entries(region).map(([k, v]) => [k, Math.round(v)]));
@@ -144,15 +144,32 @@ const keycap = (key, label, region) =>
 const row = (title) => page.locator(".entry").filter({ has: page.locator(".title", { hasText: title }) });
 const inspector = () => page.locator(".inspector");
 
-// --- Build the demo library through the UI ---------------------------------------------------
-await page.goto(APP);
-await page.waitForFunction(() => "__bibliographTestSignIn" in window);
-await page.evaluate(() => window.__bibliographTestSignIn(`demo.${Date.now()}@example.com`, "Rosalind Researcher"));
-await page.goto(`${APP}/library`);
-await page.getByRole("button", { name: "Start" }).click();
-await page.getByRole("button", { name: /Create “Bibliograph Library”/ }).click();
+// --- Video: the first run (sign in, create the library folder) -------------------------------
+// For the setup tutorial. Local test mode stands in for Google's own sign-in window.
+await page.goto(`${APP}/login`);
+await page.locator(".signin").waitFor();
+await record(
+  "first-run",
+  async () => {
+    await pause(1200);
+    await page.locator(".signin .btn.primary").hover();
+    await pause(700);
+    await page.evaluate(() => window.__biblioTestSignIn(`demo.${Date.now()}@example.com`, "Rosalind Researcher"));
+    await page.goto(`${APP}/library`);
+    await page.getByRole("button", { name: "Start" }).waitFor();
+    await pause(1400);
+    await page.getByRole("button", { name: "Start" }).click();
+    await pause(1600); // the "where your library lives" step
+    await page.getByRole("button", { name: /Create “Biblio Library”/ }).click();
+    await page.locator(".tour h2").waitFor();
+    await pause(2200);
+  },
+  { width: 1280, height: 800 }
+);
 await page.getByText("Skip tour").click();
 await page.locator(".tour").waitFor({ state: "detached" });
+
+// --- Build the demo library through the UI ---------------------------------------------------
 
 await page.keyboard.press("a");
 await page.getByRole("tab", { name: "Import .bib" }).click();

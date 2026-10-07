@@ -1,4 +1,4 @@
-// Set up your own copy of Bibliograph: your own Firebase project, database, sign-in, and site.
+// Set up your own copy of Biblio: your own Firebase project, database, sign-in, and site.
 //
 //   npm install
 //   npm run setup                      # interactive
@@ -124,7 +124,7 @@ async function signIn() {
 
 function suggestedProjectId(email) {
   const base = (email ?? "me").split("@")[0].toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 14) || "me";
-  return `bibliograph-${base}-${randomBytes(2).toString("hex")}`.replace(/^[^a-z]+/, "");
+  return `biblio-${base}-${randomBytes(2).toString("hex")}`.replace(/^[^a-z]+/, "");
 }
 
 async function chooseProject(email) {
@@ -152,7 +152,7 @@ async function chooseProject(email) {
   } else {
     note(`Creating ${projectId}… (this can take a minute)`);
     try {
-      firebase("projects:create", projectId, "--display-name", "Bibliograph");
+      firebase("projects:create", projectId, "--display-name", "Biblio");
     } catch (error) {
       console.error(`\n   Couldn't create the project: ${error.message}`);
       console.error("   If this is your first Firebase project, accept the terms at https://console.firebase.google.com once, then rerun setup.");
@@ -172,13 +172,13 @@ async function webApp(projectId) {
   let apps = firebase("apps:list", "WEB", "--project", projectId);
   if (!apps.length) {
     if (DRY) {
-      would("register a web app named Bibliograph");
+      would("register a web app named Biblio");
       return null;
     }
-    firebase("apps:create", "WEB", "Bibliograph", "--project", projectId);
+    firebase("apps:create", "WEB", "Biblio", "--project", projectId);
     apps = firebase("apps:list", "WEB", "--project", projectId);
   }
-  const app = apps.find((a) => /bibliograph/i.test(a.displayName ?? "")) ?? apps[0];
+  const app = apps.find((a) => /biblio/i.test(a.displayName ?? "")) ?? apps[0];
   const result = firebase("apps:sdkconfig", "WEB", app.appId, "--project", projectId);
   const sdk = result.sdkConfig ?? JSON.parse(String(result.fileContents).slice(String(result.fileContents).indexOf("{"), String(result.fileContents).lastIndexOf("}") + 1));
   ok(`Web app ${app.displayName ?? app.appId}`);
@@ -297,11 +297,11 @@ async function github(config) {
   if (!(await yes("Set it up?"))) return;
 
   const projectId = config.projectId;
-  const accountId = "bibliograph-deploy";
+  const accountId = "biblio-deploy";
   const email = `${accountId}@${projectId}.iam.gserviceaccount.com`;
   const iam = "https://iam.googleapis.com/v1";
   try {
-    await google("POST", `${iam}/projects/${projectId}/serviceAccounts`, { accountId, serviceAccount: { displayName: "Bibliograph deploys (GitHub Actions)" } });
+    await google("POST", `${iam}/projects/${projectId}/serviceAccounts`, { accountId, serviceAccount: { displayName: "Biblio deploys (GitHub Actions)" } });
   } catch (error) {
     if (error.status !== 409) throw error; // 409: already exists
   }
@@ -331,14 +331,14 @@ async function github(config) {
     if (result.status !== 0) throw new Error(`gh ${kind} set ${name} failed: ${result.stderr}`);
   };
   set("secret", "FIREBASE_SERVICE_ACCOUNT", keyJson);
-  set("variable", "BIBLIOGRAPH_CONFIG", JSON.stringify(config));
+  set("variable", "BIBLIO_CONFIG", JSON.stringify(config));
   ok(`Secrets saved to ${repo}. The next push to main deploys (see .github/workflows/deploy.yml).`);
 }
 
 // --- Main -------------------------------------------------------------------------------------
 
 async function main() {
-  console.log(bold("\nSet up your own Bibliograph\n"));
+  console.log(bold("\nSet up your own Biblio\n"));
   console.log(DRY ? "Dry run: nothing will be created or changed.\n" : "Every step checks what exists first, so it's safe to rerun.\n");
 
   const email = await signIn();
@@ -349,7 +349,7 @@ async function main() {
   const appUrl = hostingSite(projectId);
 
   if (!DRY && firebaseConfig) {
-    step("Save bibliograph.config.json");
+    step("Save biblio.config.json");
     writeConfig({ projectId, appUrl, firebase: firebaseConfig });
     ok("Saved (gitignored: it describes this copy only)");
     run("scripts/configure-extension.mjs");

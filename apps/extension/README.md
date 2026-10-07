@@ -1,11 +1,11 @@
-# Bibliograph extension (Chrome, Manifest V3)
+# Biblio extension (Chrome, Manifest V3)
 
-Save the paper you're reading, with its PDF, to Bibliograph.
+Save the paper you're reading, with its PDF, to Biblio.
 
 ## Install (developer mode)
 
 1. Build it for your copy of the app: `npm run build:extension` (setup does this too). It writes
-   `apps/extension/dist/`, pointed at the address in `bibliograph.config.json`.
+   `apps/extension/dist/`, pointed at the address in `biblio.config.json`.
 2. Open `chrome://extensions`, turn on **Developer mode**.
 3. **Load unpacked** → choose `apps/extension/dist`. (Loading `apps/extension` itself gives a
    version that saves to local test mode, `localhost:5173`.)
@@ -13,7 +13,7 @@ Save the paper you're reading, with its PDF, to Bibliograph.
 
 ## Use
 
-On an article page (arXiv, a journal, PubMed, OpenReview, a PDF tab…), click the extension and then **Save to Bibliograph**. A tab opens on the app's `/capture` page, which:
+On an article page (arXiv, a journal, PubMed, OpenReview, a PDF tab…), click the extension and then **Save to Biblio**. A tab opens on the app's `/capture` page, which:
 
 1. checks your library for duplicates (“✓ Already in library”, or “may already be in your library”);
 2. saves the metadata;

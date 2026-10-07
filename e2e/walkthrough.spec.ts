@@ -12,8 +12,8 @@ const pdf = Buffer.from(
 // emulator's popup widget can't complete under the Playwright runner, so the popup itself is
 // exercised manually; everything after sign-in here is the real app.
 async function signInAsNewUser(page: Page) {
-  await page.waitForFunction(() => "__bibliographTestSignIn" in window);
-  await page.evaluate((email) => (window as unknown as { __bibliographTestSignIn: (e: string) => Promise<void> }).__bibliographTestSignIn(email), `researcher.${Date.now()}@example.com`);
+  await page.waitForFunction(() => "__biblioTestSignIn" in window);
+  await page.evaluate((email) => (window as unknown as { __biblioTestSignIn: (e: string) => Promise<void> }).__biblioTestSignIn(email), `researcher.${Date.now()}@example.com`);
   await page.goto("/library");
 }
 
@@ -33,10 +33,10 @@ test("new researcher: sign in, set up, import, organize, annotate, export", asyn
 
   await test.step("create the Drive folder from the tour, then skip the rest", async () => {
     const before = popups;
-    await page.getByRole("button", { name: /Create “Bibliograph Library”/ }).click();
+    await page.getByRole("button", { name: /Create “Biblio Library”/ }).click();
     await expect(page.locator(".tour h2")).toHaveText("Add papers");
     expect(popups).toBe(before);
-    expect(await (await fetch(MOCK_DRIVE)).text()).toContain("Bibliograph Library");
+    expect(await (await fetch(MOCK_DRIVE)).text()).toContain("Biblio Library");
     await page.getByText("Skip tour").click();
     await expect(page.locator(".tour")).toHaveCount(0);
   });

@@ -1,29 +1,27 @@
 import { exportBibtex } from "../bibtex";
 import type { Creator, Folder, Paper, PaperType, PartialDate, ReadingStatus, ResearchNote } from "../types";
 
-// The Bibliograph library format (v1): how a user's library is laid out in their own storage.
+// The Biblio library format (v1): how a user's library is laid out in their own storage.
 // Everything a user deliberately creates lives here, in open formats, so the library is usable
-// without Bibliograph. Specified in docs/LIBRARY_FORMAT.md; this module is the reference reader/writer.
+// without Biblio. Specified in docs/LIBRARY_FORMAT.md; this module is the reference reader/writer.
 //
 //   <library root>/
 //     README.md          what this folder is, in plain words
-//     bibliograph.json   manifest: format + version, collections (folders), Research Notes
+//     biblio.json   manifest: format + version, collections (folders), Research Notes
 //     library.json       every paper as CSL-JSON (readable by pandoc, Zotero, citeproc)
 //     references.bib     the same library as BibTeX (convenience copy, regenerated)
-//     notes/<key>.md     one Markdown file per paper with notes
-//     research-notes/    freeform Markdown notes (<title>.md), linking papers with @[key]
+//     notes/             Markdown notes: <citationKey>.md for a paper, <title>.md for a free note
 //     papers/<key>.pdf   PDFs
 
-export const LIBRARY_FORMAT = "bibliograph-library";
+export const LIBRARY_FORMAT = "biblio-library";
 export const LIBRARY_FORMAT_VERSION = 1;
 
 export const LIBRARY_PATHS = {
   readme: "README.md",
-  manifest: "bibliograph.json",
+  manifest: "biblio.json",
   library: "library.json",
   bibtex: "references.bib",
   notesDir: "notes",
-  researchNotesDir: "research-notes",
   papersDir: "papers"
 } as const;
 
@@ -37,8 +35,8 @@ export interface LibraryManifest {
   researchNotes?: LegacyResearchNote[];
 }
 
-/** Bibliograph's own fields, kept under CSL-JSON's `custom` object so CSL tools ignore them. */
-export interface BibliographFields {
+/** Biblio's own fields, kept under CSL-JSON's `custom` object so CSL tools ignore them. */
+export interface BiblioFields {
   id: string;
   type: PaperType;
   tags: string[];
@@ -80,7 +78,7 @@ export interface CslItem {
   abstract?: string;
   language?: string;
   keyword?: string;
-  custom?: { bibliograph?: BibliographFields } & Record<string, unknown>;
+  custom?: { biblio?: BiblioFields } & Record<string, unknown>;
 }
 
 type CslName = { family?: string; given?: string; literal?: string };
@@ -162,7 +160,7 @@ export function paperToCsl(paper: Paper, paths: PaperPaths = {}): CslItem {
     language: paper.language,
     keyword: paper.tags.length ? paper.tags.join(", ") : undefined,
     custom: {
-      bibliograph: compact({
+      biblio: compact({
         id: paper.id,
         type: paper.type,
         tags: paper.tags,
@@ -177,7 +175,7 @@ export function paperToCsl(paper: Paper, paths: PaperPaths = {}): CslItem {
         openAccessPdfUrl: paper.openAccessPdfUrl,
         source: paper.source,
         sourceIdentifiers: paper.sourceIdentifiers
-      }) as BibliographFields
+      }) as BiblioFields
     }
   });
 }
@@ -185,11 +183,11 @@ export function paperToCsl(paper: Paper, paths: PaperPaths = {}): CslItem {
 const fromNames = (list?: CslName[]): Creator[] => (list ?? []).map((n) => compact({ family: n.family, given: n.given, literal: n.literal }));
 
 /**
- * CSL-JSON item → Paper. Works for any CSL-JSON (e.g. exported from Zotero); Bibliograph's own
- * `custom.bibliograph` fields, when present, restore identity and organization exactly.
+ * CSL-JSON item → Paper. Works for any CSL-JSON (e.g. exported from Zotero); Biblio's own
+ * `custom.biblio` fields, when present, restore identity and organization exactly.
  */
 export function cslToPaper(item: CslItem, now: string): { paper: Paper; paths: PaperPaths } {
-  const b = item.custom?.bibliograph;
+  const b = item.custom?.biblio;
   const parts = item.issued?.["date-parts"]?.[0];
   const tags = b?.tags ?? (item.keyword ? item.keyword.split(/[,;]/).map((t) => t.trim()).filter(Boolean) : []);
   const paper: Paper = compact({
@@ -338,11 +336,14 @@ function unquote(value?: string) {
   return value;
 }
 
-/** File name for a research note's title, unique among `taken` paths ("Title.md", "Title 2.md"…). */
+/**
+ * File name for a research note's title, unique among `taken` paths ("Title.md", "Title 2.md"…).
+ * Research notes share notes/ with paper notes, so `taken` must include the paper-note names too.
+ */
 export function researchNotePath(title: string, taken: Set<string>): string {
   const base = title.replace(/[\\/:*?"<>|#]+/g, " ").replace(/\s+/g, " ").trim().slice(0, 100) || "Untitled note";
   for (let n = 1; ; n += 1) {
-    const path = `${LIBRARY_PATHS.researchNotesDir}/${n === 1 ? base : `${base} ${n}`}.md`;
+    const path = `${LIBRARY_PATHS.notesDir}/${n === 1 ? base : `${base} ${n}`}.md`;
     if (!taken.has(path)) return path;
   }
 }
@@ -359,7 +360,7 @@ export interface SerializedLibrary {
  * Library → file contents. Output is deterministic (stable ordering, no timestamps), so the
  * same library always produces the same bytes and unchanged libraries are never rewritten.
  */
-export function serializeLibrary(papers: Paper[], folders: Folder[], pathsFor: (paper: Paper) => PaperPaths, generator = "Bibliograph"): SerializedLibrary {
+export function serializeLibrary(papers: Paper[], folders: Folder[], pathsFor: (paper: Paper) => PaperPaths, generator = "Biblio"): SerializedLibrary {
   const sorted = [...papers].sort((a, b) => a.citationKey.localeCompare(b.citationKey) || a.id.localeCompare(b.id));
   const manifest: LibraryManifest = {
     format: LIBRARY_FORMAT,
@@ -387,9 +388,9 @@ export interface ParsedLibrary {
 /** File contents → library. Notes are attached separately (they live in their own files). */
 export function parseLibrary(manifestText: string | null, libraryText: string, now: string): ParsedLibrary {
   const manifest = manifestText ? (JSON.parse(manifestText) as Partial<LibraryManifest>) : null;
-  if (manifest?.format && manifest.format !== LIBRARY_FORMAT) throw new Error(`Not a Bibliograph library (format “${manifest.format}”).`);
+  if (manifest?.format && manifest.format !== LIBRARY_FORMAT) throw new Error(`Not a Biblio library (format “${manifest.format}”).`);
   if (manifest?.version && manifest.version > LIBRARY_FORMAT_VERSION) {
-    throw new Error(`This library uses format v${manifest.version}; this version of Bibliograph reads up to v${LIBRARY_FORMAT_VERSION}.`);
+    throw new Error(`This library uses format v${manifest.version}; this version of Biblio reads up to v${LIBRARY_FORMAT_VERSION}.`);
   }
   const items = JSON.parse(libraryText) as CslItem[];
   if (!Array.isArray(items)) throw new Error("library.json must be a JSON array of CSL items.");
@@ -406,22 +407,22 @@ export function parseLibrary(manifestText: string | null, libraryText: string, n
 }
 
 export function libraryReadme(): string {
-  return `# Bibliograph library
+  return `# Biblio library
 
-This folder is your research library. Bibliograph (a web app) reads and writes it, but you own it:
+This folder is your research library. Biblio (a web app) reads and writes it, but you own it:
 everything here is plain files you can open, copy, back up, or use with other tools.
 
 | Path | What it is |
 | --- | --- |
 | \`papers/\` | Your PDFs, named by citation key (e.g. \`vaswaniAttentionNeed2017.pdf\`). |
 | \`notes/\` | Your notes, one Markdown file per paper. The short header names the paper. |
-| \`research-notes/\` | Freeform notes (questions, projects, drafts), one Markdown file each. Add your own .md files here and they appear in Bibliograph. |
-| \`library.json\` | Every paper's citation metadata as **CSL-JSON** (works with pandoc, Zotero, citeproc). Bibliograph's own fields — tags, folders, shelf/status, saved reason, which note and PDF belong to the paper — are under \`custom.bibliograph\`. |
+| \`research-notes/\` | Freeform notes (questions, projects, drafts), one Markdown file each. Add your own .md files here and they appear in Biblio. |
+| \`library.json\` | Every paper's citation metadata as **CSL-JSON** (works with pandoc, Zotero, citeproc). Biblio's own fields — tags, folders, shelf/status, saved reason, which note and PDF belong to the paper — are under \`custom.biblio\`. |
 | \`references.bib\` | The same library as BibTeX, regenerated automatically. |
-| \`bibliograph.json\` | Format name and version, and folders (collections). |
+| \`biblio.json\` | Format name and version, and folders (collections). |
 
 Links to papers are written in any note as \`@[citationKey]\`.
 
-Format version ${LIBRARY_FORMAT_VERSION}. Specification: https://github.com/jordanlei/bibliograph/blob/main/docs/LIBRARY_FORMAT.md
+Format version ${LIBRARY_FORMAT_VERSION}. Specification: https://github.com/jordanlei/biblio/blob/main/docs/LIBRARY_FORMAT.md
 `;
 }

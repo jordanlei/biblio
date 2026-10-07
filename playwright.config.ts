@@ -13,7 +13,7 @@ export default defineConfig({
   expect: { timeout: 10_000 },
   use: { baseURL: `http://localhost:${PORT}`, viewport: { width: 1440, height: 900 }, actionTimeout: 10_000 },
   webServer: {
-    // A fresh mock Drive per run, so tests can inspect exactly what Bibliograph wrote.
+    // A fresh mock Drive per run, so tests can inspect exactly what Biblio wrote.
     command: `rm -rf .dev-drive-e2e && WEB_PORT=${PORT} DEV_DRIVE_DIR=.dev-drive-e2e npm run dev:local`,
     url: `http://localhost:${PORT}`,
     reuseExistingServer: false,

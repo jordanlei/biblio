@@ -1,4 +1,4 @@
-// Fetches PDFs for the Bibliograph web app (via bridge.js). Extensions with host permissions aren't
+// Fetches PDFs for the Biblio web app (via bridge.js). Extensions with host permissions aren't
 // bound by CORS, and `credentials: "include"` lets institutional/subscription access work too.
 const MAX_BYTES = 80 * 1024 * 1024;
 

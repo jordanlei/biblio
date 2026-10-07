@@ -1,4 +1,4 @@
-import { normalizeArxivId, normalizeDoi, type Creator, type PaperCandidate, type PaperType } from "@bibliograph/core";
+import { normalizeArxivId, normalizeDoi, type Creator, type PaperCandidate, type PaperType } from "@biblio/core";
 
 // Metadata lookup for "Add papers". Search goes straight to OpenAlex (CORS-enabled, no key, ~250M
 // works). Identifier lookups go to Crossref (DOIs), DataCite (arXiv) and OpenAlex (PMID).

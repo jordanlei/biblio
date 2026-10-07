@@ -1,8 +1,9 @@
 <script setup lang="ts">
-// The setup tutorial: from nothing to your own running copy of Bibliograph.
+// The setup tutorial: from nothing to your own running copy of Biblio.
 // Keep it in step with scripts/setup.mjs and docs/SELF_HOSTING.md.
 import AppIcon from "../../web/src/components/AppIcon.vue";
 import SiteFooter from "./components/SiteFooter.vue";
+import LandingVideo from "./components/LandingVideo.vue";
 import SiteHeader from "./components/SiteHeader.vue";
 import { REPO_URL, docUrl } from "./site";
 
@@ -19,8 +20,8 @@ const ownership = [
 
     <header class="intro">
       <p class="eyebrow">Setup tutorial</p>
-      <h1 class="display">Your own Bibliograph in five minutes.</h1>
-      <p class="lede">By the end you'll have your own copy of the app running at your own address, signed in with your Google account, saving your library to your Google Drive. Nobody else, including the people who make Bibliograph, is involved.</p>
+      <h1 class="display">Your own Biblio in five minutes.</h1>
+      <p class="lede">By the end you'll have your own copy of the app running at your own address, signed in with your Google account, saving your library to your Google Drive. Nobody else, including the people who make Biblio, is involved.</p>
     </header>
 
     <section class="block">
@@ -49,96 +50,120 @@ const ownership = [
 
     <ol class="tutorial">
       <li>
-        <h2>Get the code</h2>
-        <p>
-          To keep your changes on GitHub, <a :href="`${REPO_URL}/fork`">fork the repository</a> first and clone your fork. To just try it, clone it directly:
-        </p>
-        <pre class="terminal">git clone {{ REPO_URL }}.git
-cd bibliograph</pre>
+        <div class="step-text">
+          <h2>Get the code</h2>
+          <p>To keep your changes on GitHub, <a :href="`${REPO_URL}/fork`">fork the repository</a> first and clone your fork. To just try it, clone it directly.</p>
+        </div>
+        <div class="step-demo">
+          <pre class="terminal">git clone {{ REPO_URL }}.git
+cd biblio</pre>
+        </div>
       </li>
 
       <li>
-        <h2>Install</h2>
-        <p>This downloads the app's dependencies, including the Firebase command-line tool, into the folder. Nothing is installed system-wide.</p>
-        <pre class="terminal">npm install</pre>
+        <div class="step-text">
+          <h2>Install</h2>
+          <p>This downloads the app's dependencies, including the Firebase command-line tool, into the folder. Nothing is installed system-wide.</p>
+        </div>
+        <div class="step-demo">
+          <pre class="terminal">npm install</pre>
+        </div>
       </li>
 
       <li>
-        <h2>Run setup</h2>
-        <p>Setup asks a couple of questions and does the rest. It's safe to stop and run again: every step checks what already exists first.</p>
-        <pre class="terminal">npm run setup</pre>
-        <p>Here's what you'll see. A browser window opens once so you can sign in to Google:</p>
-        <pre class="terminal transcript"><b>1. Sign in to Google (Firebase CLI)</b>
+        <div class="step-text">
+          <h2>Run setup</h2>
+          <p>Setup asks two questions — a project ID and where your database should live — and does the rest. A browser window opens once so you can sign in to Google.</p>
+          <p class="aside">Safe to stop and run again: every step checks what already exists first. If a step can't be done automatically (an organization policy, say), setup prints a link to do it by hand and carries on.</p>
+        </div>
+        <div class="step-demo">
+          <pre class="terminal">npm run setup</pre>
+          <pre class="terminal transcript"><b>1. Sign in to Google (Firebase CLI)</b>
    <i>✓</i> Signed in as ada@example.com
 
 <b>2. Your Firebase project</b>
-   Pick a new project ID. It becomes your address: &lt;id&gt;.web.app.
-Project ID: [bibliograph-ada-3f2c] <u>⏎</u>
-   <i>✓</i> Created bibliograph-ada-3f2c
+   Pick a new project ID. It becomes
+   your address: &lt;id&gt;.web.app.
+Project ID: [biblio-ada-3f2c] <u>⏎</u>
+   <i>✓</i> Created biblio-ada-3f2c
 
 <b>3. Web app registration</b>
-   <i>✓</i> Web app Bibliograph
+   <i>✓</i> Web app Biblio
 
 <b>4. Google APIs (Firestore, Drive, sign-in)</b>
    <i>✓</i> APIs on
 
 <b>5. Firestore database</b>
-   Where should your database live? nam5 (United States), eur3 (Europe), …
+   nam5 (US), eur3 (Europe), or a region
 Location: [nam5] <u>⏎</u>
    <i>✓</i> Database created (nam5)
 
 <b>6. Hosting site</b>
-   <i>✓</i> https://bibliograph-ada-3f2c.web.app
+   <i>✓</i> https://biblio-ada-3f2c.web.app
 
-
-<b>7. Save bibliograph.config.json</b>
-   <i>✓</i> Saved (gitignored: it describes this copy only)</pre>
-        <p class="aside">
-          Setup uses the Firebase command-line tool, signed in as you, on your own computer. If a step can't be done automatically (for example, an organization policy), setup prints a link to do that step by hand and carries on.
-        </p>
+<b>7. Save biblio.config.json</b>
+   <i>✓</i> Saved (gitignored)</pre>
+        </div>
       </li>
 
       <li>
-        <h2>Turn on Google sign-in</h2>
-        <p>This is the one step Google doesn't let tools do for you. Setup opens the page in your browser and waits:</p>
-        <ol class="clicks">
-          <li>If you see <strong>Get started</strong>, click it.</li>
-          <li>Under <strong>Sign-in providers</strong>, choose <strong>Google</strong>.</li>
-          <li>Switch on <strong>Enable</strong>, pick your email as the <strong>support email</strong>, and click <strong>Save</strong>.</li>
-          <li>Back in the terminal, press <kbd>Enter</kbd>. Setup checks it worked.</li>
-        </ol>
-        <pre class="terminal transcript"><b>8. Google sign-in</b>
+        <div class="step-text">
+          <h2>Turn on Google sign-in</h2>
+          <p>This is the one step Google doesn't let tools do for you. Setup opens the page in your browser and waits:</p>
+          <ol class="clicks">
+            <li>If you see <strong>Get started</strong>, click it.</li>
+            <li>Under <strong>Sign-in providers</strong>, choose <strong>Google</strong>.</li>
+            <li>Switch on <strong>Enable</strong>, pick your email as the <strong>support email</strong>, and <strong>Save</strong>.</li>
+            <li>Back in the terminal, press <kbd>Enter</kbd>. Setup checks it worked.</li>
+          </ol>
+          <p class="aside">
+            This one happens on Google's own site, so there's no demo to show —
+            <a href="https://firebase.google.com/docs/auth/web/google-signin" rel="noopener">Google's instructions</a> have screenshots if you get stuck.
+          </p>
+        </div>
+        <div class="step-demo">
+          <pre class="terminal transcript"><b>8. Google sign-in</b>
    Press Enter once it's saved. <u>⏎</u>
    <i>✓</i> Google sign-in is on
 
 <b>9. Build and deploy</b>
    ✔  Deploy complete!
-Deployed: https://bibliograph-ada-3f2c.web.app
+Deployed: https://biblio-ada-3f2c.web.app
 
-<b>Done.</b> Open https://bibliograph-ada-3f2c.web.app and sign in.</pre>
+<b>Done.</b> Open the address and sign in.</pre>
+        </div>
       </li>
 
       <li>
-        <h2>Sign in and pick your library folder</h2>
-        <p>
-          Open your address and click <strong>Continue with Google</strong>. Bibliograph asks for one Drive permission: to see only the files it creates. Then choose
-          <strong>Create “Bibliograph Library”</strong>, or <strong>Import a library (.zip)</strong> if you already have one. A short tour shows you around.
-        </p>
-        <p class="aside">
-          Nothing to approve: Google treats this permission as low-risk, so there's no warning screen and nothing to verify.
-        </p>
+        <div class="step-text">
+          <h2>Sign in and make your library</h2>
+          <p>
+            Open your address and click <strong>Continue with Google</strong>. Biblio asks for one Drive permission: to see only the files it creates. Then choose
+            <strong>Create “Biblio Library”</strong>, or <strong>Import a library (.zip)</strong> if you already have one.
+          </p>
+          <p class="aside">Nothing to approve: Google treats this permission as low-risk, so there's no warning screen and nothing to verify.</p>
+        </div>
+        <div class="step-demo">
+          <figure class="shot">
+            <LandingVideo name="first-run" :width="640" :height="400" label="Signing in, then creating the Biblio Library folder in Drive." />
+          </figure>
+        </div>
       </li>
 
       <li>
-        <h2>Make it yours</h2>
-        <p>It's your code now. Change anything, try it, and publish:</p>
-        <pre class="terminal">npm run dev        <span class="faint"># your copy, reloading as you edit</span>
+        <div class="step-text">
+          <h2>Make it yours</h2>
+          <p>It's your code now. Change anything, try it, and publish.</p>
+          <p>
+            Want every push to your fork to deploy itself? Run <code>npm run setup -- --github</code> once; it needs the <a href="https://cli.github.com">GitHub CLI</a>. Start with
+            <a :href="docUrl('ARCHITECTURE.md')">how it's built</a> to find your way around.
+          </p>
+        </div>
+        <div class="step-demo">
+          <pre class="terminal">npm run dev        <span class="faint"># reloads as you edit</span>
 npm test           <span class="faint"># quick checks</span>
-npm run deploy     <span class="faint"># publish to your-id.web.app</span></pre>
-        <p>
-          Want every push to your fork to deploy itself? Run <code>npm run setup -- --github</code> once. It needs the <a href="https://cli.github.com">GitHub CLI</a>. Start with
-          <a :href="docUrl('ARCHITECTURE.md')">how it's built</a> to find your way around.
-        </p>
+npm run deploy     <span class="faint"># publish it</span></pre>
+        </div>
       </li>
     </ol>
 
@@ -147,9 +172,9 @@ npm run deploy     <span class="faint"># publish to your-id.web.app</span></pre>
       <dl class="faq">
         <dt>Does anyone else see my library?</dt>
         <dd>
-          No. Your copy runs in your own Google Cloud project and your files sit in your own Drive. There's no Bibliograph server and no analytics. Paper lookups go straight from your browser to public catalogs (OpenAlex, Crossref, DataCite, arXiv).
+          No. Your copy runs in your own Google Cloud project and your files sit in your own Drive. There's no Biblio server and no analytics. Paper lookups go straight from your browser to public catalogs (OpenAlex, Crossref, DataCite, arXiv).
         </dd>
-        <dt>What if I stop using Bibliograph?</dt>
+        <dt>What if I stop using Biblio?</dt>
         <dd>Your library is still in your Drive as PDFs, Markdown, CSL-JSON, and BibTeX that other tools read. Delete the Firebase project and nothing in your Drive changes.</dd>
         <dt>Can I move to another copy, or a newer version?</dt>
         <dd>Yes. In the old copy, <strong>Settings → Download library (.zip)</strong>; in the new one, <strong>Import a library</strong>. No app at hand? Download the library folder from Google Drive (it comes as a .zip) and import that. Every copy reads the same <a :href="docUrl('LIBRARY_FORMAT.md')">library format</a>.</dd>
@@ -171,9 +196,14 @@ npm run deploy     <span class="faint"># publish to your-id.web.app</span></pre>
 }
 
 .intro,
-.block,
-.tutorial {
+.block {
   max-width: 760px;
+  margin: 0 auto;
+  padding: 0 32px;
+}
+
+.tutorial {
+  max-width: 1100px;
   margin: 0 auto;
   padding: 0 32px;
 }
@@ -303,11 +333,40 @@ kbd {
   list-style: none;
 }
 
+/* Each step: words on the left, something to look at on the right. */
 .tutorial > li {
   position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  gap: 32px;
+  align-items: start;
   min-width: 0;
   padding-left: 52px;
   counter-increment: step;
+}
+
+.step-text,
+.step-demo {
+  min-width: 0;
+}
+
+.step-demo {
+  display: grid;
+  gap: 10px;
+}
+
+.step-demo .shot {
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: var(--shadow);
+}
+
+.step-demo .shot :deep(video) {
+  display: block;
+  width: 100%;
+  height: auto;
 }
 
 .tutorial > li::before {
@@ -387,6 +446,8 @@ kbd {
   }
 
   .tutorial > li {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
     padding-left: 0;
     padding-top: 44px;
   }

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Paper, ResearchNote } from "@bibliograph/core";
+import type { Paper, ResearchNote } from "@biblio/core";
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import { creatorsToText, shortAuthors, updatePaper, updateResearchNote, useLibrary } from "../services/library";

@@ -3,6 +3,7 @@ import { lazyViews } from "./lazy";
 import LibraryView from "./views/LibraryView.vue";
 import { sessionReady, useSession } from "./services/session";
 import { openAdd } from "./services/ui";
+import { customRoutes } from "./custom";
 
 export const router = createRouter({
   history: createWebHistory(),
@@ -14,6 +15,8 @@ export const router = createRouter({
     { path: "/research-notes/:id?", component: lazyViews.researchNotes },
     { path: "/settings", component: lazyViews.settings },
     { path: "/capture", component: lazyViews.capture },
+    // Your own pages (apps/web/src/custom): declared before the catch-all so they resolve.
+    ...customRoutes.map((route) => ({ path: route.path, component: route.component })),
     {
       path: "/search",
       redirect: () => {

@@ -5,7 +5,7 @@ import { HOW_URL, REPO_URL, SETUP_URL } from "../site";
 
 <template>
   <footer class="foot">
-    <BrandMark :size="18" /> Bibliograph · open source (MIT) · <a :href="HOW_URL">How it works</a> · <a :href="SETUP_URL">Setup tutorial</a> · <a :href="REPO_URL">GitHub</a>
+    <BrandMark :size="18" /> Biblio · open source (MIT) · <a :href="HOW_URL">How it works</a> · <a :href="SETUP_URL">Setup tutorial</a> · <a :href="REPO_URL">GitHub</a>
   </footer>
 </template>
 

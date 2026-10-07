@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Paper } from "@bibliograph/core";
+import type { Paper } from "@biblio/core";
 import { ref, watch } from "vue";
 import { attachPdf, connectDriveFolder, createDriveFolder, driveFileExists, driveOpenUrl, grabPdf, removePdf } from "../services/drive";
 import { findPdfSources, type PdfSource } from "../services/pdfFetch";

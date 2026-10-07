@@ -25,7 +25,7 @@ async function onChosen(event: Event) {
     if (papers.value.length) {
       const { confirmed } = await askConfirm({
         title: "Switch to the imported library?",
-        message: `Bibliograph will copy it into a new folder in your Drive and show it instead of your current ${papers.value.length} papers. Your current library folder stays in Drive, untouched.`,
+        message: `Biblio will copy it into a new folder in your Drive and show it instead of your current ${papers.value.length} papers. Your current library folder stays in Drive, untouched.`,
         confirmLabel: "Import"
       });
       if (!confirmed) return;

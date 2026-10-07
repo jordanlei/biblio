@@ -1,7 +1,7 @@
 import { LIBRARY_PATHS, parseLibrary } from "./format";
 import type { FileStore, StoredFile } from "./ports";
 
-// Moving a library between copies of Bibliograph (or in from a backup): the whole library folder
+// Moving a library between copies of Biblio (or in from a backup): the whole library folder
 // as a set of files, e.g. a .zip. Each copy only has access to Drive files it created itself, so a
 // library is moved by copying its files into a new folder, never by pointing at someone else's.
 
@@ -11,7 +11,7 @@ export interface LibraryEntry {
   data: Blob;
 }
 
-const DIRS = [LIBRARY_PATHS.notesDir, LIBRARY_PATHS.researchNotesDir, LIBRARY_PATHS.papersDir];
+const DIRS = [LIBRARY_PATHS.notesDir, LIBRARY_PATHS.papersDir];
 
 /** Is this one of the library's own files (not a stray .DS_Store, or a file in some other folder)? */
 export function isLibraryPath(path: string): boolean {
@@ -38,7 +38,7 @@ export function findLibraryRoot(paths: string[]): string | null {
 /** Archive entries → the library's own files, relative to its root. Throws if there's no library. */
 export function libraryEntries(entries: LibraryEntry[]): LibraryEntry[] {
   const root = findLibraryRoot(entries.map((e) => e.path));
-  if (root === null) throw new Error("This doesn't contain a Bibliograph library: there's no library.json in it.");
+  if (root === null) throw new Error("This doesn't contain a Biblio library: there's no library.json in it.");
   return entries
     .map((e) => ({ ...e, path: e.path.replace(/\\/g, "/") }))
     .filter((e) => e.path.startsWith(root))
@@ -63,7 +63,7 @@ const MIME: Record<string, string> = { json: "application/json", md: "text/markd
 export async function importLibraryFiles(files: FileStore, entries: LibraryEntry[], onProgress?: (done: number, total: number) => void): Promise<{ papers: number; files: number }> {
   const library = entries.find((e) => e.path === LIBRARY_PATHS.library);
   const manifest = entries.find((e) => e.path === LIBRARY_PATHS.manifest);
-  if (!library) throw new Error("This doesn't contain a Bibliograph library: there's no library.json in it.");
+  if (!library) throw new Error("This doesn't contain a Biblio library: there's no library.json in it.");
   const parsed = parseLibrary(manifest ? await manifest.data.text() : null, await library.data.text(), new Date().toISOString());
 
   const write = async (entry: LibraryEntry) => {

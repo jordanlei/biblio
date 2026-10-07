@@ -44,7 +44,7 @@ const reconnect = (folder: DriveFolderSelection) =>
   });
 
 async function rebuild() {
-  if (!confirm("Rebuild Bibliograph's index from the library in your Drive folder?\n\nDrive is the source of truth: what's shown here will be replaced by what's in Drive.")) return;
+  if (!confirm("Rebuild Biblio's index from the library in your Drive folder?\n\nDrive is the source of truth: what's shown here will be replaced by what's in Drive.")) return;
   await run("rebuild", async () => {
     const summary = await rebuildFromDrive();
     toast(summary ? `Rebuilt from Drive: ${summary.papers} papers, ${summary.notes} notes, ${summary.pdfs} PDFs.` : "No library found in that folder yet.");
@@ -55,10 +55,10 @@ async function rebuild() {
 async function deleteAccount() {
   const folder = session.profile.value?.driveRootFolderName;
   const { confirmed, option } = await askConfirm({
-    title: "Delete your Bibliograph account?",
+    title: "Delete your Biblio account?",
     message: folder
-      ? `Your account and Bibliograph's index will be deleted. Your library stays in your Google Drive folder “${folder}” — papers, notes, and PDFs, readable without Bibliograph — unless you also choose to trash it below.`
-      : "Your account and everything Bibliograph stores will be deleted.",
+      ? `Your account and Biblio's index will be deleted. Your library stays in your Google Drive folder “${folder}” — papers, notes, and PDFs, readable without Biblio — unless you also choose to trash it below.`
+      : "Your account and everything Biblio stores will be deleted.",
     confirmLabel: "Delete account",
     danger: true,
     option: folder ? { label: `Also move my library folder “${folder}” to the Google Drive trash`, checked: false } : undefined
@@ -90,8 +90,8 @@ async function deleteAccount() {
         <div>
           <h2>Your library in Google Drive</h2>
           <p class="muted small">
-            Everything you put into Bibliograph — papers, folders, tags, shelves, notes, Research Notes, saved reasons, PDFs — is saved as ordinary files in a Drive folder you own.
-            If Bibliograph went away tomorrow, your library would still be there, readable by people and other tools.
+            Everything you put into Biblio — papers, folders, tags, shelves, notes, Research Notes, saved reasons, PDFs — is saved as ordinary files in a Drive folder you own.
+            If Biblio went away tomorrow, your library would still be there, readable by people and other tools.
           </p>
         </div>
       </div>
@@ -110,7 +110,7 @@ async function deleteAccount() {
           <dd>Citation metadata, tags, folders, shelves, saved reasons — CSL-JSON, readable by pandoc and Zotero.</dd>
           <dt><code>references.bib</code></dt>
           <dd>The whole library as BibTeX, kept up to date.</dd>
-          <dt><code>bibliograph.json</code>, <code>README.md</code></dt>
+          <dt><code>biblio.json</code>, <code>README.md</code></dt>
           <dd>Format version, your folder tree, and a plain-language explanation.</dd>
         </dl>
         <p class="muted small">
@@ -125,7 +125,7 @@ async function deleteAccount() {
         </div>
         <h3 class="sub">Move a library in</h3>
         <p class="muted small">
-          Bring in a library from another copy of Bibliograph or a backup: its <em>Download library</em> .zip, or the folder downloaded from Google Drive (also a .zip). It's copied
+          Bring in a library from another copy of Biblio or a backup: its <em>Download library</em> .zip, or the folder downloaded from Google Drive (also a .zip). It's copied
           into a new folder in your Drive; your current folder stays as it is.
         </p>
         <div class="row wrap">
@@ -140,7 +140,7 @@ async function deleteAccount() {
         </div>
       </template>
       <template v-else>
-        <p class="notice small">Not connected: your library currently exists only inside Bibliograph. Connect a folder to own it.</p>
+        <p class="notice small">Not connected: your library currently exists only inside Biblio. Connect a folder to own it.</p>
         <div class="row wrap">
           <button class="btn primary" type="button" :disabled="!!busy" @click="createFolder">
             <AppIcon name="folder-plus" /> {{ busy === "create" ? "Creating…" : `Create “${DEFAULT_FOLDER_NAME}” folder` }}

@@ -16,7 +16,7 @@ import {
   type PaperType,
   type LegacyResearchNote,
   type ResearchNote
-} from "@bibliograph/core";
+} from "@biblio/core";
 import { deleteDoc, deleteField, doc, onSnapshot, setDoc, updateDoc, writeBatch, type Unsubscribe } from "firebase/firestore";
 import { computed, ref, watch } from "vue";
 import { db } from "../firebase";
@@ -372,7 +372,7 @@ export async function updateResearchNote(noteId: string, patch: Partial<Pick<Res
   else await updateDoc(ref, { ...patch, updatedAt: now() });
 }
 
-/** Insert or replace a note as read from storage (edited or created outside Bibliograph). */
+/** Insert or replace a note as read from storage (edited or created outside Biblio). */
 export async function putResearchNote(note: ResearchNote) {
   await setDoc(doc(researchNotesCollection(requireUid()), note.id), note);
 }
@@ -421,7 +421,7 @@ export async function deleteFolder(folderId: string) {
 
 /**
  * Replace the whole materialized view with a library read from canonical storage (rebuild,
- * connecting an existing library, or an edit made to library.json outside Bibliograph).
+ * connecting an existing library, or an edit made to library.json outside Biblio).
  */
 export async function replaceLibrary(nextPapers: Paper[], nextFolders: Folder[], nextResearchNotes: ResearchNote[] = []) {
   const uid = requireUid();

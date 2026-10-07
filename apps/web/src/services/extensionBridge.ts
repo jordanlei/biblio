@@ -1,9 +1,9 @@
-// Talks to the Bibliograph browser extension through its content script (apps/extension/bridge.js),
+// Talks to the Biblio browser extension through its content script (apps/extension/bridge.js),
 // which relays window.postMessage to the extension. The extension can fetch PDFs from any site,
 // which pages can't do because of CORS. Nothing here is required: every caller has a fallback.
 
-const APP = "bibliograph-app";
-const EXTENSION = "bibliograph-extension";
+const APP = "biblio-app";
+const EXTENSION = "biblio-extension";
 
 interface ExtensionReply {
   source: typeof EXTENSION;

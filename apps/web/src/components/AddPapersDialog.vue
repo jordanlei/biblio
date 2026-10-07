@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { parseBibtex, type PaperCandidate, type PaperType } from "@bibliograph/core";
+import { parseBibtex, type PaperCandidate, type PaperType } from "@biblio/core";
 import { computed, nextTick, onMounted, reactive, ref } from "vue";
 import { useRouter } from "vue-router";
 import { addPaper, checkDuplicate, importPapers, paperTypeLabels, paperTypes, parseCreators } from "../services/library";

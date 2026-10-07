@@ -1,4 +1,4 @@
-import { defaultPdfPath, inspectLibrary, type Paper, type StoredFile } from "@bibliograph/core";
+import { defaultPdfPath, inspectLibrary, type Paper, type StoredFile } from "@biblio/core";
 import {
   GoogleDriveFileStore,
   createFolder,
@@ -17,7 +17,7 @@ import { hasGoogleAccessToken, updateProfile, useSession } from "./session";
 // App-level Drive actions (connect a library folder, attach/find/remove PDFs). Provider details
 // live in adapters/googleDrive.ts; the library's text files are written by the sync engine.
 
-export const DEFAULT_FOLDER_NAME = "Bibliograph Library";
+export const DEFAULT_FOLDER_NAME = "Biblio Library";
 export { DriveFileMissingError } from "../adapters/googleDrive";
 
 export interface DriveFolderSelection {

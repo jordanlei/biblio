@@ -1,11 +1,11 @@
 {
   "manifest_version": 3,
-  "name": "Bibliograph",
-  "description": "Save the paper you're reading to Bibliograph, PDF included.",
+  "name": "Biblio",
+  "description": "Save the paper you're reading to Biblio, PDF included.",
   "version": "0.2.0",
   "action": {
     "default_popup": "popup.html",
-    "default_title": "Save to Bibliograph"
+    "default_title": "Save to Biblio"
   },
   "background": {
     "service_worker": "background.js"

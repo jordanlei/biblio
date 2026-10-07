@@ -29,7 +29,7 @@ function start(name, cmd, args, onLine) {
 
 start("drive", "node", ["scripts/dev-drive-server.mjs"]);
 let webStarted = false;
-start("emulators", "npx", ["firebase", "emulators:start", "--only", "auth,firestore", "--project", "demo-bibliograph"], (line) => {
+start("emulators", "npx", ["firebase", "emulators:start", "--only", "auth,firestore", "--project", "demo-biblio"], (line) => {
   // Serve the app only once the emulators accept connections, so "ready" really means ready.
   if (webStarted || !line.includes("All emulators ready")) return;
   webStarted = true;

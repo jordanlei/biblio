@@ -67,7 +67,7 @@ export const textSizes = [
 
 export const DEFAULT_APPEARANCE: Appearance = { theme: "system", accent: "oxblood", readingFont: "literata", uiFont: "inter", textSize: "default" };
 
-const STORAGE_KEY = "bibliograph.appearance";
+const STORAGE_KEY = "biblio.appearance";
 
 function readCached(): Appearance {
   try {
@@ -106,10 +106,10 @@ export function applyAppearance(next: Appearance = appearance) {
   if (next.theme === "system") root.removeAttribute("data-theme");
   else root.setAttribute("data-theme", next.theme);
 
-  let style = document.getElementById("bibliograph-appearance") as HTMLStyleElement | null;
+  let style = document.getElementById("biblio-appearance") as HTMLStyleElement | null;
   if (!style) {
     style = document.createElement("style");
-    style.id = "bibliograph-appearance";
+    style.id = "biblio-appearance";
     document.head.appendChild(style);
   }
   // Same selector shape as styles.css so theme forcing keeps working.

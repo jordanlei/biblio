@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Paper } from "@bibliograph/core";
+import type { Paper } from "@biblio/core";
 import { computed, ref } from "vue";
 import { RouterLink } from "vue-router";
 import { setPaperTag, useLibrary } from "../services/library";

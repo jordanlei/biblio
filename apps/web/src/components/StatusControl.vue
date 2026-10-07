@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Paper, ReadingStatus } from "@bibliograph/core";
+import type { Paper, ReadingStatus } from "@biblio/core";
 import { updatePaper } from "../services/library";
 import { readingStatuses } from "../services/scope";
 import { toastError } from "../services/ui";

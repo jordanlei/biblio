@@ -1,6 +1,6 @@
 # Architecture
 
-Bibliograph is a static Vue app talking directly to Firebase (Auth, Firestore) and Google Drive from the browser. There is no application server; two optional Cloud Functions exist for jobs browsers can't do (CORS-blocked fetches).
+Biblio is a static Vue app talking directly to Firebase (Auth, Firestore) and Google Drive from the browser. There is no application server; two optional Cloud Functions exist for jobs browsers can't do (CORS-blocked fetches).
 
 **The canonical library is a folder of open files in the user's Drive; Firestore is a disposable, fast materialized view.** See [STORAGE.md](STORAGE.md) for the classification, sync model, and rebuild path, and [LIBRARY_FORMAT.md](LIBRARY_FORMAT.md) for the file format.
 
@@ -17,7 +17,7 @@ Bibliograph is a static Vue app talking directly to Firebase (Auth, Firestore) a
 
 ## Data model (`packages/core`)
 
-- `Paper` (`users/{uid}/papers/{uuid}`): bibliographic fields with structured `Creator`s, persistent `citationKey`, `tags`, `folderIds`, `notesMarkdown`, `readingStatus` (`inbox | readNext | skimming | reading | read | reference | parked`, plus legacy `tbr | skimmed`), optional `savedBecause`, optional `pdf` (Drive file ID + filename only), `openAccessPdfUrl`, `source`, timestamps.
+- `Paper` (`users/{uid}/papers/{uuid}`): biblioic fields with structured `Creator`s, persistent `citationKey`, `tags`, `folderIds`, `notesMarkdown`, `readingStatus` (`inbox | readNext | skimming | reading | read | reference | parked`, plus legacy `tbr | skimmed`), optional `savedBecause`, optional `pdf` (Drive file ID + filename only), `openAccessPdfUrl`, `source`, timestamps.
 - `Folder` (`users/{uid}/folders/{uuid}`): `name`, `parentId`. Papers can be in many folders; deleting a folder never deletes papers.
 - `ResearchNote` (`users/{uid}/researchNotes/{uuid}`): a freeform Markdown note (title, body, timestamps). Papers are connected by `@[key]` links in the body. Notes stored in the old structured shape (question, saved search, papers with roles) are folded into Markdown on read by `migrateResearchNote` and saved in the new shape on their next edit.
 - Profile (`users/{uid}`): Drive folder ID/name, `onboardingCompleted`.
@@ -25,7 +25,7 @@ Bibliograph is a static Vue app talking directly to Firebase (Auth, Firestore) a
 - Citation keys never change automatically. Renaming one offers to rewrite `@[old]` references in all notes (`replaceCitationKey`).
 - `parseBibtex()` handles `@string`, `#` concatenation, nested braces, accents/LaTeX (including Zotero's `{\textbackslash}` escapes), `and others`, arXiv `eprint`, month macros. `exportBibtex()` round-trips every paper type (tested).
 - `findExistingPaper()`: exact by DOI / Semantic Scholar / arXiv / PMID, probable by title + year + first author.
-- `library/format.ts` — the Drive library format (CSL-JSON `library.json`, `bibliograph.json`, Markdown notes); `library/ports.ts` — `FileStore`, `LibraryView`, `SyncStateStore`; `library/sync.ts` — `SyncEngine`, `readLibrary`, `inspectLibrary`; `library/memoryStore.ts` — in-memory `FileStore` for tests.
+- `library/format.ts` — the Drive library format (CSL-JSON `library.json`, `biblio.json`, Markdown notes); `library/ports.ts` — `FileStore`, `LibraryView`, `SyncStateStore`; `library/sync.ts` — `SyncEngine`, `readLibrary`, `inspectLibrary`; `library/memoryStore.ts` — in-memory `FileStore` for tests.
 
 ## Web app (`apps/web/src`)
 
@@ -59,19 +59,23 @@ Bibliograph is a static Vue app talking directly to Firebase (Auth, Firestore) a
 - `PdfPanel` — Find PDF / drop / replace / unlink vs. delete-from-Drive / missing-file state.
 - `GuidedTour` — spotlight tour anchored to `data-tour` attributes; steps whose targets are absent are skipped.
 - `CaptureView` (`/capture#…`) — landing page for the extension; dedupe → save → PDF.
-- `LoginView` — the only signed-out page: sign in with Google. (What Bibliograph is lives on the project website.)
+- `LoginView` — the only signed-out page: sign in with Google. (What Biblio is lives on the project website.)
 
 ### Routing
 
 `router.beforeEach` awaits `sessionReady`, so deep links and reloads resolve auth before rendering. Unauthenticated routes redirect to `/login?next=…` (hash preserved for `/capture`).
 
+## Your own features (`apps/web/src/custom`)
+
+Three registries (`customRoutes`, `customNavItems`, `customPaperPanels`) are read at startup by `router.ts`, `AppSidebar.vue`, and `PaperView.vue`. Upstream never changes that folder, so a fork's own features survive merges. See [EXTENDING.md](EXTENDING.md).
+
 ## Project website (`apps/site`)
 
-Three static Vue pages published to GitHub Pages (`.github/workflows/site.yml`): the home page (`src/App.vue`: the model in brief, features, the comparison), How it works (`src/HowItWorksPage.vue`, at `how-it-works/`: Bibliograph is code, not a service, with the architecture diagram; keep it true to `scripts/setup.mjs` and [STORAGE.md](STORAGE.md)), and the setup tutorial (`src/SetupPage.vue`, served at `setup/`; keep it in step with `scripts/setup.mjs`). Captures of the app (`public/landing/`, made by `scripts/capture-landing.mjs`, see [CAPTURES.md](CAPTURES.md)),. It has no Firebase and no sign-in. Each person's copy of the app (`apps/web`) is deployed separately, to their own Firebase project; see [CONTRIBUTING.md](../CONTRIBUTING.md) for the rules that keep the two apart. It reuses the app's `styles.css`, `AppIcon`, and `BrandMark` by relative import, so the two look the same.
+Three static Vue pages published to GitHub Pages (`.github/workflows/site.yml`): the home page (`src/App.vue`: the model in brief, features, the comparison), How it works (`src/HowItWorksPage.vue`, at `how-it-works/`: Biblio is code, not a service, with the architecture diagram; keep it true to `scripts/setup.mjs` and [STORAGE.md](STORAGE.md)), and the setup tutorial (`src/SetupPage.vue`, served at `setup/`; keep it in step with `scripts/setup.mjs`). Captures of the app (`public/landing/`, made by `scripts/capture-landing.mjs`, see [CAPTURES.md](CAPTURES.md)),. It has no Firebase and no sign-in. Each person's copy of the app (`apps/web`) is deployed separately, to their own Firebase project; see [CONTRIBUTING.md](../CONTRIBUTING.md) for the rules that keep the two apart. It reuses the app's `styles.css`, `AppIcon`, and `BrandMark` by relative import, so the two look the same.
 
-## Running a copy (`scripts/setup.mjs`, `bibliograph.config.json`)
+## Running a copy (`scripts/setup.mjs`, `biblio.config.json`)
 
-Each copy of the app is configured by a gitignored `bibliograph.config.json` read at build time (`apps/web/vite.config.ts`); nothing in the source names a Firebase project. `npm run setup` creates and fills it; `npm run deploy` targets it. See [SELF_HOSTING.md](SELF_HOSTING.md).
+Each copy of the app is configured by a gitignored `biblio.config.json` read at build time (`apps/web/vite.config.ts`); nothing in the source names a Firebase project. `npm run setup` creates and fills it; `npm run deploy` targets it. See [SELF_HOSTING.md](SELF_HOSTING.md).
 
 ## Moving a library (`services/transfer.ts`, core `library/transfer.ts`)
 

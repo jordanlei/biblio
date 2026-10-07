@@ -50,7 +50,7 @@ Stop the stack before running `npx playwright test`, which starts its own stack 
 ## What the script does
 
 1. **Signs in as a fresh emulator user** through the test hook
-   (`window.__bibliographTestSignIn(email, name)`). Every run uses a new
+   (`window.__biblioTestSignIn(email, name)`). Every run uses a new
    `demo.<timestamp>@example.com` account, so no state carries over between runs. No real Google
    account is involved.
 2. **Builds a demo library through the UI**, the way a person would. It creates the Drive library,

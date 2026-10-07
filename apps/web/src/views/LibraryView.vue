@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Paper } from "@bibliograph/core";
+import type { Paper } from "@biblio/core";
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { RouterLink, useRoute, useRouter } from "vue-router";
 import AppIcon from "../components/AppIcon.vue";
@@ -26,7 +26,7 @@ const router = useRouter();
 const session = useSession();
 const { papers, loaded, loadError, paperById } = useLibrary();
 
-const SORT_KEY = "bibliograph.sort";
+const SORT_KEY = "biblio.sort";
 const search = ref("");
 const sort = ref<SortKey>(readSort());
 // While a search is active the list is ranked by relevance unless the user picks another order.
@@ -293,7 +293,7 @@ const clearFilters = { pdf: "", notes: false, untagged: false, status: "" } as c
 // --- Drag & drop ---
 function onDragStart(paper: Paper, event: DragEvent) {
   const ids = checked.value.has(paper.id) ? [...checked.value] : [paper.id];
-  event.dataTransfer?.setData("application/x-bibliograph-papers", JSON.stringify(ids));
+  event.dataTransfer?.setData("application/x-biblio-papers", JSON.stringify(ids));
   event.dataTransfer?.setData("text/plain", ids.map((id) => paperById.value.get(id)?.citationKey).join(", "));
   if (event.dataTransfer) event.dataTransfer.effectAllowed = "copy";
 }
@@ -668,7 +668,7 @@ const scopeEyebrow = computed(() => (scope.value.kind === "folder" ? "Folder" : 
   width: 130px;
 }
 
-/* Bibliography-style entries: year in the margin, title in the serif, a hairline between. */
+/* Biblioy-style entries: year in the margin, title in the serif, a hairline between. */
 .papers {
   margin: 8px -12px 0;
   padding: 0;

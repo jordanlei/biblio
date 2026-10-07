@@ -29,7 +29,7 @@ exports.fetchPdf = onRequest({ cors: false, region: "us-central1", timeoutSecond
     return;
   }
   try {
-    const upstream = await fetch(target, { redirect: "follow", headers: { "User-Agent": "Bibliograph/0.2 (open-access PDF fetcher)" } });
+    const upstream = await fetch(target, { redirect: "follow", headers: { "User-Agent": "Biblio/0.2 (open-access PDF fetcher)" } });
     if (!upstream.ok) throw new Error(`Upstream returned ${upstream.status}`);
     const length = Number(upstream.headers.get("content-length") || 0);
     if (length > MAX_PDF_BYTES) throw new Error("PDF too large");

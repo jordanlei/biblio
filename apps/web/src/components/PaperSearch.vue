@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { PaperCandidate } from "@bibliograph/core";
+import type { PaperCandidate } from "@biblio/core";
 import { computed, onMounted, ref, watch } from "vue";
 import {
   lookupIdentifier,

@@ -1,5 +1,5 @@
 {
-  "name": "bibliograph",
+  "name": "biblio",
   "private": true,
   "license": "MIT",
   "version": "0.1.0",
@@ -18,7 +18,7 @@
     "typecheck": "npm --workspace packages/core run build && npm --workspace apps/web run typecheck && npm --workspace apps/site run typecheck",
     "bench:latency": "vitest run scripts/bench-latency.test.ts --pool=forks --reporter=dot",
     "preview": "npm --workspace apps/web run preview",
-    "firebase:emulators": "firebase emulators:start --project demo-bibliograph",
+    "firebase:emulators": "firebase emulators:start --project demo-biblio",
     "setup": "node scripts/setup.mjs",
     "deploy": "node scripts/deploy.mjs",
     "firebase": "node scripts/firebase.mjs",

@@ -136,7 +136,7 @@ const essence = (papers: Paper[]) =>
 function setup() {
   const { papers, folders } = sampleLibrary();
   const files = new MemoryFileStore();
-  // An existing top-level PDF, as created by earlier versions of Bibliograph.
+  // An existing top-level PDF, as created by earlier versions of Biblio.
   files.files.set(`${papers[0].citationKey}.pdf`, { file: { id: "pdf-1", path: `${papers[0].citationKey}.pdf`, version: "1" }, content: "%PDF-1.4" });
   const view = new MemoryView(papers, folders);
   const state = new MemoryState();
@@ -195,8 +195,8 @@ describe("library format", () => {
     expect(parseResearchNoteMarkdown(researchNoteToMarkdown(note), "x.md")).toEqual({ id: note.id, title: note.title, body: note.bodyMarkdown });
     expect(parseResearchNoteMarkdown("# Ideas\n\nSee @[a].", "ideas.md")).toEqual({ id: undefined, title: "Ideas", body: "# Ideas\n\nSee @[a]." });
     expect(parseResearchNoteMarkdown("Loose thoughts.", "Loose.md").title).toBe("Loose");
-    expect(researchNotePath("A/B: “test”", new Set())).toBe("research-notes/A B “test”.md");
-    expect(researchNotePath("Ideas", new Set(["research-notes/Ideas.md"]))).toBe("research-notes/Ideas 2.md");
+    expect(researchNotePath("A/B: “test”", new Set())).toBe("notes/A B “test”.md");
+    expect(researchNotePath("Ideas", new Set(["notes/Ideas.md"]))).toBe("notes/Ideas 2.md");
   });
 
   it("stores shelves and saved-because text in CSL custom fields", () => {
@@ -205,8 +205,8 @@ describe("library format", () => {
     papers[1].savedBecause = "Follow up for related work.";
     const items = JSON.parse(serializeLibrary(papers, folders, () => ({})).library);
     const dqn = items.find((i: { id: string }) => i.id === papers[1].citationKey);
-    expect(dqn.custom.bibliograph.readingStatus).toBe("readNext");
-    expect(dqn.custom.bibliograph.savedBecause).toBe("Follow up for related work.");
+    expect(dqn.custom.biblio.readingStatus).toBe("readNext");
+    expect(dqn.custom.biblio.savedBecause).toBe("Follow up for related work.");
     const parsed = parseLibrary(null, JSON.stringify([dqn]), NOW);
     expect(parsed.papers[0].readingStatus).toBe("readNext");
     expect(parsed.papers[0].savedBecause).toBe("Follow up for related work.");
@@ -254,7 +254,7 @@ describe("sync engine", () => {
     expect(paths).toEqual(
       [
         "README.md",
-        "bibliograph.json",
+        "biblio.json",
         "library.json",
         "references.bib",
         `notes/${papers[0].citationKey}.md`,
@@ -279,13 +279,13 @@ describe("sync engine", () => {
     const { files, view, engine } = setup();
     view.researchNotes = [sampleResearchNote()];
     await engine.syncNow();
-    expect(files.text("research-notes/Credit assignment.md")).toBe(researchNoteToMarkdown(view.researchNotes[0]));
-    expect(JSON.parse(files.text("bibliograph.json")!).researchNotes).toBeUndefined();
+    expect(files.text("notes/Credit assignment.md")).toBe(researchNoteToMarkdown(view.researchNotes[0]));
+    expect(JSON.parse(files.text("biblio.json")!).researchNotes).toBeUndefined();
 
     view.researchNotes = [{ ...view.researchNotes[0], title: "Credit assignment in cortex" }];
     await engine.syncNow();
-    expect(files.text("research-notes/Credit assignment.md")).toBeUndefined();
-    expect(files.text("research-notes/Credit assignment in cortex.md")).toContain("Compare against");
+    expect(files.text("notes/Credit assignment.md")).toBeUndefined();
+    expect(files.text("notes/Credit assignment in cortex.md")).toContain("Compare against");
     const writes = files.writes;
     await engine.syncNow();
     expect(files.writes).toBe(writes);
@@ -297,20 +297,30 @@ describe("sync engine", () => {
     expect(freshView.researchNotes).toEqual(view.researchNotes);
   });
 
-  it("adopts research notes written or edited outside Bibliograph", async () => {
+  it("keeps a research note titled like a paper's citation key out of that paper's note file", async () => {
+    const { files, view, engine, papers } = setup();
+    const key = papers[0].citationKey;
+    view.edit(papers[0].id, { notesMarkdown: "The paper's own note." });
+    view.researchNotes = [{ ...sampleResearchNote(), title: key }];
+    await engine.syncNow();
+    expect(files.text(`notes/${key}.md`)).toContain("The paper's own note.");
+    expect(files.text(`notes/${key} 2.md`)).toContain("Compare against");
+  });
+
+  it("adopts research notes written or edited outside Biblio", async () => {
     const { files, view, engine } = setup();
     view.researchNotes = [sampleResearchNote()];
     await engine.syncNow();
 
-    await files.writeText("research-notes/From Obsidian.md", "# Reading list\n\nStart with @[vaswaniAttentionNeed2017].", "text/markdown");
-    files.editOutside("research-notes/Credit assignment.md", researchNoteToMarkdown({ ...view.researchNotes[0], bodyMarkdown: "Edited elsewhere." }));
+    await files.writeText("notes/From Obsidian.md", "# Reading list\n\nStart with @[vaswaniAttentionNeed2017].", "text/markdown");
+    files.editOutside("notes/Credit assignment.md", researchNoteToMarkdown({ ...view.researchNotes[0], bodyMarkdown: "Edited elsewhere." }));
     await engine.syncNow();
 
     const adopted = view.researchNotes.find((n) => n.title === "Reading list");
     expect(adopted?.bodyMarkdown).toContain("@[vaswaniAttentionNeed2017]");
     expect(view.researchNotes.find((n) => n.id === "rn-credit")?.bodyMarkdown).toBe("Edited elsewhere.");
     // The hand-written file is tracked as is; it isn't rewritten until the note is edited.
-    expect(files.text("research-notes/From Obsidian.md")).toBe("# Reading list\n\nStart with @[vaswaniAttentionNeed2017].");
+    expect(files.text("notes/From Obsidian.md")).toBe("# Reading list\n\nStart with @[vaswaniAttentionNeed2017].");
     const writes = files.writes;
     await engine.syncNow();
     expect(files.writes).toBe(writes);
@@ -321,11 +331,11 @@ describe("sync engine", () => {
     view.researchNotes = [sampleResearchNote()];
     await engine.syncNow();
     const exported = await exportLibraryFiles(files);
-    expect(exported.map((e) => e.path)).toEqual(expect.arrayContaining(["library.json", "bibliograph.json", "references.bib", "README.md", "research-notes/Credit assignment.md"]));
+    expect(exported.map((e) => e.path)).toEqual(expect.arrayContaining(["library.json", "biblio.json", "references.bib", "README.md", "notes/Credit assignment.md"]));
 
     // As Google Drive's folder download would: wrapped in folders, with a stray file.
-    const archive = [...exported.map((e) => ({ ...e, path: `Bibliograph Library-2026/Bibliograph Library/${e.path}` })), { path: "Bibliograph Library-2026/.DS_Store", data: new Blob(["x"]) }];
-    expect(findLibraryRoot(archive.map((e) => e.path))).toBe("Bibliograph Library-2026/Bibliograph Library/");
+    const archive = [...exported.map((e) => ({ ...e, path: `Biblio Library-2026/Biblio Library/${e.path}` })), { path: "Biblio Library-2026/.DS_Store", data: new Blob(["x"]) }];
+    expect(findLibraryRoot(archive.map((e) => e.path))).toBe("Biblio Library-2026/Biblio Library/");
     const entries = libraryEntries(archive);
     expect(entries.map((e) => e.path).sort()).toEqual(exported.map((e) => e.path).sort());
 
@@ -345,15 +355,15 @@ describe("sync engine", () => {
   it("moves research notes from an older manifest into files", async () => {
     const { files, view, engine, papers } = setup();
     await engine.syncNow();
-    const manifest = JSON.parse(files.text("bibliograph.json")!);
+    const manifest = JSON.parse(files.text("biblio.json")!);
     manifest.researchNotes = [{ id: "rn-old", title: "Old note", paperRoles: [{ paperId: papers[0].id, role: "supports" }], bodyMarkdown: "", createdAt: NOW, updatedAt: NOW }];
-    files.editOutside("bibliograph.json", JSON.stringify(manifest));
+    files.editOutside("biblio.json", JSON.stringify(manifest));
     files.editOutside("library.json", files.text("library.json")!);
     await engine.syncNow(); // adopts the outside library, including the old note
     await engine.syncNow(); // writes the note as a file and drops it from the manifest
     expect(view.researchNotes.map((n) => n.bodyMarkdown)).toEqual([`- @[${papers[0].citationKey}] (supports)\n`]);
-    expect(files.text("research-notes/Old note.md")).toContain(`@[${papers[0].citationKey}] (supports)`);
-    expect(JSON.parse(files.text("bibliograph.json")!).researchNotes).toBeUndefined();
+    expect(files.text("notes/Old note.md")).toContain(`@[${papers[0].citationKey}] (supports)`);
+    expect(JSON.parse(files.text("biblio.json")!).researchNotes).toBeUndefined();
   });
 
   it("queues edits while storage is unavailable and writes them when it returns", async () => {
@@ -371,7 +381,7 @@ describe("sync engine", () => {
     expect(files.text(`notes/${papers[1].citationKey}.md`)).toContain("Written offline.");
   });
 
-  it("pulls notes edited outside Bibliograph", async () => {
+  it("pulls notes edited outside Biblio", async () => {
     const { files, view, engine, papers } = setup();
     await engine.syncNow();
     const path = `notes/${papers[0].citationKey}.md`;
@@ -398,7 +408,7 @@ describe("sync engine", () => {
     const { files, engine, papers } = setup();
     await engine.syncNow();
 
-    // Bibliograph's database and sync bookkeeping disappear. Only the files remain.
+    // Biblio's database and sync bookkeeping disappear. Only the files remain.
     const freshView = new MemoryView([], []);
     const fresh = new SyncEngine({ files, view: freshView, state: new MemoryState(), now: () => NOW });
     const summary = await fresh.rebuild();

@@ -9,7 +9,7 @@ import { rememberAccessToken, sessionPublished } from "./session";
  */
 export function installEmulatorHooks() {
   Object.assign(window, {
-    __bibliographTestSignIn: async (email: string, name = "Test Researcher") => {
+    __biblioTestSignIn: async (email: string, name = "Test Researcher") => {
       const idToken = JSON.stringify({ sub: `test-${email}`, email, email_verified: true, name });
       const result = await signInWithCredential(auth, GoogleAuthProvider.credential(idToken));
       rememberAccessToken("mock-drive-token");

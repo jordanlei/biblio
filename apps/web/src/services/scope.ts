@@ -1,4 +1,4 @@
-import type { Paper, ReadingStatus } from "@bibliograph/core";
+import type { Paper, ReadingStatus } from "@biblio/core";
 import type { LocationQuery } from "vue-router";
 import { folderDescendants, useLibrary } from "./library";
 

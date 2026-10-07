@@ -31,7 +31,7 @@ import {
 // There is no separate write queue. Pending work is *derived*: whatever the view would serialize
 // differently from what was last confirmed in storage (tracked by content hashes in SyncState).
 // So edits made while storage is unreachable — even across reloads — are never lost; they are
-// written as soon as a sync succeeds. Files changed outside Bibliograph are detected by version
+// written as soon as a sync succeeds. Files changed outside Biblio are detected by version
 // and pulled in, or kept side by side as conflict copies; nothing is silently overwritten.
 
 /** Fast, stable, non-cryptographic content hash (cyrb53). */
@@ -216,11 +216,10 @@ export class SyncEngine {
     const stamp = this.now().replace(/[:.]/g, "-");
     const conflicts: string[] = [];
 
-    const [rootFiles, noteFiles, paperFiles, researchFiles] = await Promise.all([
+    const [rootFiles, noteFiles, paperFiles] = await Promise.all([
       files.list(""),
       files.list(LIBRARY_PATHS.notesDir),
-      files.list(LIBRARY_PATHS.papersDir),
-      files.list(LIBRARY_PATHS.researchNotesDir)
+      files.list(LIBRARY_PATHS.papersDir)
     ]);
     const root = new Map(rootFiles.map((f) => [f.path, f]));
     const notesByPath = new Map(noteFiles.map((f) => [f.path, f]));
@@ -239,7 +238,7 @@ export class SyncEngine {
       await files.writeText(copy, await files.readText(remoteLibrary), JSON_MIME);
       conflicts.push(`This folder already had a library; it was kept as ${copy}.`);
     } else if (remoteLibrary && state.library && remoteLibrary.version !== state.library.version) {
-      // library.json changed outside Bibliograph.
+      // library.json changed outside Biblio.
       const local = serializeLibrary(snap.papers, snap.folders, pathsFrom(state), this.options.generator);
       if (hashText(local.library) === state.library.hash && hashText(local.manifest) === state.manifest?.hash) {
         await this.adopt(state);
@@ -247,7 +246,7 @@ export class SyncEngine {
       }
       const copy = `library.conflict-${stamp}.json`;
       await files.writeText(copy, await files.readText(remoteLibrary), JSON_MIME);
-      conflicts.push(`library.json was edited outside Bibliograph while you also made changes; the outside version is kept as ${copy}.`);
+      conflicts.push(`library.json was edited outside Biblio while you also made changes; the outside version is kept as ${copy}.`);
     }
 
     // 1. PDFs live in papers/. Move any older, top-level PDFs there.
@@ -297,8 +296,8 @@ export class SyncEngine {
       record(await files.writeText(path, noteToMarkdown(paper, body), MD, remote), hash);
     }
 
-    // 2b. Research notes: research-notes/<title>.md, one file per note.
-    await this.syncResearchNotes(state, researchFiles, stamp, conflicts);
+    // 2b. Research notes: notes/<title>.md, beside the papers' own notes/<key>.md.
+    await this.syncResearchNotes(state, noteFiles, stamp, conflicts);
 
     // 3. Library metadata, manifest, BibTeX, README.
     snap = view.snapshot();
@@ -336,8 +335,13 @@ export class SyncEngine {
     if (conflicts.length) this.setStatus({ conflicts: [...this.status.conflicts, ...conflicts] });
   }
 
+  /**
+   * Research notes live in notes/ alongside the papers' own notes. A paper note is written with a
+   * `key:` header, so anything carrying one belongs to a paper and is left alone here.
+   */
   private async syncResearchNotes(state: SyncState, remoteFiles: StoredFile[], stamp: string, conflicts: string[]) {
     const { files, view } = this.options;
+    const paperNotePaths = new Set(Object.values(state.notes).map((entry) => entry.path));
     const known = (state.researchNotes ??= {});
     const byId = new Map(remoteFiles.map((f) => [f.id, f]));
     const knownFileIds = new Set(Object.values(known).map((e) => e.fileId));
@@ -348,15 +352,16 @@ export class SyncEngine {
     // the bookkeeping was lost. Read them once; the header id says which note they are.
     const untracked = new Map<string, { file: StoredFile; text: string; parsed: ReturnType<typeof parseResearchNoteMarkdown> }>();
     for (const file of remoteFiles) {
-      if (knownFileIds.has(file.id) || /\.conflict-/.test(file.path) || !/\.md$/i.test(file.path)) continue;
+      if (knownFileIds.has(file.id) || paperNotePaths.has(file.path) || /\.conflict-/.test(file.path) || !/\.md$/i.test(file.path)) continue;
       const text = await files.readText(file);
+      if (parseNoteMarkdown(text).key) continue; // a paper's note, not a free one
       const parsed = parseResearchNoteMarkdown(text, file.path.split("/").pop() ?? file.path);
       // Its header id, unless that id is already spoken for (e.g. a copy of another note's file).
       const id = parsed.id && /^[\w-]{1,100}$/.test(parsed.id) && !known[parsed.id] && !untracked.has(parsed.id) ? parsed.id : `md-${file.id}`;
       untracked.set(id, { file, text, parsed });
     }
 
-    const taken = new Set(remoteFiles.map((f) => f.path));
+    const taken = new Set([...remoteFiles.map((f) => f.path), ...paperNotePaths]);
     const record = (id: string, file: StoredFile, hash: string, title: string) => (known[id] = { fileId: file.id, path: file.path, version: file.version, hash, title });
 
     for (const note of notes) {
@@ -382,7 +387,7 @@ export class SyncEngine {
           continue;
         }
         if (entry && hash === entry.hash) {
-          // Only changed outside Bibliograph: take that version.
+          // Only changed outside Biblio: take that version.
           await view.applyResearchNote({ ...theirs, updatedAt: this.now() });
           record(note.id, remote, theirHash, theirs.title);
           continue;
@@ -406,7 +411,7 @@ export class SyncEngine {
       record(note.id, file, hashText(researchNoteToMarkdown(note)), note.title);
     }
 
-    // Forget notes deleted in Bibliograph (their files were trashed by the delete itself).
+    // Forget notes deleted in Biblio (their files were trashed by the delete itself).
     const current = new Set([...noteIds, ...untracked.keys()]);
     for (const id of Object.keys(known)) if (!current.has(id)) delete known[id];
   }
@@ -422,7 +427,7 @@ export class SyncEngine {
   }
 
   /**
-   * Rebuild the materialized view from canonical storage — the "Bibliograph can disappear"
+   * Rebuild the materialized view from canonical storage — the "Biblio can disappear"
    * path. Returns what was found, or null if the folder holds no library.
    */
   async rebuild(): Promise<{ papers: number; notes: number; pdfs: number } | null> {
@@ -447,7 +452,7 @@ export class SyncEngine {
   }
 }
 
-/** Does this storage hold a Bibliograph library? Cheap: one listing, one small read. */
+/** Does this storage hold a Biblio library? Cheap: one listing, one small read. */
 export async function inspectLibrary(files: FileStore): Promise<{ papers: number } | null> {
   const root = await files.list("");
   const library = root.find((f) => f.path === LIBRARY_PATHS.library);
@@ -462,12 +467,7 @@ export async function inspectLibrary(files: FileStore): Promise<{ papers: number
 
 /** Read the whole canonical library: metadata, collections, notes, and PDF locations. */
 export async function readLibrary(files: FileStore, now: string): Promise<{ papers: Paper[]; folders: Folder[]; researchNotes: ResearchNote[]; state: SyncState } | null> {
-  const [rootFiles, noteFiles, paperFiles, researchFiles] = await Promise.all([
-    files.list(""),
-    files.list(LIBRARY_PATHS.notesDir),
-    files.list(LIBRARY_PATHS.papersDir),
-    files.list(LIBRARY_PATHS.researchNotesDir)
-  ]);
+  const [rootFiles, noteFiles, paperFiles] = await Promise.all([files.list(""), files.list(LIBRARY_PATHS.notesDir), files.list(LIBRARY_PATHS.papersDir)]);
   const root = new Map(rootFiles.map((f) => [f.path, f]));
   const libraryFile = root.get(LIBRARY_PATHS.library);
   if (!libraryFile) return null;
@@ -501,10 +501,13 @@ export async function readLibrary(files: FileStore, now: string): Promise<{ pape
   // Research notes: one Markdown file each; notes from an older manifest fill in the rest.
   const researchNotes = new Map<string, ResearchNote>();
   state.researchNotes = {};
-  const researchJobs = researchFiles
-    .filter((f) => /\.md$/i.test(f.path) && !/\.conflict-/.test(f.path))
+  // Paper notes were claimed above; whatever is left in notes/ is a free note.
+  const claimed = new Set(Object.values(state.notes).map((entry) => entry.path));
+  const researchJobs = noteFiles
+    .filter((f) => /\.md$/i.test(f.path) && !/\.conflict-/.test(f.path) && !claimed.has(f.path))
     .map((file) => async () => {
       const text = await files.readText(file);
+      if (parseNoteMarkdown(text).key) return; // a paper's note whose paper is missing from library.json
       const parsed = parseResearchNoteMarkdown(text, file.path.split("/").pop() ?? file.path);
       const time = file.modifiedTime ?? now;
       const ownId = parsed.id && /^[\w-]{1,100}$/.test(parsed.id) && !researchNotes.has(parsed.id) ? parsed.id : undefined;

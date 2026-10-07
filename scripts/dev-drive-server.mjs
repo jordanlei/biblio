@@ -1,4 +1,4 @@
-// Mock Google Drive v3 for local testing. Implements the endpoints Bibliograph uses (folders,
+// Mock Google Drive v3 for local testing. Implements the endpoints Biblio uses (folders,
 // `'<id>' in parents` listing, multipart create/update, metadata moves, alt=media downloads,
 // file versions), stores files under .dev-drive/, and serves a browsable index at
 // http://127.0.0.1:9199/.
@@ -70,7 +70,7 @@ function pathOf(file) {
   return names.join("/");
 }
 
-/** The tiny subset of Drive's query language Bibliograph sends. */
+/** The tiny subset of Drive's query language Biblio sends. */
 function matches(file, q) {
   if (file.trashed) return false;
   for (const clause of q.split(/\s+and\s+/i)) {

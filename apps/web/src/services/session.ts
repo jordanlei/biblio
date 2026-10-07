@@ -136,7 +136,7 @@ export async function clearLocalCache() {
 // --- Google OAuth access token (for Drive) ---------------------------------------------------
 // Kept in memory and sessionStorage only, never in Firestore. Google access tokens last ~1 hour;
 // caching avoids a consent popup on every Drive action.
-const TOKEN_KEY = "bibliograph.googleAccessToken";
+const TOKEN_KEY = "biblio.googleAccessToken";
 const TOKEN_TTL_MS = 50 * 60 * 1000;
 let memoryToken: { token: string; expiresAt: number } | null = null;
 

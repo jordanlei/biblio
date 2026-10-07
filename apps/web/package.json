@@ -1,5 +1,5 @@
 {
-  "name": "@bibliograph/web",
+  "name": "@biblio/web",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -10,7 +10,7 @@
     "typecheck": "vue-tsc -b"
   },
   "dependencies": {
-    "@bibliograph/core": "file:../../packages/core",
+    "@biblio/core": "file:../../packages/core",
     "@fontsource-variable/inter": "^5.3.0",
     "@fontsource-variable/jetbrains-mono": "^5.3.0",
     "@fontsource-variable/literata": "^5.3.0",

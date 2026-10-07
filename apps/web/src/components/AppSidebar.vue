@@ -3,6 +3,7 @@ import { computed, ref } from "vue";
 import { RouterLink, useRoute, useRouter } from "vue-router";
 import { usingEmulators } from "../firebase";
 import { createFolder, createResearchNote, setPaperFolders, useLibrary } from "../services/library";
+import { customNavItems } from "../custom";
 import { scopeFromQuery, smartViews } from "../services/scope";
 import { signOut, useSession } from "../services/session";
 import { openAdd, toastError, ui } from "../services/ui";
@@ -99,7 +100,7 @@ async function addFolder() {
 
 async function dropOnFolder(folderId: string, event: DragEvent) {
   dropFolderId.value = null;
-  const raw = event.dataTransfer?.getData("application/x-bibliograph-papers");
+  const raw = event.dataTransfer?.getData("application/x-biblio-papers");
   if (!raw) return;
   event.preventDefault();
   await setPaperFolders(JSON.parse(raw) as string[], folderId, true);
@@ -109,7 +110,7 @@ async function dropOnFolder(folderId: string, event: DragEvent) {
 <template>
   <aside class="sidebar" @click="($event.target as HTMLElement).closest('a') && emit('navigate')">
     <div class="brand-row">
-      <RouterLink to="/library" class="brand"><BrandMark :size="26" /> Bibliograph</RouterLink>
+      <RouterLink to="/library" class="brand"><BrandMark :size="26" /> Biblio</RouterLink>
       <span v-if="usingEmulators" class="chip accent" title="Firebase emulators + mock Drive">Local</span>
     </div>
 
@@ -184,6 +185,12 @@ async function dropOnFolder(folderId: string, event: DragEvent) {
         </div>
       </template>
       <p v-else class="hint">Use folders for stable projects or broad areas.</p>
+    </section>
+
+    <section v-if="customNavItems.length" class="nav-group">
+      <RouterLink v-for="item in customNavItems" :key="item.to" class="nav-item" :class="{ active: route.path === item.to }" :to="item.to">
+        <AppIcon :name="item.icon" /> <span class="label">{{ item.label }}</span>
+      </RouterLink>
     </section>
 
     <section class="nav-group">

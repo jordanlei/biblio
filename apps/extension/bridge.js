@@ -1,9 +1,9 @@
-// Runs on Bibliograph's own pages. Relays window.postMessage requests from the web app to the
+// Runs on Biblio's own pages. Relays window.postMessage requests from the web app to the
 // extension's background worker and posts the answers back. Only same-window messages from the app
 // are accepted.
 (() => {
-  const APP = "bibliograph-app";
-  const EXTENSION = "bibliograph-extension";
+  const APP = "biblio-app";
+  const EXTENSION = "biblio-extension";
   const version = chrome.runtime.getManifest().version;
   const reply = (data) => window.postMessage({ source: EXTENSION, version, ...data }, window.location.origin);
 

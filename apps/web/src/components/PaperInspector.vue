@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { paperToBibtex, type Paper } from "@bibliograph/core";
+import { paperToBibtex, type Paper } from "@biblio/core";
 import { computed, ref, watch } from "vue";
 import { RouterLink, useRouter } from "vue-router";
 import { creatorsToText, paperTypeLabels, updatePaper, useLibrary } from "../services/library";

@@ -1,6 +1,6 @@
 # Roadmap: discovery, organization, and comprehension under one roof
 
-Bibliograph is a reference manager. Its job is not to become a grand theory of research or a generic
+Biblio is a reference manager. Its job is not to become a grand theory of research or a generic
 "second brain"; it should solve the ordinary friction of living with a large paper library:
 
 - papers arrive from many places;
@@ -31,7 +31,7 @@ organization, and comprehension in the same workflow.
    a reading list. Papers connect organically through `@[key]` links, not a rigid membership list.
 8. **Drive remains the durable library.** Firestore is a fast view. Papers, notes, folders, shelves,
    Research Notes, PDFs, CSL-JSON, and BibTeX must rebuild from user-owned files.
-9. **You run it; it's yours.** Bibliograph is open-source software, not a service. The project
+9. **You run it; it's yours.** Biblio is open-source software, not a service. The project
    website is GitHub Pages; each person runs their own copy on their own Firebase site, with their
    library in their own Drive. Setup stays a five-minute, one-command job. Nothing belongs to anyone
    but the person running it: no central server, accounts, or analytics.
@@ -47,7 +47,7 @@ The near-term surface is now:
   paper pages show and edit that context.
 - **Folders remain prominent:** folder creation, nesting, collapse, and paper drag/drop remain in the
   sidebar because folders are the stable counterweight to tag sprawl.
-- **Research notes:** freeform Markdown files in `research-notes/`, linking papers with `@[key]`.
+- **Research notes:** freeform Markdown files in `notes/`, linking papers with `@[key]`.
   (An earlier version had saved searches and papers with roles; it was too rigid and was folded into
   plain Markdown.)
 - **Context backlinks:** paper pages show where a paper is mentioned, including snippet context from
@@ -55,7 +55,7 @@ The near-term surface is now:
 
 ## Main Pain Points In Existing Systems
 
-| Pain point | What usually happens | Bibliograph's angle |
+| Pain point | What usually happens | Biblio's angle |
 | --- | --- | --- |
 | Capture is split | Search tools, browser tabs, PDFs, and reference managers all have separate save flows. | One add dialog and extension capture, with dedupe and Inbox as the default landing zone. |
 | Organization gets noisy | Tags become too numerous; folders become too rigid; reading status is too coarse. | Use folders for coarse placement, tags for labels, shelves for attention, and saved-because for local intent. |
@@ -98,7 +98,7 @@ library-format regressions as the product surface grows.
 2. **Research notes as Markdown files** (done)
    - Create, edit, retitle, and delete notes; recent notes in the sidebar.
    - Connect papers with `@[key]` links; show linked papers and backlinks with context.
-   - One `.md` file per note in Drive; adopt files added or edited outside Bibliograph.
+   - One `.md` file per note in Drive; adopt files added or edited outside Biblio.
    - Convert notes saved in the old structured shape.
 
 3. **Make context visible**

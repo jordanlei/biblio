@@ -111,8 +111,8 @@ describe("latency benchmarks", () => {
     const rows: string[] = [];
     for (const count of sizes) {
       const library = makeLibrary(count);
-      const serialized = serializeLibrary(library.papers, library.folders, () => ({}), "Bibliograph benchmark");
-      rows.push(lineFor(count, measure("serializeLibrary", () => serializeLibrary(library.papers, library.folders, () => ({}), "Bibliograph benchmark"), 7)));
+      const serialized = serializeLibrary(library.papers, library.folders, () => ({}), "Biblio benchmark");
+      rows.push(lineFor(count, measure("serializeLibrary", () => serializeLibrary(library.papers, library.folders, () => ({}), "Biblio benchmark"), 7)));
       rows.push(lineFor(count, measure("parseLibrary", () => parseLibrary(serialized.manifest, serialized.library, now), 7)));
       rows.push(lineFor(count, measure("exportBibtex", () => exportBibtex(library.papers), 5)));
       rows.push(lineFor(count, measure("local search scan", () => searchScan(library.papers, "credit assignment"), 11)));

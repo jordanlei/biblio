@@ -1,4 +1,4 @@
-// Build the Chrome extension for this copy's web app (from bibliograph.config.json):
+// Build the Chrome extension for this copy's web app (from biblio.config.json):
 // copies apps/extension/ to apps/extension/dist/ with the app URL and app origins filled in.
 // The source keeps local-test-mode defaults, so no one's deployment ends up in git.
 //   npm run build:extension   (also run by `npm run setup`)

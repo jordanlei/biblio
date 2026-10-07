@@ -2,18 +2,18 @@
 
 ## Current Version
 
-Bibliograph is a browser-native reference manager whose canonical library lives in the user's Google
+Biblio is a browser-native reference manager whose canonical library lives in the user's Google
 Drive. Firestore is a fast materialized view; the durable library is ordinary files: CSL-JSON,
 BibTeX, Markdown notes and research notes, PDFs, and a manifest for folders.
 
-Bibliograph is open-source software that each person runs themselves. The project website is
-GitHub Pages (<https://jordanlei.github.io/bibliograph/>, with a [setup tutorial](https://jordanlei.github.io/bibliograph/setup/));
+Biblio is open-source software that each person runs themselves. The project website is
+GitHub Pages (<https://jordanlei.github.io/biblio/>, with a [setup tutorial](https://jordanlei.github.io/biblio/setup/));
 each person's copy of the app runs on their own Firebase site ([SELF_HOSTING.md](SELF_HOSTING.md)).
 
 ## Implemented
 
 - **User-owned storage:** `library.json`, `references.bib`, `notes/*.md`, `papers/*.pdf`,
-  `bibliograph.json`, and `README.md` sync to Drive and can rebuild Firestore from Drive.
+  `biblio.json`, and `README.md` sync to Drive and can rebuild Firestore from Drive.
 - **Capture and import:** OpenAlex search, DOI/arXiv/PMID lookup, BibTeX import, manual entry, and
   extension capture all flow through the same dedupe path.
 - **Paper Inbox and shelves:** new papers default to Inbox. Shelves are Inbox, Read next, Skimming,
@@ -25,7 +25,7 @@ each person's copy of the app runs on their own Firebase site ([SELF_HOSTING.md]
   pages, Drive format, and local search include `savedBecause`.
 - **Research notes:** freeform Markdown notes (`/research-notes/:id`) for questions, projects, and
   drafts. Papers connect through `@[key]` links; each note lists the papers it links, and recent
-  notes appear in the sidebar. Each is `research-notes/<title>.md` in Drive, renamed with its title;
+  notes appear in the sidebar. Each is `notes/<title>.md` in Drive, renamed with its title;
   `.md` files added there elsewhere become notes, and outside edits flow back in.
 - **Contextual backlinks:** paper pages and inspectors show where a paper is mentioned (paper notes
   and research notes), with the paragraph or bullet around the link.
@@ -38,7 +38,7 @@ each person's copy of the app runs on their own Firebase site ([SELF_HOSTING.md]
   library folder the same copy made. Drive access is `drive.file` only: no unverified-app warning.
 - **Run your own copy:** `npm run setup` creates and configures a new Firebase project (web app,
   Firestore, APIs, hosting) and deploys; config lives in gitignored
-  `bibliograph.config.json`, with no project hardcoded in source. Optional push-to-deploy via
+  `biblio.config.json`, with no project hardcoded in source. Optional push-to-deploy via
   GitHub Actions. See [SELF_HOSTING.md](SELF_HOSTING.md).
 - **Appearance and onboarding:** guided first-run tour, settings, themes, accents, font choices, and
   text sizes.

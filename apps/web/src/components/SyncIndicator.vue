@@ -56,7 +56,7 @@ async function reconnect() {
     </button>
 
     <div v-if="open && s.phase !== 'disconnected'" class="pop card" @mouseleave="open = false">
-      <p class="small"><strong>Your library lives in Google Drive.</strong> Bibliograph keeps a fast copy for searching; Drive holds the real one.</p>
+      <p class="small"><strong>Your library lives in Google Drive.</strong> Biblio keeps a fast copy for searching; Drive holds the real one.</p>
       <p class="small faint">
         Folder: {{ session.profile.value?.driveRootFolderName ?? "connected folder" }}<template v-if="when"> · last saved {{ when }}</template>
       </p>

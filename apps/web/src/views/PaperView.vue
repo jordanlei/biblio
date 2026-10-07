@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { paperToBibtex } from "@bibliograph/core";
+import { paperToBibtex } from "@biblio/core";
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { RouterLink, useRoute, useRouter } from "vue-router";
 import AppIcon from "../components/AppIcon.vue";
 import BacklinkList from "../components/BacklinkList.vue";
+import { customPaperPanels } from "../custom";
 import EditDetailsDialog from "../components/EditDetailsDialog.vue";
 import NotesEditor from "../components/NotesEditor.vue";
 import PdfPanel from "../components/PdfPanel.vue";
@@ -173,6 +174,9 @@ async function removePaper() {
           <h2 class="section-label">Mentioned in notes</h2>
           <BacklinkList :paper="paper" />
         </section>
+
+        <!-- Your own panels (apps/web/src/custom). -->
+        <component :is="panel.component" v-for="panel in customPaperPanels" :key="panel.id" :paper="paper" />
       </article>
 
       <aside class="side">

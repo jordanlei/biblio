@@ -1,8 +1,8 @@
 # Storage: a user-owned library
 
-> **Bibliograph can disappear. The user's research cannot.**
+> **Biblio can disappear. The user's research cannot.**
 
-Bibliograph is an interface, index, and intelligence layer over a library the user owns. The canonical library is a folder of open-format files in the user's Google Drive ([format spec](LIBRARY_FORMAT.md)). Bibliograph's database is a fast, disposable materialized view of it.
+Biblio is an interface, index, and intelligence layer over a library the user owns. The canonical library is a folder of open-format files in the user's Google Drive ([format spec](LIBRARY_FORMAT.md)). Biblio's database is a fast, disposable materialized view of it.
 
 ## What lives where
 
@@ -10,9 +10,9 @@ Bibliograph is an interface, index, and intelligence layer over a library the us
 | --- | --- | --- | --- |
 | Paper metadata (title, authors, venue, identifiers…) | **Canonical** | `library.json` (CSL-JSON) | Firestore `papers/{id}` |
 | Citation keys | **Canonical** | `library.json` `id` | Firestore |
-| Tags, reading shelf/status, saved-because reason, date added | **Canonical** | `library.json` `custom.bibliograph` | Firestore |
-| Collections (folders) and membership | **Canonical** | `bibliograph.json` + `custom.bibliograph.collections` | Firestore `folders/{id}` |
-| Research notes | **Canonical** | `research-notes/<title>.md` | Firestore `researchNotes/{id}` |
+| Tags, reading shelf/status, saved-because reason, date added | **Canonical** | `library.json` `custom.biblio` | Firestore |
+| Collections (folders) and membership | **Canonical** | `biblio.json` + `custom.biblio.collections` | Firestore `folders/{id}` |
+| Research notes | **Canonical** | `notes/<title>.md` | Firestore `researchNotes/{id}` |
 | Notes | **Canonical** | `notes/<key>.md` | Firestore `notesMarkdown` |
 | Paper ↔ paper links | **Canonical** | `@[key]` inside notes | backlinks computed in memory |
 | PDFs | **Canonical** | `papers/<key>.pdf` | Drive file id in Firestore |
@@ -23,14 +23,14 @@ Bibliograph is an interface, index, and intelligence layer over a library the us
 | UI preferences (sort, collapsed folders) | Derived | — | localStorage |
 | Google OAuth tokens | Session | — | memory + sessionStorage (never Firestore or Drive) |
 
-The test: delete Bibliograph's entire database, reconnect the Drive folder, and the library reconstructs. This is an automated test (`e2e/ownership.spec.ts`).
+The test: delete Biblio's entire database, reconnect the Drive folder, and the library reconstructs. This is an automated test (`e2e/ownership.spec.ts`).
 
 ## Architecture
 
 ```text
                     USER-OWNED / CANONICAL
                   Google Drive: <library folder>
-        README.md · bibliograph.json · library.json · references.bib
+        README.md · biblio.json · library.json · references.bib
         folders · researchNotes
                 notes/<key>.md        papers/<key>.pdf
                               ▲
@@ -96,21 +96,21 @@ The library and Drive are kept in step for deliberate deletions, and every destr
 | --- | --- | --- |
 | Delete paper(s) (⌫, bulk, paper page) | removed from `library.json`; PDF and note file moved to Drive trash | ⌘Z restores the record and untrashes both files |
 | Remove PDF | PDF moved to Drive trash | ⌘Z |
-| Delete folder | collection removed from `bibliograph.json`; papers stay | ⌘Z |
+| Delete folder | collection removed from `biblio.json`; papers stay | ⌘Z |
 | Delete account | nothing, unless “also move my library folder to the trash” is ticked | — (Drive trash keeps it 30 days) |
 
 Deletions are all-or-nothing: if a Drive file can't be trashed, nothing is deleted and any files already trashed are restored (`services/deletion.ts`). The sync engine itself never deletes files.
 
 ## Rebuild
 
-`SyncEngine.rebuild()` (Settings → *Rebuild from Drive*), and connecting a folder that already holds a library, read `bibliograph.json`, `library.json`, every note, and the `papers/` listing, then replace the Firestore view and the sync bookkeeping. Folders come from `bibliograph.json`; research notes from `research-notes/*.md` (plus any left in an older manifest's `researchNotes`, which are converted). Search indexes and backlinks are in-memory and rebuild themselves. Future derived state (full-text, embeddings, graph) must be rebuildable the same way.
+`SyncEngine.rebuild()` (Settings → *Rebuild from Drive*), and connecting a folder that already holds a library, read `biblio.json`, `library.json`, every note, and the `papers/` listing, then replace the Firestore view and the sync bookkeeping. Folders come from `biblio.json`; research notes from `research-notes/*.md` (plus any left in an older manifest's `researchNotes`, which are converted). Search indexes and backlinks are in-memory and rebuild themselves. Future derived state (full-text, embeddings, graph) must be rebuildable the same way.
 
 ## Migration from the Firestore-canonical version
 
 Existing libraries migrate on their first sync, with no user action:
 
 1. The previously chosen Drive folder becomes the library root.
-2. Papers, folders, and notes are written out from Firestore (`library.json`, `bibliograph.json`, `notes/`).
+2. Papers, folders, and notes are written out from Firestore (`library.json`, `biblio.json`, `notes/`).
 3. PDFs at the folder's top level are moved into `papers/` (same Drive files; ids and sharing unchanged).
 4. Users without a connected folder see *Connect Google Drive* in the sidebar; their library stays in Firestore until they connect one.
 

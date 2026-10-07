@@ -1,10 +1,10 @@
-import { normalizeArxivId, normalizeDoi, type Paper } from "@bibliograph/core";
+import { normalizeArxivId, normalizeDoi, type Paper } from "@biblio/core";
 import { auth } from "../firebase";
 import { extensionFetch, extensionAvailable } from "./extensionBridge";
 
 // Finding and downloading open-access PDFs. Sources, best first: arXiv by ID, the link saved at
 // import, then every OA location OpenAlex knows for the DOI. Each URL is tried directly (works for
-// CORS-friendly hosts like arXiv), then through the Bibliograph extension (works for any host the
+// CORS-friendly hosts like arXiv), then through the Biblio extension (works for any host the
 // browser can reach), then through the optional `fetchPdf` Cloud Function.
 
 export interface PdfSource {
@@ -141,6 +141,6 @@ export async function downloadPdf(sources: PdfSource[], onStep: FetchStep = () =
   throw new Error(
     hasExtension
       ? "Found open-access links, but none returned a PDF. Open one, save the PDF, and drop it here."
-      : "This publisher blocks downloads from web pages. Install the Bibliograph extension to grab it, or open the link and drop the PDF here."
+      : "This publisher blocks downloads from web pages. Install the Biblio extension to grab it, or open the link and drop the PDF here."
   );
 }

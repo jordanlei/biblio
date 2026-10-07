@@ -1,20 +1,20 @@
 # Contributing
 
-Bibliograph is open-source software that each person runs themselves. There is no central service.
+Biblio is open-source software that each person runs themselves. There is no central service.
 Changes are welcome; please keep the rules below true.
 
 ## Rules that always hold
 
 1. **Two kinds of site, never mixed.**
    - **The project website** is GitHub Pages, built from `apps/site` in this repository
-     (<https://jordanlei.github.io/bibliograph/>). It explains Bibliograph and how to run it:
-     features, comparison, How it works (Bibliograph is code, not a service), the setup tutorial,
+     (<https://jordanlei.github.io/biblio/>). It explains Biblio and how to run it:
+     features, comparison, How it works (Biblio is code, not a service), the setup tutorial,
      links to the code. It has no sign-in and no user data.
    - **Each person's copy** of the app is `apps/web`, deployed by its owner to their own Firebase
      project (`<their-id>.web.app` or their own domain). Signed out, it shows only a sign-in page.
      It doesn't advertise, and it isn't the project website.
 2. **No one's deployment in the source.** Firebase projects, addresses, and keys come from the
-   gitignored `bibliograph.config.json` (or `BIBLIOGRAPH_CONFIG` in CI), written by
+   gitignored `biblio.config.json` (or `BIBLIO_CONFIG` in CI), written by
    `npm run setup`. A build without one fails; it never falls back to someone else's project.
 3. **Everything belongs to the person running it.** Their copy runs in their Google Cloud project,
    and their library is plain files in their Google Drive ([docs/LIBRARY_FORMAT.md](docs/LIBRARY_FORMAT.md)).

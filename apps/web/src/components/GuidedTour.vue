@@ -26,14 +26,14 @@ interface Step {
 const steps: Step[] = [
   {
     id: "welcome",
-    title: "Welcome to Bibliograph",
+    title: "Welcome to Biblio",
     body: "A quick tour of where things are — about a minute. You can skip it and replay it from Settings."
   },
   {
     id: "drive",
     target: "drive",
     title: "First, choose where your library lives",
-    body: "Your papers, notes, and PDFs are saved as ordinary files in a Google Drive folder you own — readable even without Bibliograph. Have a library already? Import its .zip, or the folder downloaded from Google Drive.",
+    body: "Your papers, notes, and PDFs are saved as ordinary files in a Google Drive folder you own — readable even without Biblio. Have a library already? Import its .zip, or the folder downloaded from Google Drive.",
     when: () => !session.profile.value?.driveRootFolderId
   },
   { id: "add", target: "add", title: "Add papers", body: "Search by topic, title, or author; paste DOIs or arXiv links; or import a .bib from Zotero or Mendeley. Shortcut: A." },

@@ -67,7 +67,7 @@ onBeforeUnmount(() => window.removeEventListener("keydown", onKey));
     <header class="mobile-bar">
       <button class="btn quiet icon" type="button" aria-label="Open navigation" @click="drawerOpen = !drawerOpen"><AppIcon name="menu" /></button>
       <BrandMark :size="22" />
-      <span class="display" style="font-size: calc(17px * var(--text-scale))">Bibliograph</span>
+      <span class="display" style="font-size: calc(17px * var(--text-scale))">Biblio</span>
       <span class="spacer" />
       <button class="btn primary sm" type="button" @click="openAdd('search')"><AppIcon name="plus" :size="14" /> Add</button>
     </header>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// How it works: Bibliograph is code that sets up your own reference manager, not a service.
+// How it works: Biblio is code that sets up your own reference manager, not a service.
 // The architecture diagram is plain HTML/CSS so it stays readable (and stacks) on a phone.
 // Keep it true to scripts/setup.mjs and docs/STORAGE.md.
 import AppIcon from "../../web/src/components/AppIcon.vue";
@@ -28,9 +28,9 @@ const lives = [
 
     <header class="intro">
       <p class="eyebrow">How it works</p>
-      <h1 class="display">Bibliograph isn't a service. It's code that builds your own.</h1>
+      <h1 class="display">Biblio isn't a service. It's code that builds your own.</h1>
       <p class="lede">
-        Bibliograph is pre-written, open-source code. Run one command and it sets up a complete reference manager from scratch, inside your own Google account: your own website,
+        Biblio is pre-written, open-source code. Run one command and it sets up a complete reference manager from scratch, inside your own Google account: your own website,
         your own sign-in, your own database, and your library in your own Google Drive. Nobody else runs any part of it.
       </p>
     </header>
@@ -63,10 +63,10 @@ const lives = [
             <div class="panel drive">
               <span class="panel-title">Your Google Drive</span>
               <ul class="tree">
-                <li><AppIcon name="folder" :size="14" /> Bibliograph Library</li>
+                <li><AppIcon name="folder" :size="14" /> Biblio Library</li>
                 <li class="in"><AppIcon name="library" :size="14" /> library.json</li>
                 <li class="in"><AppIcon name="quote" :size="14" /> references.bib</li>
-                <li class="in"><AppIcon name="note" :size="14" /> notes/ · research-notes/</li>
+                <li class="in"><AppIcon name="note" :size="14" /> notes/*.md</li>
                 <li class="in"><AppIcon name="pdf" :size="14" /> papers/*.pdf</li>
               </ul>
               <small>The real copy of your library, as plain files.</small>
@@ -88,7 +88,7 @@ const lives = [
 
         <aside class="outside">
           <p><strong>Outside your account:</strong> looking up a paper asks public catalogs (OpenAlex, Crossref, DataCite, arXiv) directly from your browser.</p>
-          <p><strong>Not in the picture:</strong> the people who write Bibliograph. They publish the code; they never see your copy or your library.</p>
+          <p><strong>Not in the picture:</strong> the people who write Biblio. They publish the code; they never see your copy or your library.</p>
         </aside>
       </div>
     </section>
@@ -134,7 +134,7 @@ const lives = [
     </section>
 
     <section class="narrow">
-      <h2>What Bibliograph is not</h2>
+      <h2>What Biblio is not</h2>
       <ul class="nots">
         <li>Not an account with a company. There's nothing to sign up for.</li>
         <li>Not a central server. Each copy is separate, and none reports anywhere. No analytics.</li>

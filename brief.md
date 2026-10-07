@@ -8,7 +8,7 @@ This is **not** a Zotero clone. Do not implement word-processor citation inserti
 
 The application should do one job extremely well:
 
-> Capture papers from the web or external sources, store their bibliographic metadata and personal organization in Firestore, store their PDFs exclusively in the user's Google Drive, make the library fast to browse/search/organize, allow Markdown notes with links between papers, and export the library as `references.bib`.
+> Capture papers from the web or external sources, store their biblioic metadata and personal organization in Firestore, store their PDFs exclusively in the user's Google Drive, make the library fast to browse/search/organize, allow Markdown notes with links between papers, and export the library as `references.bib`.
 
 The initial implementation is single-user/private, but the database must be user-scoped so that multi-user support does not require a rewrite.
 
@@ -48,7 +48,7 @@ Prefer proven open-source packages and existing APIs where they reduce risky cus
 
 - Use Firebase client SDKs for Auth and Firestore rather than custom auth/session code.
 - Use the narrow `drive.file` scope (no "unverified app" warning). A copy sees only files it created; libraries move between copies by .zip export/import, never by opening another copy's files.
-- Use Citation.js or a similarly maintained bibliographic library for BibTeX/CSL parsing and export once the canonical data model is stable.
+- Use Citation.js or a similarly maintained biblioic library for BibTeX/CSL parsing and export once the canonical data model is stable.
 - Use Zotero Translate and bundled Zotero translators behind `extractFromCurrentPage()` rather than writing publisher-specific parsers.
 
 Security constraints for dependencies and plugins:
@@ -175,7 +175,7 @@ Store the chosen Drive folder ID in the user profile.
 
 There are two independent objects:
 
-**Bibliographic record → Firestore**
+**Biblioic record → Firestore**
 
 **PDF file → Google Drive**
 
@@ -212,7 +212,7 @@ interface Paper {
   // Stable human-facing identifier
   citationKey: string;
 
-  // Bibliographic type
+  // Biblioic type
   type:
     | "article"
     | "conferencePaper"
@@ -870,7 +870,7 @@ Support at minimum:
 1. Zotero JSON
 2. BibTeX
 
-Prefer Zotero JSON because it preserves richer Zotero metadata. Zotero supports JSON-based API records and numerous bibliographic export formats, including BibTeX, BibLaTeX, CSL JSON and RIS. [Zotero](https://www.zotero.org/support/dev/web_api/v3/basics?utm_source=chatgpt.com)
+Prefer Zotero JSON because it preserves richer Zotero metadata. Zotero supports JSON-based API records and numerous biblioic export formats, including BibTeX, BibLaTeX, CSL JSON and RIS. [Zotero](https://www.zotero.org/support/dev/web_api/v3/basics?utm_source=chatgpt.com)
 
 Import flow:
 
@@ -898,7 +898,7 @@ Preview:
 
 Map:
 
-- Zotero bibliographic metadata → Paper
+- Zotero biblioic metadata → Paper
 - Zotero tags → tags
 - Zotero collections → folders
 - nested Zotero collections → nested folders
@@ -970,7 +970,7 @@ Tags may optionally become BibTeX `keywords`.
 Add round-trip tests:
 
 ```text
-Paper → BibTeX → parser → equivalent bibliographic metadata
+Paper → BibTeX → parser → equivalent biblioic metadata
 ```
 
 for every supported paper type.
@@ -1331,7 +1331,7 @@ Verify every mapped field.
 
 Then export imported library to `references.bib`.
 
-Verify stable citation keys and bibliographic correctness.
+Verify stable citation keys and biblioic correctness.
 
 ---
 
@@ -1412,7 +1412,7 @@ The brief is ready to implement in phases, but the following decisions and local
 
 ### Firebase project configuration
 
-Each copy of the app uses its own Firebase project, named in a gitignored `bibliograph.config.json` written by `npm run setup` (see section 35). Nothing in the source names a project.
+Each copy of the app uses its own Firebase project, named in a gitignored `biblio.config.json` written by `npm run setup` (see section 35). Nothing in the source names a project.
 
 Remaining setup:
 
@@ -1420,7 +1420,7 @@ Remaining setup:
 - Authorized domains for local development and deployed Hosting
 - Whether local emulator data should be seeded with representative sample papers
 
-Do not commit real Firebase config secrets that are not meant for the browser bundle. Firebase web app config is not a database secret, but it is per copy: it lives in `bibliograph.config.json` (gitignored), never as a fallback in source, so a fork can't silently use another person's project.
+Do not commit real Firebase config secrets that are not meant for the browser bundle. Firebase web app config is not a database secret, but it is per copy: it lives in `biblio.config.json` (gitignored), never as a fallback in source, so a fork can't silently use another person's project.
 
 Semantic Scholar search cannot call the Graph API directly from the browser because of CORS. The app includes a Firebase Function proxy in `functions/`, but deployment requires the project to be upgraded to Blaze so Cloud Build and Artifact Registry can be enabled.
 
@@ -1494,7 +1494,7 @@ Only after that works should Zotero translator bundling and the broader test cor
 
 Implementation can begin once these are available:
 
-- Firebase project ID and web app config for the dedicated `bibliograph` Firebase project
+- Firebase project ID and web app config for the dedicated `biblio` Firebase project
 - Google OAuth configuration sufficient for web **Login with Google**
 - npm workspace setup
 - Drive onboarding that lets the user choose the PDF storage folder
@@ -1550,7 +1550,7 @@ These are scope creep.
 
 **Import/export is part of data ownership, not an afterthought.**
 
-**You run it; it's yours.** Bibliograph is open-source software that each person runs themselves, not a service. The project website (GitHub Pages, `apps/site`) explains it and how to set it up; each person's copy of the app runs on their own Firebase site and shows only a sign-in page. Nothing belongs to anyone but the person running it. See section 35 and `CONTRIBUTING.md`.
+**You run it; it's yours.** Biblio is open-source software that each person runs themselves, not a service. The project website (GitHub Pages, `apps/site`) explains it and how to set it up; each person's copy of the app runs on their own Firebase site and shows only a sign-in page. Nothing belongs to anyone but the person running it. See section 35 and `CONTRIBUTING.md`.
 
 **Keep the product fast and boring underneath.** This is a personal library containing thousands or perhaps tens of thousands of small metadata records, not a distributed scientific-computing system.
 
@@ -1565,14 +1565,14 @@ Anyone should be able to take this code, run their own copy on their own terms, 
 **Goal.** A new user with a Google account, Node, and git gets a working copy of their own (their own Firebase project, Firestore database, web app, Google sign-in, and `<id>.web.app` address) from:
 
 ```sh
-git clone <their fork> && cd bibliograph
+git clone <their fork> && cd biblio
 npm install
 npm run setup
 ```
 
 **Requirements:**
 
-- **No project in the source.** All per-copy settings live in `bibliograph.config.json` (gitignored), or the `BIBLIOGRAPH_CONFIG` variable in CI. A build without it fails with a pointer to `npm run setup`; it never falls back to someone else's project. Local test mode (`npm run dev:local`) needs no config at all.
+- **No project in the source.** All per-copy settings live in `biblio.config.json` (gitignored), or the `BIBLIO_CONFIG` variable in CI. A build without it fails with a pointer to `npm run setup`; it never falls back to someone else's project. Local test mode (`npm run dev:local`) needs no config at all.
 - **One command, safe to rerun.** `npm run setup` signs in through the Firebase CLI (a pinned dev dependency, so `npm install` is enough). It creates or reuses the project and web app, turns on the Firestore, Drive, and sign-in APIs, creates the database and hosting site, writes the config, points the extension at the new address, and deploys. Every step checks what already exists first. `--dry-run` shows the plan without changing anything.
 - **Be honest about the manual step.** Google offers no API to turn on Google sign-in for a personal project, so setup opens the Firebase console page, waits for the one click, and verifies it. If any automated step is blocked (e.g. by an organization policy), setup prints the console page for that step instead of failing.
 - **Change, try, publish.** `npm run dev` (own project) or `npm run dev:local` (emulators), then `npm run deploy`. Deploy commands always target the project in the config.

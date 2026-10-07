@@ -1,4 +1,4 @@
-import type { Paper } from "@bibliograph/core";
+import type { Paper } from "@biblio/core";
 
 // Client-side library search: fielded, accent-insensitive, relevance-ranked.
 //   deep learning            → every word must match somewhere; title/author hits rank highest

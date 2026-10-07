@@ -1,4 +1,4 @@
-import { SyncEngine, inspectLibrary, readLibrary, type LibraryView, type SyncStatus } from "@bibliograph/core";
+import { SyncEngine, inspectLibrary, readLibrary, type LibraryView, type SyncStatus } from "@biblio/core";
 import { ref, watch } from "vue";
 import { GoogleDriveFileStore } from "../adapters/googleDrive";
 import { FirestoreSyncStateStore } from "../adapters/firestoreSyncState";
@@ -12,7 +12,7 @@ import { getGoogleAccessToken, useSession } from "../services/session";
 // UI edits never wait on Drive: they land in Firestore (and on screen) immediately, and the
 // engine writes the library files in the background. See docs/STORAGE.md.
 
-const GENERATOR = "Bibliograph web";
+const GENERATOR = "Biblio web";
 export const syncStatus = ref<SyncStatus>({ phase: "disconnected", pending: 0, conflicts: [] });
 
 const session = useSession();
@@ -32,7 +32,7 @@ const view: LibraryView = {
 /** One sync at a time across tabs (Web Locks); falls back to running directly. */
 function webLock<T>(task: () => Promise<T>): Promise<T> {
   const locks = (navigator as Navigator & { locks?: { request: (name: string, cb: () => Promise<unknown>) => Promise<unknown> } }).locks;
-  return locks ? (locks.request("bibliograph-library-sync", task) as Promise<T>) : task();
+  return locks ? (locks.request("biblio-library-sync", task) as Promise<T>) : task();
 }
 
 function start(uid: string | null, rootId: string | null | undefined) {
@@ -111,7 +111,7 @@ export function dismissConflicts() {
   engine?.dismissConflicts();
 }
 
-/** Rebuild Bibliograph's index from the Drive library (the canonical copy). */
+/** Rebuild Biblio's index from the Drive library (the canonical copy). */
 export async function rebuildFromDrive() {
   if (!engine) throw new Error("Connect a Google Drive folder first.");
   await getGoogleAccessToken();
@@ -121,12 +121,12 @@ export async function rebuildFromDrive() {
 }
 
 /**
- * Connect a Drive folder as the library. If it already holds a Bibliograph library, offer to
+ * Connect a Drive folder as the library. If it already holds a Biblio library, offer to
  * load it (that's how a library is recovered or moved between accounts); otherwise this
  * library is written into it.
  */
 export async function connectLibraryFolder(folder: DriveFolderSelection, confirmLoad: (count: number) => boolean = (count) =>
-  confirm(`“${folder.name}” already contains a Bibliograph library with ${count} paper${count === 1 ? "" : "s"}. Load it?\n\nWhat Bibliograph shows now will be replaced by the library in this folder.`)
+  confirm(`“${folder.name}” already contains a Biblio library with ${count} paper${count === 1 ? "" : "s"}. Load it?\n\nWhat Biblio shows now will be replaced by the library in this folder.`)
 ): Promise<{ loaded: number | null }> {
   const files = new GoogleDriveFileStore(folder.id, true);
   const found = await inspectLibrary(files);

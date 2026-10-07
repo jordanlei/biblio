@@ -1,6 +1,6 @@
 # Deploy this copy to its own Firebase project on every push to main.
 # Turned on by `npm run setup -- --github`, which stores two things in the repository settings:
-#   variable BIBLIOGRAPH_CONFIG     this copy's bibliograph.config.json
+#   variable BIBLIO_CONFIG     this copy's biblio.config.json
 #   secret   FIREBASE_SERVICE_ACCOUNT  a deploy-only service account key
 # Without them (e.g. a fresh fork) the job is skipped. See docs/SELF_HOSTING.md.
 name: Deploy
@@ -16,7 +16,7 @@ concurrency:
 
 jobs:
   deploy:
-    if: vars.BIBLIOGRAPH_CONFIG != ''
+    if: vars.BIBLIO_CONFIG != ''
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -28,7 +28,7 @@ jobs:
       - run: npm test
       - name: Deploy
         env:
-          BIBLIOGRAPH_CONFIG: ${{ vars.BIBLIOGRAPH_CONFIG }}
+          BIBLIO_CONFIG: ${{ vars.BIBLIO_CONFIG }}
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
         run: |
           echo "$FIREBASE_SERVICE_ACCOUNT" > "$RUNNER_TEMP/deployer.json"

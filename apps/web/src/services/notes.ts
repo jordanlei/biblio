@@ -1,4 +1,4 @@
-import type { Paper } from "@bibliograph/core";
+import type { Paper } from "@biblio/core";
 import DOMPurify from "dompurify";
 import { Marked, type TokenizerAndRendererExtension } from "marked";
 import { shortAuthors } from "./library";

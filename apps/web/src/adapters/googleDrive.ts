@@ -1,4 +1,4 @@
-import { StorageAuthError, StorageUnavailableError, type FileStore, type StoredFile } from "@bibliograph/core";
+import { StorageAuthError, StorageUnavailableError, type FileStore, type StoredFile } from "@biblio/core";
 import { clearGoogleAccessToken, getGoogleAccessToken } from "../services/session";
 
 // Google Drive adapter: every Drive REST detail lives here. The rest of the app talks to it
@@ -39,7 +39,7 @@ export async function driveRequest(url: string, init: RequestInit = {}, interact
       // The Drive box was unticked on Google's consent screen: ask again.
       clearGoogleAccessToken();
       if (interactive && attempt === 0) continue;
-      throw new StorageAuthError("Bibliograph needs permission to your Google Drive. Reconnect and allow Drive access.");
+      throw new StorageAuthError("Biblio needs permission to your Google Drive. Reconnect and allow Drive access.");
     }
     if (response.status === 404) throw new DriveFileMissingError("That file is no longer in Google Drive.");
     if (response.status === 429 || response.status >= 500) throw new StorageUnavailableError(`Google Drive is temporarily unavailable (${response.status}).`);

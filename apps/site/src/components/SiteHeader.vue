@@ -5,7 +5,7 @@ import { BASE, HOW_URL, REPO_URL, SETUP_URL } from "../site";
 
 <template>
   <header class="top">
-    <a class="brand" :href="BASE"><BrandMark :size="30" /> Bibliograph</a>
+    <a class="brand" :href="BASE"><BrandMark :size="30" /> Biblio</a>
     <span class="spacer" />
     <nav class="links">
       <a :href="HOW_URL">How it works</a>

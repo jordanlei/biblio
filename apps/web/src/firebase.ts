@@ -2,10 +2,10 @@ import { initializeApp } from "firebase/app";
 import { connectAuthEmulator, getAuth, GoogleAuthProvider } from "firebase/auth";
 import { connectFirestoreEmulator, initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from "firebase/firestore";
 
-// This copy's own Firebase project, from bibliograph.config.json (see vite.config.ts and
+// This copy's own Firebase project, from biblio.config.json (see vite.config.ts and
 // docs/SELF_HOSTING.md). VITE_FIREBASE_* variables override single values; local test mode
 // (.env.emulator) uses a demo project that exists only in the emulators.
-const deployment = __BIBLIOGRAPH_CONFIG__;
+const deployment = __BIBLIO_CONFIG__;
 const env = import.meta.env;
 
 export const firebaseConfig = {

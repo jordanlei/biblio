@@ -2,10 +2,10 @@ import { expect, test, type Page } from "@playwright/test";
 import { readFileSync } from "node:fs";
 
 // Acceptance tests for the user-owned library (docs/STORAGE.md):
-//   Bibliograph can disappear. The user's research cannot.
+//   Biblio can disappear. The user's research cannot.
 
 const DRIVE = "http://127.0.0.1:9199";
-const FIRESTORE = "http://127.0.0.1:8080/emulator/v1/projects/demo-bibliograph/databases/(default)/documents";
+const FIRESTORE = "http://127.0.0.1:8080/emulator/v1/projects/demo-biblio/databases/(default)/documents";
 const sampleBib = readFileSync(new URL("../samples/sample.bib", import.meta.url), "utf8");
 const pdf = Buffer.from(
   "%PDF-1.4\n1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj 2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj 3 0 obj<</Type/Page/MediaBox[0 0 300 144]/Parent 2 0 R>>endobj\ntrailer<</Root 1 0 R>>\n%%EOF\n"
@@ -41,8 +41,8 @@ async function libraryFiles(rootId: string) {
 
 async function signIn(page: Page, email: string) {
   await page.goto("/");
-  await page.waitForFunction(() => "__bibliographTestSignIn" in window);
-  await page.evaluate((e) => (window as unknown as { __bibliographTestSignIn: (x: string) => Promise<void> }).__bibliographTestSignIn(e), email);
+  await page.waitForFunction(() => "__biblioTestSignIn" in window);
+  await page.evaluate((e) => (window as unknown as { __biblioTestSignIn: (x: string) => Promise<void> }).__biblioTestSignIn(e), email);
   await page.goto("/library");
 }
 
@@ -53,7 +53,7 @@ async function topLevelFolders() {
 async function createLibraryFromTour(page: Page): Promise<string> {
   const before = new Set(await topLevelFolders());
   await page.getByRole("button", { name: "Start" }).click();
-  await page.getByRole("button", { name: /Create “Bibliograph Library”/ }).click();
+  await page.getByRole("button", { name: /Create “Biblio Library”/ }).click();
   await expect(page.locator(".tour h2")).toHaveText("Add papers");
   await page.getByText("Skip tour").click();
   await expect(page.locator(".tour")).toHaveCount(0);
@@ -74,7 +74,7 @@ async function importSample(page: Page) {
 
 const synced = (page: Page) => expect(page.locator('[data-sync-status][data-phase="saved"]')).toBeVisible({ timeout: 20_000 });
 
-test("Bibliograph can disappear; the library survives in Drive and rebuilds", async ({ page }) => {
+test("Biblio can disappear; the library survives in Drive and rebuilds", async ({ page }) => {
   let rootId = "";
 
   await test.step("build a library: papers, tags, status, folder, notes with a link, a PDF", async () => {
@@ -110,7 +110,7 @@ test("Bibliograph can disappear; the library survives in Drive and rebuilds", as
     const files = await libraryFiles(rootId);
     const rel = files.map((f) => f.rel).sort();
     expect(rel).toEqual(
-      expect.arrayContaining(["README.md", "bibliograph.json", "library.json", "references.bib", `notes/${LFADS}.md`, `papers/${LFADS}.pdf`])
+      expect.arrayContaining(["README.md", "biblio.json", "library.json", "references.bib", `notes/${LFADS}.md`, `papers/${LFADS}.pdf`])
     );
     const text = (name: string) => files.find((f) => f.rel === name)!.text!;
     expect(text("README.md")).toContain("This folder is your research library");
@@ -118,17 +118,17 @@ test("Bibliograph can disappear; the library survives in Drive and rebuilds", as
     expect(library.map((i) => i.title)).toHaveLength(3);
     const lfads = library.find((i) => i.id === LFADS)!;
     expect(lfads).toMatchObject({ title: "LFADS - Latent Factor Analysis via Dynamical Systems", DOI: "10.48550/arxiv.1608.06315" });
-    expect(lfads.custom.bibliograph).toMatchObject({ readingStatus: "read", note: `notes/${LFADS}.md`, pdf: `papers/${LFADS}.pdf` });
-    expect(lfads.custom.bibliograph.tags).toContain("favorite");
-    const manifest = JSON.parse(text("bibliograph.json"));
-    expect(manifest).toMatchObject({ format: "bibliograph-library", version: 1 });
+    expect(lfads.custom.biblio).toMatchObject({ readingStatus: "read", note: `notes/${LFADS}.md`, pdf: `papers/${LFADS}.pdf` });
+    expect(lfads.custom.biblio.tags).toContain("favorite");
+    const manifest = JSON.parse(text("biblio.json"));
+    expect(manifest).toMatchObject({ format: "biblio-library", version: 1 });
     expect(manifest.collections.map((c: { name: string }) => c.name)).toEqual(["Dynamics"]);
-    expect(lfads.custom.bibliograph.collections).toEqual([manifest.collections[0].id]);
+    expect(lfads.custom.biblio.collections).toEqual([manifest.collections[0].id]);
     expect(text(`notes/${LFADS}.md`)).toContain("Builds on @[pandarinathInferringSingletrialNeural2018] — same lab.");
     expect(text("references.bib")).toContain(`@misc{${LFADS},`);
   });
 
-  await test.step("delete Bibliograph's entire database (index, profile, sync state)", async () => {
+  await test.step("delete Biblio's entire database (index, profile, sync state)", async () => {
     await page.goto("about:blank");
     expect((await fetch(FIRESTORE, { method: "DELETE" })).ok).toBe(true);
   });
@@ -138,7 +138,7 @@ test("Bibliograph can disappear; the library survives in Drive and rebuilds", as
     await expect(page.locator(".tour")).toBeVisible(); // a brand-new profile
     await page.getByRole("button", { name: "Start" }).click();
     // The copy can still see the folder it created (drive.file), so it offers to reconnect it.
-    await page.getByRole("button", { name: /Reconnect “Bibliograph Library”/ }).first().click();
+    await page.getByRole("button", { name: /Reconnect “Biblio Library”/ }).first().click();
     await expect(page.getByText(/Loaded 3 papers/)).toBeVisible();
     if (await page.locator(".tour").count()) await page.getByText("Skip tour").click();
 
@@ -191,7 +191,7 @@ test("a library moves to another copy as a .zip: download, then import", async (
     await expect(inspector.locator(".prose")).toContainText("Carried over in a zip.");
     await expect(inspector.getByRole("link", { name: "Open PDF" })).toBeVisible();
     // A new folder this copy created holds the files.
-    const folders = (await driveTree()).filter((f) => /Bibliograph Library \(imported/.test(f.path) && !f.path.includes("/"));
+    const folders = (await driveTree()).filter((f) => /Biblio Library \(imported/.test(f.path) && !f.path.includes("/"));
     expect(folders).toHaveLength(1);
     expect((await libraryFiles(folders[0].id)).map((f) => f.rel)).toEqual(expect.arrayContaining(["library.json", `notes/${LFADS}.md`, `papers/${LFADS}.pdf`]));
   });
@@ -229,12 +229,12 @@ test("offline: edits stay instant, survive a reload, and sync when Drive returns
   await page.getByRole("button", { name: "Sync now" }).click();
   await synced(page);
   const files = await libraryFiles(rootId);
-  const library = JSON.parse(files.find((f) => f.rel === "library.json")!.text!) as Array<{ id: string; custom: { bibliograph: { tags: string[] } } }>;
-  expect(library.find((i) => i.id === LFADS)!.custom.bibliograph.tags).toContain("offline-tag");
+  const library = JSON.parse(files.find((f) => f.rel === "library.json")!.text!) as Array<{ id: string; custom: { biblio: { tags: string[] } } }>;
+  expect(library.find((i) => i.id === LFADS)!.custom.biblio.tags).toContain("offline-tag");
   expect(files.find((f) => f.rel === `notes/${LFADS}.md`)!.text).toContain("Written while Drive was down.");
 });
 
-test("notes edited outside Bibliograph flow back in", async ({ page }) => {
+test("notes edited outside Biblio flow back in", async ({ page }) => {
   await signIn(page, `outside.${Date.now()}@example.com`);
   const rootId = await createLibraryFromTour(page);
   await importSample(page);

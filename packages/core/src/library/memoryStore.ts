@@ -71,7 +71,7 @@ export class MemoryFileStore implements FileStore {
     for (const [path, entry] of this.files) if (entry.file.id === fileId) this.files.delete(path);
   }
 
-  /** Simulate someone editing a file outside Bibliograph. */
+  /** Simulate someone editing a file outside Biblio. */
   editOutside(path: string, content: string) {
     const entry = this.files.get(path);
     if (!entry) throw new Error(`No file at ${path}`);

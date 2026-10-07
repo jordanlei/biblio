@@ -5,7 +5,7 @@ dist-*/
 .firebaserc
 .firebaserc.local
 # This copy's Firebase project (written by `npm run setup`; per copy, never shared via git)
-bibliograph.config.json
+biblio.config.json
 
 .env
 .env.*

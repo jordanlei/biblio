@@ -1,4 +1,4 @@
-import { exportLibraryFiles, importLibraryFiles, inspectLibrary, libraryEntries, type LibraryEntry } from "@bibliograph/core";
+import { exportLibraryFiles, importLibraryFiles, inspectLibrary, libraryEntries, type LibraryEntry } from "@biblio/core";
 import { unzip, zip, type Unzipped } from "fflate";
 import { GoogleDriveFileStore } from "../adapters/googleDrive";
 import { connectLibraryFolder, syncNow } from "../sync/librarySync";
@@ -19,7 +19,7 @@ export async function downloadLibraryZip(): Promise<number> {
   const url = URL.createObjectURL(new Blob([zipped as BlobPart], { type: "application/zip" }));
   const link = document.createElement("a");
   link.href = url;
-  link.download = `bibliograph-library-${new Date().toISOString().slice(0, 10)}.zip`;
+  link.download = `biblio-library-${new Date().toISOString().slice(0, 10)}.zip`;
   link.click();
   setTimeout(() => URL.revokeObjectURL(url), 10_000);
   return entries.length;
@@ -49,7 +49,7 @@ export async function readLibrarySource(chosen: File[]): Promise<LibraryEntry[]>
 
 /**
  * Import a library into a new Drive folder that this copy owns, then switch to it. The folder
- * Bibliograph was using (if any) is left untouched in Drive.
+ * Biblio was using (if any) is left untouched in Drive.
  */
 export async function importLibrary(entries: LibraryEntry[], onProgress?: (done: number, total: number) => void): Promise<{ papers: number; folderName: string }> {
   const folderName = `${DEFAULT_FOLDER_NAME} (imported ${new Date().toISOString().slice(0, 10)})`;

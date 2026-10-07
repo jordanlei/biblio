@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { DuplicateResult, Paper, PaperCandidate } from "@bibliograph/core";
-import { normalizeArxivId } from "@bibliograph/core";
+import type { DuplicateResult, Paper, PaperCandidate } from "@biblio/core";
+import { normalizeArxivId } from "@biblio/core";
 import { computed, onMounted, ref, watch } from "vue";
 import { RouterLink, useRoute } from "vue-router";
 import AppIcon from "../components/AppIcon.vue";
@@ -8,7 +8,7 @@ import { grabPdf } from "../services/drive";
 import { addPaper, checkDuplicate, parseCreators, shortAuthors, useLibrary } from "../services/library";
 import { useSession } from "../services/session";
 
-// Landing page for the browser extension's "Save to Bibliograph". The extension passes the page's
+// Landing page for the browser extension's "Save to Biblio". The extension passes the page's
 // metadata in the URL hash (never sent to a server); this signed-in page saves it and fetches the PDF.
 
 interface Captured {
@@ -113,7 +113,7 @@ onMounted(() => {
   try {
     captured.value = decode(route.hash);
   } catch {
-    error.value = "This link doesn't contain a paper. Use the Bibliograph extension's “Save” button on an article page.";
+    error.value = "This link doesn't contain a paper. Use the Biblio extension's “Save” button on an article page.";
   }
 });
 watch([loaded, captured], start, { immediate: true });

@@ -30,9 +30,9 @@ export interface FileStore {
 /** The fast, disposable materialized view the UI reads (Firestore today). */
 export interface LibraryView {
   snapshot(): { papers: Paper[]; folders: Folder[]; researchNotes?: ResearchNote[] };
-  /** Adopt a note edited outside Bibliograph. */
+  /** Adopt a note edited outside Biblio. */
   applyNote(paperId: string, markdown: string): Promise<void>;
-  /** Adopt a research note created or edited outside Bibliograph (insert or replace by id). */
+  /** Adopt a research note created or edited outside Biblio (insert or replace by id). */
   applyResearchNote(note: ResearchNote): Promise<void>;
   /** Replace the whole view with the canonical library (rebuild / external library edit). */
   replaceAll(papers: Paper[], folders: Folder[], researchNotes?: ResearchNote[]): Promise<void>;

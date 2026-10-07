@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { Paper, PaperType } from "@bibliograph/core";
-import { normalizeArxivId, normalizeDoi } from "@bibliograph/core";
+import type { Paper, PaperType } from "@biblio/core";
+import { normalizeArxivId, normalizeDoi } from "@biblio/core";
 import { computed, reactive, ref } from "vue";
 import { creatorsToText, paperTypeLabels, paperTypes, parseCreators, renameCitationKey, updatePaper, useLibrary } from "../services/library";
 import { toast, toastError, undoAction } from "../services/ui";

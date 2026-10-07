@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Paper, PaperCandidate } from "@bibliograph/core";
+import type { Paper, PaperCandidate } from "@biblio/core";
 import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
 import { grabPdf } from "../services/drive";

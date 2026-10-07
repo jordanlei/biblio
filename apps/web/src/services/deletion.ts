@@ -1,4 +1,4 @@
-import type { Paper, ResearchNote } from "@bibliograph/core";
+import type { Paper, ResearchNote } from "@biblio/core";
 import { trashFile, untrashFile } from "../adapters/googleDrive";
 import { syncedNoteFileId, syncedResearchNoteFileId } from "../sync/librarySync";
 import { deletePapers, deleteResearchNote } from "./library";
