@@ -18,27 +18,57 @@ const driveTree = [
   { depth: 2, icon: "quote", name: "references.bib" }
 ];
 
-// What a reference manager ought to do, and who actually does it.
-// From each product's own documentation and support forums, October 2026.
+// What a reference manager ought to do. Each row names the quality; the Biblio cell says what
+// that means here. Checked against each product's own documentation and support forums,
+// October 2026 — see docs/COMPARISON.md for sources. Keep claims conservative and verifiable.
 const compareColumns = ["Biblio", "Zotero", "EndNote", "Paperpile"];
 const compareRows = [
-  { label: "Be open source", ours: "Yes, MIT — read it, fork it, change it", cells: ["Yes (AGPL)", "No", "No"] },
-  { label: "Be free, forever", ours: "No subscription, no storage tier", cells: ["Free; paid storage over 300 MB", "One-time license", "Subscription"] },
   {
-    label: "Survive its own vendor",
-    ours: "Your copy and your files keep working; rebuild from a .zip",
-    cells: ["Library is local, sync is Zotero's", "Library is local", "Library is Paperpile's"]
+    label: "Open source",
+    ours: "Yes, MIT. Read it, fork it, change it.",
+    cells: ["Yes, AGPL", "No", "No"]
   },
-  { label: "Let you own the app", ours: "You host it and change it", cells: ["Desktop app you can patch", "No", "No"] },
   {
-    label: "Let you own the data",
-    ours: "Everything — notes, tags, shelves, links — in your Drive",
-    cells: ["PDFs and a local database", "Local .enl library", "Only PDFs in your Drive"]
+    label: "Pricing",
+    ours: "Free. You host it, so there's nobody to bill you.",
+    cells: ["Free; paid storage above 300 MB", "Paid licence", "Paid subscription"]
   },
-  { label: "Store it readably", ours: "Files named for what they are, not hVSZF", cells: ["SQLite + opaque storage keys", "Proprietary .enl", "Cloud records"] },
-  { label: "Connect papers to each other", ours: "@[ links in any note, with backlinks in context", cells: ["Manual “Related”, outside notes", "Web of Science citations", "Not built in"] },
-  { label: "Find new papers natively", ours: "250M papers, searched in the app", cells: ["Via connectors and the browser plugin", "Online search", "Google Scholar button"] },
-  { label: "Export to .bib", ours: "references.bib, always current in your Drive", cells: ["Yes, on export", "Yes, on export", "Yes, on export"] }
+  {
+    label: "Fault tolerance",
+    ours: "If your hosting breaks, your files are still in Drive. Rebuild a copy from a .zip.",
+    cells: ["Library is local; sync needs Zotero's servers", "Library is local", "Library lives on Paperpile's servers"]
+  },
+  {
+    label: "Code ownership",
+    ours: "You deploy and run the app yourself, and can change any part of it.",
+    cells: ["Source is open; the service is Zotero's", "Vendor-run", "Vendor-run"]
+  },
+  {
+    label: "Data ownership",
+    ours: "Everything — papers, notes, tags, shelves, links — in a Drive folder you control.",
+    cells: ["Files and database on your own machine", "Files and database on your own machine", "PDFs in your Drive; the rest is Paperpile's"]
+  },
+  {
+    label: "Storage format",
+    ours: "Plain files named for what they are: CSL-JSON, Markdown, BibTeX, PDF.",
+    cells: ["SQLite; attachments under random 8-character keys", "Proprietary .enl library", "Cloud records you reach through the app"]
+  },
+  {
+    label: "Cross-referencing",
+    ours: "Type @[ to link a paper from any note; the paper lists back every note that mentions it.",
+    cells: ["“Related” links between items and notes", "Citing articles via Web of Science", "Not built in"]
+  },
+  {
+    label: "Discovery",
+    ours: "Search 250M papers in the app, and save one with a note on why.",
+    cells: ["Search databases in-app and via the browser plugin", "Online search of subscribed databases", "Search PubMed, Scholar, arXiv and more in-app"]
+  },
+  {
+    label: "Exports",
+    tie: true,
+    ours: "references.bib and library.json stay current in Drive, no export step.",
+    cells: ["BibTeX, RIS, CSL-JSON on export", "BibTeX, RIS, XML on export", "BibTeX, RIS, CSL-JSON on export"]
+  }
 ];
 
 // Each one has a demo below.
@@ -48,35 +78,35 @@ const features = [
     eyebrow: "Search",
     title: "Find papers without leaving.",
     text: "Search 250 million papers by topic, title, or author, and note why you're saving one as you add it. Or paste a DOI, an arXiv link, or a .bib from Zotero.",
-    video: { name: "search", width: 600, height: 230 }
+    video: { name: "search", width: 600, height: 326 }
   },
   {
     id: "organize",
     eyebrow: "Organize",
     title: "Three shelves, one keypress.",
     text: "To read, Skimming, Read — press 1, 2, 3. That's the whole reading model; anything more specific is a tag. Folders hold stable projects.",
-    video: { name: "organize", width: 600, height: 507 }
+    video: { name: "organize", width: 600, height: 602 }
   },
   {
     id: "review",
     eyebrow: "Review",
     title: "Notes beside the paper.",
     text: "Write in Markdown next to the abstract and the PDF, without opening another app. Notes save as you type, into your own Drive.",
-    video: { name: "review", width: 600, height: 525 }
+    video: { name: "review", width: 600, height: 478 }
   },
   {
     id: "link",
     eyebrow: "Link",
     title: "Papers that know each other.",
     text: "Type @[ to link a paper from any note. The linked paper then lists every note that mentions it, with the sentence around the link.",
-    video: { name: "linking", width: 552, height: 740 }
+    video: { name: "linking", width: 600, height: 478 }
   },
   {
     id: "write",
     eyebrow: "Write",
     title: "Think across papers.",
     text: "A research note is freeform Markdown for a question or a project. Link the papers that bear on it and they gather themselves.",
-    video: { name: "research-notes", width: 600, height: 585 }
+    video: { name: "research-notes", width: 600, height: 604 }
   }
 ];
 
@@ -132,13 +162,16 @@ const extras = [
           <tbody>
             <tr v-for="row in compareRows" :key="row.label">
               <th scope="row">{{ row.label }}</th>
-              <td class="us"><AppIcon name="check" :size="15" class="tick" /> {{ row.ours }}</td>
+              <td class="us"><AppIcon v-if="!row.tie" name="check" :size="15" class="tick" /> {{ row.ours }}</td>
               <td v-for="cell in row.cells" :key="cell">{{ cell }}</td>
             </tr>
           </tbody>
         </table>
       </div>
-      <p class="fine">Where the others are ahead: Word and Google Docs plugins, PDF annotation, and mobile apps.</p>
+      <p class="fine">
+        Where the others are ahead: Word and Google Docs plugins, PDF annotation, and mobile apps. Checked against each product's own documentation, October 2026
+        (<a :href="docUrl('COMPARISON.md')">sources</a>).
+      </p>
     </section>
 
     <section id="how-it-works" class="how">
@@ -146,47 +179,34 @@ const extras = [
       <p class="lead">Biblio isn't a service you sign up for. It's code that sets up your own reference manager, inside your own Google account.</p>
 
       <div class="arch">
-        <div class="computer">
-          <span class="label"><AppIcon name="link" :size="15" /> Your computer, once</span>
-          <p><strong>This code</strong>, cloned from GitHub. You run <code>npm run setup</code>.</p>
+        <div class="box code">
+          <AppIcon name="link" :size="18" />
+          <strong>This code</strong>
+          <small>Open source, on GitHub</small>
         </div>
-        <div class="setup-arrow" aria-hidden="true"><span>creates &amp; deploys</span></div>
 
-        <div class="account">
-          <span class="label"><AppIcon name="user" :size="15" /> Your Google account</span>
-          <div class="services">
-            <div class="panel">
-              <span class="panel-title">Your Firebase project</span>
-              <ul class="chips">
-                <li><AppIcon name="settings" :size="15" /><div><strong>Hosting</strong><small>Serves the app at your-id.web.app</small></div></li>
-                <li><AppIcon name="user" :size="15" /><div><strong>Authentication</strong><small>Google sign-in. Only you</small></div></li>
-                <li><AppIcon name="search" :size="15" /><div><strong>Firestore</strong><small>A search index, rebuilt from Drive</small></div></li>
-              </ul>
+        <div class="deploys"><span>deploys</span></div>
+
+        <div class="yours">
+          <p class="yours-label">Everything below is in your own Google account</p>
+          <div class="pair">
+            <div class="box">
+              <AppIcon name="settings" :size="18" />
+              <strong>Your Firebase</strong>
+              <small>Hosting, sign-in, and a search index</small>
             </div>
-            <div class="panel drive">
-              <span class="panel-title">Your Google Drive</span>
-              <ul class="tree-mini">
-                <li><AppIcon name="folder" :size="14" /> Biblio Library</li>
-                <li class="in"><AppIcon name="library" :size="14" /> library.json</li>
-                <li class="in"><AppIcon name="quote" :size="14" /> references.bib</li>
-                <li class="in"><AppIcon name="note" :size="14" /> notes/*.md</li>
-                <li class="in"><AppIcon name="pdf" :size="14" /> papers/*.pdf</li>
-              </ul>
-              <small>The real copy of your library.</small>
+            <div class="box">
+              <AppIcon name="drive" :size="18" />
+              <strong>Your Drive</strong>
+              <small>The library itself, as plain files</small>
             </div>
           </div>
-        </div>
-
-        <ol class="wires" aria-label="What the web app does">
-          <li><span class="n">1</span> loads from Hosting</li>
-          <li><span class="n">2</span> signs you in</li>
-          <li><span class="n">3</span> searches the index</li>
-          <li><span class="n">4</span> reads &amp; writes your files</li>
-        </ol>
-
-        <div class="browser">
-          <span class="label"><AppIcon name="search" :size="15" /> Your browser, every day</span>
-          <p><strong>The web app you spun up.</strong> It talks straight to your Firebase project and your Drive — there's no server in between, and nobody else's machine is involved.</p>
+          <div class="link-up" aria-hidden="true"></div>
+          <div class="box app">
+            <AppIcon name="search" :size="18" />
+            <strong>Your web app</strong>
+            <small>At <code>your-id.web.app</code> — talks straight to both. No server in between.</small>
+          </div>
         </div>
       </div>
 
@@ -462,210 +482,118 @@ h1 {
   color: var(--text-2);
 }
 
-/* The architecture diagram, shared with the How it works page. */
-.label,
-.panel-title {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  font-size: calc(12.5px * var(--text-scale));
-  font-weight: 650;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--text-3);
+/* The architecture diagram: this code → your Firebase + your Drive ↔ your web app. */
+.arch {
+  display: grid;
+  justify-items: center;
+  margin: 32px 0 20px;
 }
 
-.label :deep(svg) {
-  color: var(--accent);
-}
-
-.computer,
-.browser {
-  padding: 14px 18px;
+.box {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  width: min(320px, 100%);
+  padding: 16px 18px;
   border: 1px solid var(--border);
   border-radius: 12px;
   background: var(--surface);
   box-shadow: var(--shadow);
-}
-
-.computer p,
-.browser p {
-  margin-top: 4px;
-}
-
-.computer {
-  justify-self: center;
-  width: min(520px, 100%);
   text-align: center;
 }
 
-.setup-arrow {
+.box :deep(svg) {
+  margin-bottom: 4px;
+  color: var(--accent);
+}
+
+.box strong {
+  font-family: var(--font-serif);
+  font-size: calc(17px * var(--text-scale));
+  font-weight: 650;
+}
+
+.box small {
+  color: var(--text-2);
+  font-size: calc(13.5px * var(--text-scale));
+  line-height: 1.45;
+}
+
+.box code {
+  font-size: 0.92em;
+}
+
+/* "deploys", on a downward arrow. */
+.deploys {
   position: relative;
-  justify-self: center;
   width: 2px;
-  height: 54px;
-  margin: 4px 0;
+  height: 58px;
   background: var(--accent);
 }
 
-.setup-arrow::after {
+.deploys::after {
   content: "";
   position: absolute;
-  bottom: -2px;
+  bottom: -1px;
   left: -5px;
   border: 6px solid transparent;
   border-top: 8px solid var(--accent);
   border-bottom: 0;
 }
 
-.setup-arrow span {
+.deploys span {
   position: absolute;
   top: 50%;
   left: 14px;
   transform: translateY(-50%);
   white-space: nowrap;
+  color: var(--accent);
   font-size: calc(13px * var(--text-scale));
   font-weight: 600;
-  color: var(--accent);
 }
 
-.account {
-  padding: 14px 16px 16px;
+.yours {
+  display: grid;
+  justify-items: center;
+  width: 100%;
+  padding: 16px;
   border: 2px dashed var(--accent);
   border-radius: 16px;
-  background: color-mix(in srgb, var(--select) 55%, transparent);
+  background: color-mix(in srgb, var(--select) 50%, transparent);
 }
 
-.services {
-  display: grid;
-  grid-template-columns: 3fr 1.6fr;
-  gap: 14px;
-  margin-top: 10px;
-}
-
-.panel {
-  padding: 12px 14px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: var(--surface);
-}
-
-.chips {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
-  margin: 10px 0 0;
-  padding: 0;
-  list-style: none;
-}
-
-.chips li {
-  display: flex;
-  gap: 8px;
-  padding: 10px;
-  border-radius: 8px;
-  background: var(--surface-2);
-}
-
-.chips :deep(svg),
-.tree-mini :deep(svg) {
-  flex: none;
-  margin-top: 3px;
-  color: var(--accent);
-}
-
-.chips div {
-  display: grid;
-  gap: 2px;
-}
-
-.chips small,
-.drive small {
-  color: var(--text-3);
-  font-size: calc(12.5px * var(--text-scale));
-  line-height: 1.4;
-}
-
-.tree-mini {
-  margin: 10px 0 8px;
-  padding: 0;
-  list-style: none;
-}
-
-.tree-mini li {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  padding: 2px 0;
-  font-size: calc(13.5px * var(--text-scale));
-  color: var(--text);
-}
-
-.tree-mini li.in {
-  padding-left: 18px;
+.yours-label {
+  margin-bottom: 14px;
   color: var(--text-2);
-}
-
-.wires {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr)) 1.6fr;
-  gap: 14px;
-  margin: 0;
-  padding: 0 16px;
-  list-style: none;
-}
-
-.wires li {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  min-height: 64px;
   font-size: calc(13px * var(--text-scale));
   font-weight: 600;
-  color: var(--accent);
-  text-align: center;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
-.wires li::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 50%;
-  border-left: 2px solid var(--accent);
-  opacity: 0.35;
-}
-
-.wires .n {
-  position: relative;
-  display: inline-grid;
-  place-items: center;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: var(--accent);
-  color: var(--accent-text);
-  font-size: 11.5px;
-}
-
-.wires li {
-  background: linear-gradient(var(--bg), var(--bg)) center / 100% 24px no-repeat;
-}
-
-.browser {
-  padding: 14px 18px;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  background: var(--surface);
-  box-shadow: var(--shadow);
-}
-
-.arch {
+.pair {
   display: grid;
-  gap: 0;
+  grid-template-columns: repeat(2, minmax(0, 300px));
+  justify-content: center;
+  gap: 16px;
 }
+
+.pair .box {
+  width: auto;
+}
+
+/* The line joining the pair above to the app below. */
+.link-up {
+  width: 2px;
+  height: 34px;
+  background: color-mix(in srgb, var(--accent) 45%, transparent);
+}
+
+.box.app {
+  width: min(420px, 100%);
+  border-color: var(--accent);
+}
+
 
 .arch {
   margin: 28px 0 18px;
@@ -902,36 +830,9 @@ code {
   }
 
 
-  .extras {
+  .extras,
+  .pair {
     grid-template-columns: 1fr;
-  }
-
-  .services,
-  .chips {
-    grid-template-columns: 1fr;
-  }
-
-  .wires {
-    grid-template-columns: 1fr;
-    gap: 6px;
-    margin: 14px 0;
-    padding: 0 0 0 18px;
-    border-left: 2px solid color-mix(in srgb, var(--accent) 35%, transparent);
-  }
-
-  .wires li {
-    justify-content: flex-start;
-    min-height: 0;
-    background: none;
-    text-align: left;
-  }
-
-  .wires li::before {
-    display: none;
-  }
-
-  .flow .arrow {
-    display: none;
   }
 
   .tree {

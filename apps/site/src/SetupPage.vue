@@ -145,7 +145,7 @@ Deployed: https://biblio-ada-3f2c.web.app
         </div>
         <div class="step-demo">
           <figure class="shot">
-            <LandingVideo name="first-run" :width="640" :height="400" label="Signing in, then creating the Biblio Library folder in Drive." />
+            <LandingVideo name="first-run" :width="600" :height="375" label="Signing in, then creating the Biblio Library folder in Drive." />
           </figure>
         </div>
       </li>

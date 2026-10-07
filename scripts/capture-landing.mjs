@@ -116,6 +116,18 @@ const listRegion = (height) =>
     return { x: left, y: 0, width: right - left, height };
   }, height);
 
+/** Round a measured region and keep it inside the viewport. Crops follow real pane edges. */
+function region({ x, y, width, height }, viewport) {
+  const left = Math.max(0, Math.round(x));
+  const top = Math.max(0, Math.round(y));
+  return {
+    x: left,
+    y: top,
+    width: Math.min(Math.round(width), viewport.width - left),
+    height: Math.min(Math.round(height), viewport.height - top)
+  };
+}
+
 /** Flash a keycap with what the key did, so key presses are visible in the video. */
 const keycap = (key, label, region) =>
   page.evaluate(
@@ -236,11 +248,11 @@ await page.locator("a.nav-item", { hasText: "All papers" }).click();
 
 // --- Video: organize — shelve with one key, then file into a folder ---------------------------
 // Wider window so titles fit beside the inspector; the video keeps only the paper list.
-await page.setViewportSize({ width: 1440, height: 860 });
+await page.setViewportSize({ width: 1440, height: 760 });
 await top();
 await row("Attention Is All You Need").click();
 await noToasts();
-const listArea = await listRegion(640);
+const listArea = region(await listRegion(760), { width: 1440, height: 760 });
 await record(
   "organize",
   async () => {
@@ -264,7 +276,7 @@ await record(
     await page.locator(".filters").getByRole("button", { name: "To read", exact: true }).click();
     await pause(1500);
   },
-  { width: 1440, height: 860, crop: listArea }
+  { width: 1440, height: 760, crop: listArea }
 );
 await page.setViewportSize({ width: 1280, height: 800 });
 for (const [title, key] of [["Inferring single-trial", "2"], ["LFADS", "3"]]) {
@@ -279,12 +291,17 @@ await top();
 await shot("library");
 
 // --- Video: search — find a paper online, save it with a reason ------------------------------
-await page.setViewportSize({ width: 1280, height: 800 });
+// A wider window so the whole Add papers dialog fits inside the frame.
+await page.setViewportSize({ width: 1500, height: 900 });
 await page.keyboard.press("a");
 await page.getByRole("tab", { name: "Search" }).click();
-const addPanel = await page.locator(".add-panel").evaluate((el) => {
+// The whole dialog, with a little air around it: it is already wider than it is tall.
+const addPanel = await page.locator(".modal").evaluate((el) => {
   const box = el.getBoundingClientRect();
-  return { x: box.x, y: box.y, width: box.width, height: box.height };
+  const pad = 12;
+  const x = Math.max(0, box.x - pad);
+  const y = Math.max(0, box.y - pad);
+  return { x, y, width: Math.min(box.width + pad * 2, innerWidth - x), height: Math.min(box.height + pad * 2, innerHeight - y) };
 });
 await record(
   "search",
@@ -298,9 +315,10 @@ await record(
     await reason.pressSequentially("Classic result for the background section", { delay: 28 });
     await pause(1800);
   },
-  { crop: addPanel }
+  { width: 1500, height: 900, crop: addPanel }
 );
 await page.keyboard.press("Escape");
+await page.setViewportSize({ width: 1280, height: 800 });
 await noToasts();
 
 // --- Video: review — read the paper, write notes beside it ------------------------------------
@@ -309,10 +327,14 @@ await row("Recurrent Switching").click();
 await top();
 // The inspector is a tall column; a page needs something closer to landscape, so the capture
 // takes the paper list and the inspector together.
-const reviewArea = await page.locator(".inspector").evaluate((el) => {
-  const box = el.getBoundingClientRect();
-  return { x: Math.max(0, box.x - 470), y: 0, width: innerWidth - Math.max(0, box.x - 470), height: 700 };
-});
+// The inspector plus a slice of the list it belongs to, from the sidebar's edge rightwards.
+const reviewArea = region(
+  await page.evaluate(() => {
+    const left = document.querySelector(".sidebar").getBoundingClientRect().right;
+    return { x: left, y: 0, width: innerWidth - left, height: innerHeight };
+  }),
+  { width: 1280, height: 800 }
+);
 await record(
   "review",
   async () => {
@@ -339,10 +361,14 @@ await page.locator("h1.title").waitFor();
 await page.getByRole("button", { name: "Write" }).click();
 await top();
 await page.setViewportSize({ width: 1180, height: 740 });
-const noteColumn = await page.locator(".notes-editor").evaluate((el) => {
-  const box = el.getBoundingClientRect();
-  return { x: box.x - 24, y: 0, width: box.width + 48, height: innerHeight };
-});
+// The reading column plus the detail panel beside it, so the frame isn't a narrow strip.
+const noteColumn = region(
+  await page.locator(".notes-editor").evaluate((el) => {
+    const box = el.getBoundingClientRect();
+    return { x: box.x - 28, y: 0, width: innerWidth - box.x + 28, height: innerHeight };
+  }),
+  { width: 1180, height: 740 }
+);
 await record(
   "linking",
   async () => {
@@ -376,11 +402,14 @@ await record(
 await page.goto(`${APP}/research-notes`);
 await page.getByRole("button", { name: "New note" }).first().waitFor();
 await page.setViewportSize({ width: 1180, height: 800 });
-const notePane = await page.locator(".notes-list").evaluate((el) => {
-  // Start a little left of the pane edge so the title's own padding isn't shaved off.
-  const right = el.getBoundingClientRect().right - 8;
-  return { x: right, y: 0, width: innerWidth - right, height: 620 };
-});
+const notePane = region(
+  await page.locator(".notes-list").evaluate((el) => {
+    // Start a little left of the pane edge so the title's own padding isn't shaved off.
+    const right = el.getBoundingClientRect().right - 8;
+    return { x: right, y: 0, width: innerWidth - right, height: 640 };
+  }),
+  { width: 1180, height: 800 }
+);
 await record(
   "research-notes",
   async () => {

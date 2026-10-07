@@ -74,11 +74,18 @@ Stop the stack before running `npx playwright test`, which starts its own stack 
 Each video also writes `<name>-poster.jpg`, a screenshot of the cropped region in its final state.
 The page shows the poster until the video scrolls into view.
 
+**Crops follow real pane edges, never an arbitrary rectangle.** `region(box, viewport)` rounds a
+measured box and clamps it inside the window; measure from the DOM (a sidebar's right edge, a
+dialog's bounds) so a frame never slices through a control. Resist fitting crops to a target aspect
+ratio — it grows the box into neighbouring panes and cuts them mid-element. If a frame is too tall,
+shorten the capture viewport so the pane itself is shorter.
+
 **Videos are cropped to the part of the screen that matters.** A full window shrunk into a page
 column is unreadable. `record(name, steps, { width, height, crop })` takes a region in CSS pixels,
 usually measured from the DOM just before recording:
 
 - `listRegion(height)`: between the sidebar and the inspector (the paper list).
+- A dialog's own `.modal` box, padded (search). Widen the viewport if the dialog is wider than it.
 - The `.notes-editor` column, padded (linking).
 - Everything right of `.notes-list` (research notes).
 
@@ -121,8 +128,9 @@ and pauses it when it scrolls away.
   away first. For a single element, use `locator.screenshot(...)`.
 - **Video:** wrap the steps in `await record("name", async () => { … }, { crop })`, then add
   `<LandingVideo name="name" :width="…" :height="…" label="…" />` to `apps/site/src/App.vue`. Width and
-  height are the crop's CSS size (half the poster's pixel size), so the page reserves the right
-  space before the poster loads. Use `pause(ms)` between steps so the
+  height are the crop's CSS size (half the capture's pixel size, since captures are 2x), so the page
+  reserves the right space before the poster loads. Check them against `ffmpeg -i <file>.webm` after
+  re-recording — a stale size letterboxes the video. Use `pause(ms)` between steps so the
   viewer can follow, and end on a frame that works as a poster: blur inputs, close menus, and scroll
   the interesting part into view.
 - **Selectors:** keep locators unambiguous, because Playwright's strict mode fails on multiple matches.
