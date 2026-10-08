@@ -9,10 +9,11 @@ export default defineConfig({
   plugins: [vue()],
   build: {
     rollupOptions: {
-      // Two pages: the home page and the setup tutorial (setup/).
+      // Pages: home, the setup tutorial (setup/), and data & privacy (privacy/).
       input: {
         main: fileURLToPath(new URL("index.html", import.meta.url)),
-        setup: fileURLToPath(new URL("setup/index.html", import.meta.url))
+        setup: fileURLToPath(new URL("setup/index.html", import.meta.url)),
+        privacy: fileURLToPath(new URL("privacy/index.html", import.meta.url))
       }
     }
   },

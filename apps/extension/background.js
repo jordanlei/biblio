@@ -69,16 +69,43 @@ async function fetchPdf(url) {
   return { base64: toBase64(buffer), contentType: "application/pdf" };
 }
 
-/** Only this extension's own content scripts, running on a page the manifest allows. */
+/**
+ * Only this extension's own content scripts, on an origin we actually ship to.
+ *
+ * Derived from the manifest's concrete origins rather than by interpreting match patterns:
+ * a pattern language has wildcards, and a parser that mishandles one would widen who can ask
+ * for a credentialed fetch. Patterns containing a wildcard are ignored here by design.
+ */
+function allowedOrigins() {
+  const patterns = (chrome.runtime.getManifest().content_scripts ?? []).flatMap((entry) => entry.matches ?? []);
+  return patterns
+    .map((pattern) => {
+      const [scheme, rest] = pattern.split("://");
+      if (!scheme || !rest) return ""; // <all_urls> and friends: no concrete origin
+      const host = rest.split("/")[0];
+      // A wildcard scheme or host has no single origin to compare against; ignore it.
+      if (scheme.includes("*") || host.includes("*") || !host) return "";
+      try {
+        return new URL(`${scheme}://${host}`).origin;
+      } catch {
+        return "";
+      }
+    })
+    .filter(Boolean);
+}
+
 function trusted(sender) {
   if (sender?.id !== chrome.runtime.id) return false;
-  const origin = sender.origin || (sender.url ? new URL(sender.url).origin : "");
-  const allowed = chrome.runtime.getManifest().content_scripts.flatMap((entry) => entry.matches);
-  return allowed.some((pattern) => {
-    const [scheme, rest] = pattern.split("://");
-    const host = rest.replace(/\/.*$/, "");
-    return origin === `${scheme}://${host}`;
-  });
+  let origin = sender.origin;
+  if (!origin && sender.url) {
+    try {
+      origin = new URL(sender.url).origin;
+    } catch {
+      return false;
+    }
+  }
+  if (!origin || origin === "null") return false; // opaque origins: sandboxed frames, data:, about:blank
+  return allowedOrigins().includes(origin);
 }
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {

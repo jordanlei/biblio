@@ -6,7 +6,7 @@ import FaqItem from "./components/FaqItem.vue";
 import LandingVideo from "./components/LandingVideo.vue";
 import SiteFooter from "./components/SiteFooter.vue";
 import SiteHeader from "./components/SiteHeader.vue";
-import { BASE, REPO_URL, SETUP_URL, docUrl } from "./site";
+import { BASE, PRIVACY_URL, REPO_URL, SETUP_URL, docUrl } from "./site";
 
 const driveTree = [
   { depth: 0, icon: "drive", name: "My Drive" },
@@ -212,7 +212,7 @@ const extras = [
 
       <p class="aside">
         Looking up a paper asks public catalogs (OpenAlex, Crossref, arXiv) directly from your browser. The people who write Biblio never see your copy or your library.
-        <a :href="docUrl('STORAGE.md')">How storage works →</a>
+        <a :href="PRIVACY_URL">What's private, and what isn't →</a>
       </p>
     </section>
 
@@ -269,7 +269,8 @@ npm run setup</pre>
           Only the files it creates. That's Google's narrowest Drive permission, which is also why signing in shows no warning screen.
         </FaqItem>
         <FaqItem question="Who can see my library?">
-          You. There's no Biblio server, no accounts, and no analytics. Paper lookups go straight from your browser to public catalogs.
+          You. There's no Biblio server, no accounts, and no analytics. Paper lookups go straight from your browser to public catalogs, which see your IP and what you asked
+          about — <a :href="PRIVACY_URL">the privacy page</a> spells out exactly what is and isn't private.
         </FaqItem>
         <FaqItem question="Why only three reading shelves?">
           Because more shelves become a filing problem of their own. To read, Skimming, and Read cover how much attention a paper needs; everything else — reference, parked, to cite — is a tag, which you can combine and rename.

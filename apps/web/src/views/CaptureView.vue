@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { DuplicateResult, Paper, PaperCandidate } from "@biblio/core";
-import { normalizeArxivId } from "@biblio/core";
+import type { CapturedPaper, DuplicateResult, Paper, PaperCandidate } from "@biblio/core";
+import { decodeCaptureHash, normalizeArxivId } from "@biblio/core";
 import { computed, onMounted, ref, watch } from "vue";
 import { RouterLink, useRoute } from "vue-router";
 import AppIcon from "../components/AppIcon.vue";
@@ -11,28 +11,12 @@ import { useSession } from "../services/session";
 // Landing page for the browser extension's "Save to Biblio". The extension passes the page's
 // metadata in the URL hash (never sent to a server); this signed-in page saves it and fetches the PDF.
 
-interface Captured {
-  title: string;
-  authors: string[];
-  year?: number;
-  venue?: string;
-  volume?: string;
-  issue?: string;
-  pages?: string;
-  publisher?: string;
-  doi?: string;
-  arxivId?: string;
-  pmid?: string;
-  abstract?: string;
-  pdfUrl?: string;
-  url?: string;
-}
 
 const route = useRoute();
 const session = useSession();
 const { loaded, paperById } = useLibrary();
 
-const captured = ref<Captured | null>(null);
+const captured = ref<CapturedPaper | null>(null);
 const error = ref("");
 const phase = ref<"waiting" | "duplicate" | "probable" | "saving" | "saved">("waiting");
 const duplicate = ref<DuplicateResult | null>(null);
@@ -41,44 +25,7 @@ const pdf = ref<{ state: "idle" | "working" | "done" | "failed" | "skipped"; mes
 
 const paper = computed<Paper | null>(() => (paperId.value ? paperById.value.get(paperId.value) ?? null : null));
 
-/**
- * Read the extension's capture payload. The hash is attacker-supplyable (anyone can send a
- * crafted /capture#… link), so every field is checked rather than trusted: the worst a bad link
- * should do is show an error, never throw or smuggle a value into a URL.
- */
-function decode(hash: string): Captured {
-  const base64 = hash.replace(/^#/, "").replace(/-/g, "+").replace(/_/g, "/");
-  const bytes = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
-  const raw: unknown = JSON.parse(new TextDecoder().decode(bytes));
-  if (!raw || typeof raw !== "object") throw new Error("not a capture");
-  const value = raw as Record<string, unknown>;
-  const text = (key: string) => (typeof value[key] === "string" ? (value[key] as string).slice(0, 6000) : undefined);
-  const title = text("title");
-  if (!title?.trim()) throw new Error("no title");
-  const link = (key: string) => {
-    const href = text(key);
-    return href && /^https?:\/\//i.test(href) ? href : undefined;
-  };
-  const year = Number(value.year);
-  return {
-    title,
-    authors: Array.isArray(value.authors) ? value.authors.filter((a): a is string => typeof a === "string").slice(0, 200) : [],
-    year: Number.isInteger(year) && year > 1000 && year < 3000 ? year : undefined,
-    venue: text("venue"),
-    volume: text("volume"),
-    issue: text("issue"),
-    pages: text("pages"),
-    publisher: text("publisher"),
-    doi: text("doi"),
-    arxivId: text("arxivId"),
-    pmid: text("pmid"),
-    abstract: text("abstract"),
-    pdfUrl: link("pdfUrl"),
-    url: link("url")
-  };
-}
-
-function toCandidate(c: Captured): PaperCandidate {
+function toCandidate(c: CapturedPaper): PaperCandidate {
   const arxivId = normalizeArxivId(c.arxivId || undefined);
   return {
     title: c.title,
@@ -142,7 +89,7 @@ function start() {
 
 onMounted(() => {
   try {
-    captured.value = decode(route.hash);
+    captured.value = decodeCaptureHash(route.hash);
   } catch {
     error.value = "This link doesn't contain a paper. Use the Biblio extension's “Save” button on an article page.";
   }

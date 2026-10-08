@@ -1,4 +1,5 @@
 export * from "./bibtex";
+export * from "./capture";
 export * from "./bibtexParse";
 export * from "./citationKey";
 export * from "./dedupe";

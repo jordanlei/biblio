@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { decodeCaptureHash, parseCapturedPaper } from "./capture";
 import { isLibraryPath, libraryEntries } from "./library/transfer";
 
 describe("zip import rejects path traversal", () => {
@@ -36,53 +37,55 @@ describe("zip import rejects path traversal", () => {
 });
 
 // The capture hash is attacker-supplyable: anyone can send a crafted /capture#… link.
-// CaptureView.decode() mirrors this logic; these cases pin the behaviour it must keep.
+// These exercise the REAL function the app calls, not a copy of its logic.
 describe("capture payload validation", () => {
-  const decode = (raw: unknown) => {
-    if (!raw || typeof raw !== "object") throw new Error("not a capture");
-    const value = raw as Record<string, unknown>;
-    const text = (key: string) => (typeof value[key] === "string" ? (value[key] as string).slice(0, 6000) : undefined);
-    const title = text("title");
-    if (!title?.trim()) throw new Error("no title");
-    const link = (key: string) => {
-      const href = text(key);
-      return href && /^https?:\/\//i.test(href) ? href : undefined;
-    };
-    const year = Number(value.year);
-    return {
-      title,
-      authors: Array.isArray(value.authors) ? value.authors.filter((a): a is string => typeof a === "string").slice(0, 200) : [],
-      year: Number.isInteger(year) && year > 1000 && year < 3000 ? year : undefined,
-      pdfUrl: link("pdfUrl"),
-      url: link("url")
-    };
-  };
-
   it("rejects javascript: and data: URLs", () => {
-    const out = decode({ title: "X", pdfUrl: "javascript:alert(1)", url: "data:text/html,<script>alert(1)</script>" });
+    const out = parseCapturedPaper({ title: "X", pdfUrl: "javascript:alert(1)", url: "data:text/html,<script>alert(1)</script>" });
     expect(out.pdfUrl).toBeUndefined();
     expect(out.url).toBeUndefined();
   });
 
   it("rejects a payload with no usable title", () => {
-    for (const bad of [null, "a string", 42, {}, { title: "" }, { title: "   " }, { title: 123 }]) {
-      expect(() => decode(bad)).toThrow();
+    for (const bad of [null, undefined, "a string", 42, [], {}, { title: "" }, { title: "   " }, { title: 123 }]) {
+      expect(() => parseCapturedPaper(bad)).toThrow();
     }
   });
 
   it("survives hostile field types instead of throwing", () => {
-    const out = decode({ title: "X", authors: { length: 1e9 }, year: "not a year" });
+    const out = parseCapturedPaper({ title: "X", authors: { length: 1e9 }, year: "not a year" });
     expect(out.authors).toEqual([]);
     expect(out.year).toBeUndefined();
   });
 
   it("drops non-string entries from authors", () => {
-    expect(decode({ title: "X", authors: ["Real Name", null, 7, { toString: () => "evil" }] }).authors).toEqual(["Real Name"]);
+    expect(parseCapturedPaper({ title: "X", authors: ["Real Name", null, 7, { toString: () => "evil" }] }).authors).toEqual(["Real Name"]);
   });
 
   it("keeps ordinary http(s) links", () => {
-    const out = decode({ title: "X", pdfUrl: "https://arxiv.org/pdf/1234.pdf", url: "http://example.com/a" });
+    const out = parseCapturedPaper({ title: "X", pdfUrl: "https://arxiv.org/pdf/1234.pdf", url: "http://example.com/a" });
     expect(out.pdfUrl).toBe("https://arxiv.org/pdf/1234.pdf");
     expect(out.url).toBe("http://example.com/a");
+  });
+
+  it("caps absurdly long text and author lists", () => {
+    const out = parseCapturedPaper({ title: "T".repeat(50_000), abstract: "A".repeat(50_000), authors: Array(5000).fill("X") });
+    expect(out.title.length).toBe(6000);
+    expect(out.abstract?.length).toBe(6000);
+    expect(out.authors.length).toBe(200);
+  });
+
+  it("ignores prototype-polluting keys", () => {
+    const payload = JSON.parse('{"title":"X","__proto__":{"polluted":true},"constructor":{"bad":1}}') as unknown;
+    const out = parseCapturedPaper(payload);
+    expect(out.title).toBe("X");
+    expect(({} as Record<string, unknown>).polluted).toBeUndefined();
+    expect((out as unknown as Record<string, unknown>).polluted).toBeUndefined();
+  });
+
+  it("decodes a real base64url hash end to end", () => {
+    const json = JSON.stringify({ title: "Attention Is All You Need", authors: ["Vaswani, Ashish"], year: 2017 });
+    const hash = "#" + Buffer.from(json).toString("base64url");
+    expect(decodeCaptureHash(hash).title).toBe("Attention Is All You Need");
+    expect(() => decodeCaptureHash("#not-valid-base64!!")).toThrow();
   });
 });

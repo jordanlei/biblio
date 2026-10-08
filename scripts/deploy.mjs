@@ -8,5 +8,8 @@ const run = (cmd, args) => {
   if (result.status !== 0) process.exit(result.status ?? 1);
 };
 run("npm", ["run", "build"]);
+// Rebuild the extension too, so a stale apps/extension/dist can't ship an older worker than
+// the one in source — that directory is what people load into Chrome.
+run("node", ["scripts/configure-extension.mjs"]);
 run("npx", ["firebase", "deploy", "--only", "hosting,firestore:rules", "--project", projectId, "--non-interactive"]);
 console.log(`\nDeployed: ${appUrl}`);

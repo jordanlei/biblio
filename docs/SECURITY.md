@@ -1,68 +1,85 @@
 # Security and privacy
 
 Biblio has no central server. Your copy runs in your own Google Cloud project and your library
-lives in your own Drive, so there is no account of yours for the maintainers to look at. This
-document says what that does and doesn't protect, and what still leaves your browser.
+lives in your own Google Drive. This page says what that protects, what it doesn't, and where your
+data goes.
 
-## What the maintainers can see
+A note on what's here: this describes the guarantees and the honest limits. It deliberately
+doesn't catalogue individual defences — a list of countermeasures is more useful to someone
+probing for gaps than to someone deciding whether to trust the software. The code is public if you
+want to read the specifics.
 
-Nothing. They publish code; they don't run your copy. There is no analytics, telemetry, crash
-reporting, or phone-home of any kind in the app or the extension.
+## What other people can see
+
+**The maintainers: nothing.** They publish code; they don't run your copy and have no access to it.
+There is no Biblio account, no central database, no analytics, no telemetry, no crash reporting.
+
+**Other users: nothing.** Each copy is a separate Google Cloud project. There is no shared
+infrastructure between installs, so there is no "other users" to be exposed to.
+
+**Google: what you'd expect.** You sign in with Google and your files are in Google Drive, so
+Google can see your account activity and the files in your own Drive, exactly as with any document
+you keep there.
 
 ## What leaves your browser
 
-Biblio has no server to look things up for you, so lookups go straight from your browser to public
-catalogs. Those services see your IP address and what you asked for:
+With no server of its own, Biblio looks papers up directly from your browser. Those services see
+your IP address and what you asked about:
 
-| Host | When | What it learns |
+| Where | When | What they learn |
 | --- | --- | --- |
-| `api.openalex.org` | Searching for papers; finding a PDF | Your search terms, DOIs, paper titles |
-| `api.crossref.org`, `api.datacite.org` | Pasting a DOI | The DOI |
-| `arxiv.org`, `openreview.net`, publisher hosts | Downloading a PDF | Which paper |
-| `www.googleapis.com` | Sync, sign-in | Your own Google account activity |
-| `fonts.googleapis.com` | Only if you pick a non-default reading font | Your IP |
+| OpenAlex | Searching for papers; finding a PDF | Search terms, DOIs, paper titles |
+| Crossref, DataCite | Pasting a DOI | The identifier |
+| arXiv, OpenReview, publisher sites | Downloading a PDF | Which paper |
+| Google (Drive, sign-in) | Sync and sign-in | Your own account activity |
 
-No request carries your Biblio identity, account, or email — there's no API key or user agent
-identifying you. But a catalog can still infer a reading list from a stream of DOIs and an IP
-address. That is the honest cost of having no server in the middle: the alternative is proxying
-lookups through one, which would mean *someone* holds that list. Nothing is logged on your side.
+No request identifies you as a Biblio user — there's no key, account id, or tracking parameter
+attached. But a catalog can still infer a reading list from a stream of requests and an IP address.
 
-Default fonts are bundled with the app; Google Fonts is contacted only if you choose one of the
+**This is the real trade-off.** The alternative is routing lookups through a server, which means
+someone operates that server and holds the list. Biblio prefers no middleman over a trusted one.
+If this matters for your work, a VPN addresses the IP side.
+
+Reading fonts are bundled with the app. Google Fonts is contacted only if you choose one of the
 optional fonts in Settings.
 
-## Your data
+## Your library
 
-- **Firestore rules** allow each user to read and write only their own documents. Rules are
-  default-deny, so anything not explicitly allowed is refused. Tested against cross-user reads,
-  writes, listing, and undeclared collections.
-- **Drive access** uses `drive.file`, Google's narrowest Drive permission: Biblio sees only the
-  files it creates. It cannot read the rest of your Drive. This is why importing a library *copies*
-  it into a new folder rather than adopting one in place.
-- **Your Google access token** is held in memory and `sessionStorage` (cleared when the tab closes),
-  never written to Firestore, and cleared on sign-out.
-- **Notes are sanitised** before display (DOMPurify), so a pasted note can't run scripts.
-- **Imported archives** are filtered against a strict allowlist, so a malicious `.zip` can't write
-  outside the library folder.
+- **Only you can read it.** Access is scoped per user; a signed-in user can reach their own data
+  and nothing else.
+- **Biblio sees only its own files in your Drive.** It uses Google's narrowest Drive permission, so
+  it cannot read the rest of your Drive — only the files it created. This is why importing a
+  library copies it into a new folder instead of adopting one in place.
+- **It survives Biblio.** The library is plain files — PDFs, Markdown, CSL-JSON, BibTeX. Delete the
+  app, the project, or the whole account and the folder in your Drive is unchanged.
 
 ## The browser extension
 
-- It reads a page **only when you click it**. No background scanning, no tab monitoring, and no
-  `tabs` permission.
+- It reads a page **only when you click it**. It does not watch your browsing, monitor tabs, or run
+  in the background.
 - It holds no Google or Firebase credentials. Saving happens in the signed-in web app.
-- Its content script runs **only on your own Biblio address**, so no other site can talk to it.
-  Development builds additionally allow `localhost:5173`; released builds do not.
-- `<all_urls>` exists so the worker can download a PDF you asked for, including from hosts that
-  block ordinary web pages. It refuses private, loopback, and link-local addresses, so it can't be
-  used to reach your local network.
+- It talks only to your own Biblio address, not to any other site.
+- It can download a PDF you asked for, including from publishers that block ordinary web pages.
+  That capability is restricted to fetching papers on your behalf.
 
-## The optional PDF proxy
+## Known limits
 
-`functions/fetchPdf` is an optional Cloud Function for PDFs whose hosts block browser downloads. It
-requires a signed-in user, refuses private and link-local addresses (re-checked on every redirect),
-returns only real PDFs, and gives generic errors so it can't be used to probe a network. If you
-deploy it, note that Cloud Run request logs will record which URLs were fetched — on a single-user
-install that's your own activity, but don't run a shared instance without considering it.
+Worth being straight about:
+
+- **Catalog lookups reveal interests**, as above. Intrinsic to having no server.
+- **The optional PDF proxy keeps logs.** If you deploy the Cloud Function, your cloud provider
+  records which URLs it fetched. On a single-user install that's your own activity; think twice
+  before running a shared instance.
+- **Your copy is as secure as your Google account.** Anyone who can sign in as you can read your
+  library. Use two-factor authentication.
+- **An unverified app warning may appear** the first time you sign in, because your copy is a new
+  OAuth client that Google hasn't reviewed. That's expected for self-hosted software.
+- **Biblio is not audited by a third party.** It has been reviewed adversarially during
+  development, and security-relevant behaviour is covered by automated tests, but no outside firm
+  has examined it.
 
 ## Reporting a problem
 
-Open an issue, or for something sensitive, contact the maintainer privately through GitHub.
+Please report security issues privately rather than in a public issue: open a
+[security advisory](https://github.com/jordanlei/biblio/security/advisories/new) on the repository.
+If you self-host, you can also just read the code and patch your own copy — that's the point.

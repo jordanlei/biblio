@@ -4,6 +4,7 @@ const { onRequest } = require("firebase-functions/v2/https");
 // Last-resort fetcher for open-access PDFs whose hosts block browser downloads (CORS). Requires a
 // signed-in Firebase user, only returns real PDFs, and caps size. Deploying needs the Blaze plan.
 const admin = require("firebase-admin");
+const net = require("node:net");
 const { lookup } = require("node:dns/promises");
 const { isPrivateAddress, safeDestination } = require("./safe-destination");
 if (!admin.apps.length) admin.initializeApp();
@@ -32,7 +33,10 @@ exports.fetchPdf = onRequest({ cors: false, region: "us-central1", timeoutSecond
   // A name that looks public can still resolve into private space (DNS rebinding), so check the
   // addresses it actually resolves to, not just how it is spelled.
   async function assertPublic(url) {
-    if (/^\[?[0-9a-f:.]+\]?$/i.test(url.hostname)) return; // already an IP literal, checked by name
+    // Only skip resolution for a genuine IP literal. A character-class test would also match
+    // hostnames spelled with hex letters (cafe.ac, abcdef.de), which are registrable domains an
+    // attacker can simply point at an internal address.
+    if (net.isIP(url.hostname.replace(/^\[|\]$/g, ""))) return;
     let addresses;
     try {
       addresses = await lookup(url.hostname, { all: true });
