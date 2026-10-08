@@ -12,6 +12,12 @@ Rules for this table:
 - A row where everyone does the same thing is worth keeping only if it matters; say so plainly
   rather than implying an advantage.
 - When something is ambiguous, say less. "Not built in" is a claim, and needs a source too.
+- Marks are **yes / partly / no**. Use *partly* generously: it covers "true with a caveat"
+  (Zotero's library is local but its sync isn't) and "we can't verify the detail". Reserve *no*
+  for things a product documents as absent or clearly doesn't do.
+- Privacy is a weak spot for comparison: a vendor's policy says what they're permitted to collect,
+  not what they do. So every competitor is marked *partly* there, describing their stated policy
+  rather than asserting what actually happens.
 
 ## Zotero
 
@@ -24,6 +30,8 @@ Rules for this table:
 | "Related" links between items and notes | [Related items](https://www.zotero.org/support/related) · [forum thread on inline links](https://forums.zotero.org/discussion/78829/feature-request-links-to-library-items-in-a-note) |
 | Searches databases in-app and via the connector | [Zotero Connector](https://www.zotero.org/support/adding_items_to_zotero) |
 | Exports BibTeX, RIS, CSL-JSON | [Exporting](https://www.zotero.org/support/kb/exporting) |
+| Sync optional and off by default; servers log IPs up to 90 days | [Zotero privacy policy](https://www.zotero.org/support/privacy) |
+| Zotero Connector browser extension | [Adding items](https://www.zotero.org/support/adding_items_to_zotero) |
 
 Note on cross-referencing: Zotero's Related tab does link notes to items. What it doesn't do is
 inline links inside the note text, which is a long-standing feature request. The table says what it
@@ -38,6 +46,8 @@ has, not what it lacks.
 | Citing articles via Web of Science | [EndNote 2025 features](https://endnote.com/product-details) |
 | Online search of subscribed databases | [EndNote online search](https://support.clarivate.com/Endnote/s/article/EndNote-Online-Search) |
 | Exports BibTeX, RIS, XML | [Exporting references](https://support.clarivate.com/Endnote/s/article/EndNote-Export-references) |
+| Privacy governed by Clarivate's corporate policy | [EndNote privacy policy](https://endnote.com/privacy-policy/) |
+| Capture browser extension | [EndNote Click / capture](https://endnote.com/product-details) |
 
 We found no documented feature for linking one reference to another from within a note, so that
 cell describes the Web of Science citation feature instead.
@@ -50,6 +60,8 @@ cell describes the Web of Science citation feature instead.
 | Metadata on Paperpile's servers; PDFs in your Drive | [How Paperpile stores data](https://paperpile.com/h/google-drive/) |
 | Searches PubMed, Google Scholar, arXiv and more in-app | [Paperpile features](https://paperpile.com/features) |
 | Exports BibTeX, RIS, CSL-JSON | [Paperpile export](https://paperpile.com/h/export/) |
+| App listing declares usage data and diagnostics linked to identity | [Paperpile privacy policy](https://paperpile.com/privacy) · App Store listing |
+| Paperpile browser extension | [Chrome Web Store listing](https://chromewebstore.google.com/detail/bomfdkbfpdhijjbeoicnfhjbdhncfhig) |
 
 ## Biblio
 

@@ -4,7 +4,7 @@ import { useRouter } from "vue-router";
 import AppIcon from "../components/AppIcon.vue";
 import AppearanceSettings from "../components/AppearanceSettings.vue";
 import LibraryImport from "../components/LibraryImport.vue";
-import { connectDriveFolder, createDriveFolder, DEFAULT_FOLDER_NAME, disconnectDriveFolder, driveFolderUrl, findOwnLibraries, trashLibraryFolder, type DriveFolderSelection } from "../services/drive";
+import { connectDriveFolder, createDriveFolder, DEFAULT_FOLDER_NAME, disconnectDriveFolder, driveFolderUrl, findOwnLibraries, trashLibraryFolder, type DriveFolderSelection, type OwnLibrary } from "../services/drive";
 import { downloadLibraryZip } from "../services/transfer";
 import { deleteAllUserMetadata, deleteProfileDoc } from "../services/library";
 import { clearLocalCache, deleteCurrentAuthUser, updateProfile, useSession } from "../services/session";
@@ -34,7 +34,7 @@ const download = () =>
   });
 
 // Library folders this copy created (the only ones it can open); listed on request.
-const ownLibraries = ref<DriveFolderSelection[] | null>(null);
+const ownLibraries = ref<OwnLibrary[] | null>(null);
 const listOwn = () => run("list", async () => (ownLibraries.value = await findOwnLibraries()));
 const reconnect = (folder: DriveFolderSelection) =>
   run("pick", async () => {
@@ -134,7 +134,7 @@ async function deleteAccount() {
         </div>
         <div v-if="ownLibraries" class="row wrap">
           <template v-for="folder in ownLibraries" :key="folder.id">
-            <button v-if="folder.id !== session.profile.value?.driveRootFolderId" class="btn sm" type="button" :disabled="!!busy" @click="reconnect(folder)">{{ folder.name }}</button>
+            <button v-if="folder.id !== session.profile.value?.driveRootFolderId" class="btn sm" type="button" :disabled="!!busy" @click="reconnect(folder)">{{ folder.name }} · {{ folder.papers }} paper{{ folder.papers === 1 ? "" : "s" }}</button>
           </template>
           <span v-if="!ownLibraries.some((f) => f.id !== session.profile.value?.driveRootFolderId)" class="muted small">No other libraries found.</span>
         </div>
@@ -149,7 +149,7 @@ async function deleteAccount() {
           <button class="link-btn small" type="button" :disabled="!!busy" @click="listOwn">Reconnect a library this copy made…</button>
         </div>
         <div v-if="ownLibraries" class="row wrap">
-          <button v-for="folder in ownLibraries" :key="folder.id" class="btn sm" type="button" :disabled="!!busy" @click="reconnect(folder)">{{ folder.name }}</button>
+          <button v-for="folder in ownLibraries" :key="folder.id" class="btn sm" type="button" :disabled="!!busy" @click="reconnect(folder)">{{ folder.name }} · {{ folder.papers }} paper{{ folder.papers === 1 ? "" : "s" }}</button>
           <span v-if="!ownLibraries.length" class="muted small">None found.</span>
         </div>
       </template>

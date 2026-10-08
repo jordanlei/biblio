@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue";
-import { DEFAULT_FOLDER_NAME, connectDriveFolder, createDriveFolder, findOwnLibraries, type DriveFolderSelection } from "../services/drive";
+import { DEFAULT_FOLDER_NAME, connectDriveFolder, createDriveFolder, findOwnLibraries, type DriveFolderSelection, type OwnLibrary } from "../services/drive";
 import { connectLibraryFolder } from "../sync/librarySync";
 import { useLibrary } from "../services/library";
 import { useSession } from "../services/session";
@@ -129,7 +129,7 @@ async function createFolder() {
 
 // Libraries this copy made before (e.g. its index was reset): offered as "Reconnect". Checked
 // quietly, without a sign-in popup; if there's no Drive token yet, the option just isn't shown.
-const ownLibraries = ref<DriveFolderSelection[]>([]);
+const ownLibraries = ref<OwnLibrary[]>([]);
 watch(
   () => step.value.id,
   async (id) => {
@@ -209,7 +209,7 @@ watch(() => papers.value.length, () => nextTick(measure));
           <AppIcon name="folder-plus" /> {{ busy === "create" ? "Creating…" : `Create “${DEFAULT_FOLDER_NAME}”` }}
         </button>
         <button v-for="folder in ownLibraries" :key="folder.id" class="btn" type="button" :disabled="!!busy" @click="reconnect(folder)">
-          Reconnect “{{ folder.name }}”
+          Reconnect “{{ folder.name }}” <span class="faint">· {{ folder.papers }} paper{{ folder.papers === 1 ? "" : "s" }}</span>
         </button>
         <LibraryImport @imported="go(1)" />
       </div>

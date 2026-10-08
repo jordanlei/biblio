@@ -174,7 +174,9 @@ await record(
     await pause(1600); // the "where your library lives" step
     await page.getByRole("button", { name: /Create “Biblio Library”/ }).click();
     await page.locator(".tour h2").waitFor();
-    await pause(2200);
+    // Hold on the connected state: the sidebar's "Saved to Drive" is the point of the clip.
+    await page.locator('[data-sync-status][data-phase="saved"]').waitFor({ timeout: 20_000 }).catch(() => {});
+    await pause(2400);
   },
   { width: 1280, height: 800 }
 );

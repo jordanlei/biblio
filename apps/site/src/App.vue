@@ -18,56 +18,113 @@ const driveTree = [
   { depth: 2, icon: "quote", name: "references.bib" }
 ];
 
-// What a reference manager ought to do. Each row names the quality; the Biblio cell says what
-// that means here. Checked against each product's own documentation and support forums,
-// October 2026 — see docs/COMPARISON.md for sources. Keep claims conservative and verifiable.
+// What a reference manager ought to do. `mark` is yes / partly / no, so every cell is legible at
+// a glance; `note` says what the mark means. Competitor claims come from each product's own
+// documentation and privacy policy, October 2026 — sources in docs/COMPARISON.md. Keep claims
+// conservative: where a product's behaviour isn't clearly documented, say so rather than guess.
+const markGlyph: Record<string, string> = { yes: "✓", partly: "~", no: "✕" };
+const markLabel: Record<string, string> = { yes: "Yes", partly: "Partly", no: "No" };
+
 const compareColumns = ["Biblio", "Zotero", "EndNote", "Paperpile"];
 const compareRows = [
   {
     label: "Open source",
-    ours: "Yes, MIT. Read it, fork it, change it.",
-    cells: ["Yes, AGPL", "No", "No"]
+    ours: { mark: "yes", note: "MIT — read it, fork it, change it" },
+    cells: [
+      { mark: "yes", note: "AGPL" },
+      { mark: "no", note: "Proprietary" },
+      { mark: "no", note: "Proprietary" }
+    ]
   },
   {
-    label: "Pricing",
-    ours: "Free. You host it, so there's nobody to bill you.",
-    cells: ["Free; paid storage above 300 MB", "Paid licence", "Paid subscription"]
+    label: "Free",
+    ours: { mark: "yes", note: "You host it, so there's nobody to bill you" },
+    cells: [
+      { mark: "partly", note: "Free; paid storage above 300 MB" },
+      { mark: "no", note: "Paid licence" },
+      { mark: "no", note: "Paid subscription" }
+    ]
   },
   {
-    label: "Fault tolerance",
-    ours: "If your hosting breaks, your files are still in Drive. Rebuild a copy from a .zip.",
-    cells: ["Library is local; sync needs Zotero's servers", "Library is local", "Library lives on Paperpile's servers"]
+    label: "Survives its vendor",
+    ours: { mark: "yes", note: "Your files stay in Drive; rebuild a copy from a .zip" },
+    cells: [
+      { mark: "partly", note: "Library is local, but sync needs Zotero's servers" },
+      { mark: "partly", note: "Library is local, in a proprietary format" },
+      { mark: "no", note: "Library lives on Paperpile's servers" }
+    ]
   },
   {
-    label: "Code ownership",
-    ours: "You deploy and run the app yourself, and can change any part of it.",
-    cells: ["Source is open; the service is Zotero's", "Vendor-run", "Vendor-run"]
+    label: "You run the app",
+    ours: { mark: "yes", note: "Deployed to your own project; change any part" },
+    cells: [
+      { mark: "partly", note: "Source is open; the sync service is Zotero's" },
+      { mark: "no", note: "Vendor-run" },
+      { mark: "no", note: "Vendor-run" }
+    ]
   },
   {
-    label: "Data ownership",
-    ours: "Everything — papers, notes, tags, shelves, links — in a Drive folder you control.",
-    cells: ["Files and database on your own machine", "Files and database on your own machine", "PDFs in your Drive; the rest is Paperpile's"]
+    label: "You own the data",
+    ours: { mark: "yes", note: "Papers, notes, tags, links — all in your Drive" },
+    cells: [
+      { mark: "partly", note: "Files and database on your machine" },
+      { mark: "partly", note: "Files and database on your machine" },
+      { mark: "no", note: "PDFs in your Drive; the rest is Paperpile's" }
+    ]
   },
   {
-    label: "Storage format",
-    ours: "Plain files named for what they are: CSL-JSON, Markdown, BibTeX, PDF.",
-    cells: ["SQLite; attachments under random 8-character keys", "Proprietary .enl library", "Cloud records you reach through the app"]
+    label: "Readable storage",
+    ours: { mark: "yes", note: "Plain files named for what they are" },
+    cells: [
+      { mark: "partly", note: "SQLite; attachments under random keys" },
+      { mark: "no", note: "Proprietary .enl library" },
+      { mark: "no", note: "Cloud records reached through the app" }
+    ]
+  },
+  {
+    label: "Privacy",
+    ours: { mark: "yes", note: "No account, no analytics; lookups go direct from your browser" },
+    cells: [
+      { mark: "partly", note: "Sync is optional and off by default; servers log IPs for 90 days" },
+      { mark: "partly", note: "Covered by Clarivate's corporate privacy policy" },
+      { mark: "partly", note: "Store listing declares usage data and diagnostics linked to you" }
+    ]
   },
   {
     label: "Cross-referencing",
-    ours: "Type @[ to link a paper from any note; the paper lists back every note that mentions it.",
-    cells: ["“Related” links between items and notes", "Citing articles via Web of Science", "Not built in"]
+    ours: { mark: "yes", note: "@[ links in any note, with backlinks in context" },
+    cells: [
+      { mark: "partly", note: "“Related” links, separate from note text" },
+      { mark: "partly", note: "Citing articles via Web of Science" },
+      { mark: "no", note: "Not built in" }
+    ]
   },
   {
     label: "Discovery",
-    ours: "Search 250M papers in the app, and save one with a note on why.",
-    cells: ["Search databases in-app and via the browser plugin", "Online search of subscribed databases", "Search PubMed, Scholar, arXiv and more in-app"]
+    ours: { mark: "yes", note: "250M papers searched in the app" },
+    cells: [
+      { mark: "yes", note: "Databases in-app and via the connector" },
+      { mark: "yes", note: "Online search of subscribed databases" },
+      { mark: "yes", note: "PubMed, Scholar, arXiv and more" }
+    ]
   },
   {
-    label: "Exports",
-    tie: true,
-    ours: "references.bib and library.json stay current in Drive, no export step.",
-    cells: ["BibTeX, RIS, CSL-JSON on export", "BibTeX, RIS, XML on export", "BibTeX, RIS, CSL-JSON on export"]
+    label: "Browser extension",
+    ours: { mark: "yes", note: "Saves a paper and its PDF; reads a page only on click" },
+    cells: [
+      { mark: "yes", note: "Zotero Connector" },
+      { mark: "yes", note: "Capture tool" },
+      { mark: "yes", note: "Paperpile extension" }
+    ]
+  },
+  {
+    label: "Exports to .bib",
+    ours: { mark: "yes", note: "Always current in Drive, no export step" },
+    cells: [
+      { mark: "yes", note: "On export" },
+      { mark: "yes", note: "On export" },
+      { mark: "yes", note: "On export" }
+    ]
   }
 ];
 
@@ -162,8 +219,12 @@ const extras = [
           <tbody>
             <tr v-for="row in compareRows" :key="row.label">
               <th scope="row">{{ row.label }}</th>
-              <td class="us"><AppIcon v-if="!row.tie" name="check" :size="15" class="tick" /> {{ row.ours }}</td>
-              <td v-for="cell in row.cells" :key="cell">{{ cell }}</td>
+              <td class="us">
+                <span class="mark" :class="row.ours.mark" :aria-label="markLabel[row.ours.mark]">{{ markGlyph[row.ours.mark] }}</span> {{ row.ours.note }}
+              </td>
+              <td v-for="(cell, i) in row.cells" :key="i">
+                <span class="mark" :class="cell.mark" :aria-label="markLabel[cell.mark]">{{ markGlyph[cell.mark] }}</span> {{ cell.note }}
+              </td>
             </tr>
           </tbody>
         </table>
@@ -707,9 +768,32 @@ td.us {
   font-weight: 450;
 }
 
-.tick {
-  margin: 0 4px -2px 0;
+.mark {
+  display: inline-grid;
+  place-items: center;
+  width: 17px;
+  height: 17px;
+  margin-right: 3px;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  vertical-align: -3px;
+}
+
+.mark.yes {
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
   color: var(--accent);
+}
+
+.mark.partly {
+  background: var(--warn-soft);
+  color: var(--warn-ink);
+}
+
+.mark.no {
+  background: var(--surface-2);
+  color: var(--text-3);
 }
 
 .us {

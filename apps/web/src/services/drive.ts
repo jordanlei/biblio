@@ -41,11 +41,23 @@ export async function disconnectDriveFolder() {
  * Library folders this copy created earlier (e.g. before its index was reset), newest first.
  * drive.file only lets a copy see its own folders, so this never lists anyone else's files.
  */
-export async function findOwnLibraries(interactive = true): Promise<DriveFolderSelection[]> {
+export interface OwnLibrary extends DriveFolderSelection {
+  /** How many papers it holds, so several same-named folders can be told apart. */
+  papers: number;
+}
+
+/**
+ * Library folders this copy created earlier, newest first. Several can accumulate — a reset index,
+ * a few imports — and they often share a name, so each carries its paper count.
+ */
+export async function findOwnLibraries(interactive = true, limit = 4): Promise<OwnLibrary[]> {
   const folders = await listVisibleFolders(interactive);
-  const found: DriveFolderSelection[] = [];
-  for (const folder of folders) {
-    if (await inspectLibrary(new GoogleDriveFileStore(folder.id, interactive))) found.push(folder);
+  const found: OwnLibrary[] = [];
+  // Newest first: the most recently created folder is the one most likely to be wanted.
+  for (const folder of [...folders].reverse()) {
+    const library = await inspectLibrary(new GoogleDriveFileStore(folder.id, interactive));
+    if (library) found.push({ ...folder, papers: library.papers });
+    if (found.length >= limit) break;
   }
   return found;
 }

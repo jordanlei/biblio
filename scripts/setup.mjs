@@ -13,6 +13,7 @@ import { randomBytes } from "node:crypto";
 import { createRequire } from "node:module";
 import { stdin, stdout } from "node:process";
 import { createInterface } from "node:readline/promises";
+import { fileURLToPath } from "node:url";
 import { readConfig, writeConfig } from "./lib/config.mjs";
 
 const args = process.argv.slice(2);
@@ -335,6 +336,30 @@ async function github(config) {
   ok(`Secrets saved to ${repo}. The next push to main deploys (see .github/workflows/deploy.yml).`);
 }
 
+/**
+ * The Chrome extension saves a paper from the page you're reading. It's optional, and it's the one
+ * piece that needs a manual step in Chrome, so it's offered rather than assumed.
+ */
+async function browserExtension(appUrl) {
+  step("Browser extension (optional)");
+  note("Saves the paper you're reading, with its PDF, straight to your library.");
+  if (DRY) return would("build the extension for your address and show how to load it");
+  if (!(await yes("Set it up now?", true))) {
+    note("Skipped. Run `npm run build:extension` whenever you want it.");
+    return;
+  }
+  run("scripts/configure-extension.mjs");
+  const dist = fileURLToPath(new URL("../apps/extension/dist", import.meta.url));
+  console.log("\n   To finish, in Chrome:");
+  console.log("     1. Open chrome://extensions and turn on Developer mode (top right).");
+  console.log("     2. Click “Load unpacked”.");
+  console.log(`     3. Choose: ${dist}`);
+  console.log(`\n   It saves to ${appUrl}. Pin it to your toolbar and you're set.`);
+  openInBrowser("chrome://extensions");
+  await ask("   Press Enter when you've loaded it (or to skip).");
+  ok("Extension ready");
+}
+
 // --- Main -------------------------------------------------------------------------------------
 
 async function main() {
@@ -352,7 +377,6 @@ async function main() {
     step("Save biblio.config.json");
     writeConfig({ projectId, appUrl, firebase: firebaseConfig });
     ok("Saved (gitignored: it describes this copy only)");
-    run("scripts/configure-extension.mjs");
   }
 
   await googleSignIn(projectId);
@@ -362,6 +386,8 @@ async function main() {
     if (DRY) would("build the app and deploy hosting + Firestore rules");
     else run("scripts/deploy.mjs");
   }
+
+  await browserExtension(appUrl);
 
   if (flag("github") || (!DRY && (await yes("\nAlso deploy automatically on every push to GitHub?", false)))) {
     const config = readConfig();

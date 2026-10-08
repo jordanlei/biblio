@@ -8,25 +8,31 @@ import SiteFooter from "./components/SiteFooter.vue";
 import SiteHeader from "./components/SiteHeader.vue";
 import { REPO_URL, docUrl } from "./site";
 
-const whoSees = [
+// Who holds what, in the order a reader will wonder about it.
+const access = [
   {
     icon: "user",
-    who: "The people who make Biblio",
-    sees: "Nothing",
-    detail: "They publish code; they don't run your copy. There's no Biblio account and no server of theirs involved."
+    who: "You",
+    sees: "Everything",
+    detail: "Your papers, notes, tags and PDFs, in a Drive folder you own. You're the only one who can sign in to your copy."
   },
-  { icon: "link", who: "Other Biblio users", sees: "Nothing", detail: "Every copy is a separate project. Installs share no infrastructure." },
   {
     icon: "drive",
     who: "Google",
-    sees: "Your account activity",
-    detail: "You sign in with Google and your files are in your Drive, the same as any document you keep there."
+    sees: "Your account and your files",
+    detail: "You sign in with Google and the files live in your Drive — the same arrangement as any document you keep there."
   },
   {
     icon: "search",
     who: "Paper catalogs",
     sees: "What you look up",
-    detail: "Searches and downloads go straight from your browser, so they see your IP and the paper you asked about."
+    detail: "Searches and downloads go straight from your browser, so OpenAlex and publishers see your IP and the paper you asked about."
+  },
+  {
+    icon: "link",
+    who: "Biblio's authors, and other users",
+    sees: "No access",
+    detail: "They publish code; they don't operate your copy. Every install is a separate project with no shared infrastructure, so there's no system through which they could reach your library."
   }
 ];
 
@@ -52,9 +58,9 @@ const leaves = [
     </header>
 
     <section class="block">
-      <h2>Who can see your library</h2>
+      <h2>Data access: who sees what?</h2>
       <ul class="who">
-        <li v-for="row in whoSees" :key="row.who">
+        <li v-for="row in access" :key="row.who">
           <AppIcon :name="row.icon" :size="18" />
           <div>
             <strong>{{ row.who }}</strong>
