@@ -19,6 +19,7 @@
 - Where it could go: [docs/ROADMAP.md](docs/ROADMAP.md)
 - How the website's screenshots and videos are made: [docs/CAPTURES.md](docs/CAPTURES.md)
 - Adding your own features without fighting upstream: [docs/EXTENDING.md](docs/EXTENDING.md)
+- What Biblio protects, and what leaves your browser: [docs/SECURITY.md](docs/SECURITY.md)
 - Contributing and the rules that always hold: [CONTRIBUTING.md](CONTRIBUTING.md)
 - Original product brief: [brief.md](brief.md)
 

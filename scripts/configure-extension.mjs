@@ -19,7 +19,9 @@ writeFileSync(`${out}app-url.js`, readFileSync(`${out}app-url.js`, "utf8").repla
 
 const manifest = JSON.parse(readFileSync(`${out}manifest.json`, "utf8"));
 const bridge = manifest.content_scripts.find((entry) => entry.js.includes("bridge.js"));
-bridge.matches = [...new Set([`${origin}/*`, `https://${firebase.authDomain}/*`, ...bridge.matches])];
+// Replace, never union: keeping the source's localhost entries would let any page served from
+// localhost on any port talk to the extension's worker on a user's real install.
+bridge.matches = [...new Set([`${origin}/*`, `https://${firebase.authDomain}/*`])];
 writeFileSync(`${out}manifest.json`, `${JSON.stringify(manifest, null, 2)}\n`);
 
 console.log(`Extension built for ${origin}: load apps/extension/dist in chrome://extensions (Developer mode → Load unpacked).`);

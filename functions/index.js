@@ -4,6 +4,7 @@ const { onRequest } = require("firebase-functions/v2/https");
 // Last-resort fetcher for open-access PDFs whose hosts block browser downloads (CORS). Requires a
 // signed-in Firebase user, only returns real PDFs, and caps size. Deploying needs the Blaze plan.
 const admin = require("firebase-admin");
+const { safeDestination } = require("./safe-destination");
 if (!admin.apps.length) admin.initializeApp();
 
 const MAX_PDF_BYTES = 80 * 1024 * 1024;
@@ -22,15 +23,24 @@ exports.fetchPdf = onRequest({ cors: false, region: "us-central1", timeoutSecond
   }
   let target;
   try {
-    target = new URL(String(request.query.url || ""));
-    if (!/^https?:$/.test(target.protocol)) throw new Error("bad protocol");
-  } catch {
-    response.status(400).json({ error: "A valid http(s) url is required" });
+    target = safeDestination(request.query.url);
+  } catch (error) {
+    response.status(400).json({ error: error.message });
     return;
   }
   try {
-    const upstream = await fetch(target, { redirect: "follow", headers: { "User-Agent": "Biblio/0.2 (open-access PDF fetcher)" } });
-    if (!upstream.ok) throw new Error(`Upstream returned ${upstream.status}`);
+    // Follow redirects by hand: a public URL can redirect to a private one, so every hop is checked.
+    let upstream;
+    for (let hop = 0; ; hop += 1) {
+      if (hop > 5) throw new Error("Too many redirects");
+      upstream = await fetch(target, { redirect: "manual", headers: { "User-Agent": "Biblio/0.2 (open-access PDF fetcher)" } });
+      if (![301, 302, 303, 307, 308].includes(upstream.status)) break;
+      const location = upstream.headers.get("location");
+      if (!location) break;
+      target = safeDestination(new URL(location, target).href);
+    }
+    // Don't echo the upstream status: it would turn this into a scanner for whoever is signed in.
+    if (!upstream.ok) throw new Error("Couldn't fetch that PDF");
     const length = Number(upstream.headers.get("content-length") || 0);
     if (length > MAX_PDF_BYTES) throw new Error("PDF too large");
     const buffer = Buffer.from(await upstream.arrayBuffer());
@@ -38,6 +48,9 @@ exports.fetchPdf = onRequest({ cors: false, region: "us-central1", timeoutSecond
     if (!buffer.subarray(0, 1024).toString("latin1").includes("%PDF-")) throw new Error("Not a PDF");
     response.set("Cache-Control", "private, no-store").type("application/pdf").send(buffer);
   } catch (error) {
-    response.status(502).json({ error: error instanceof Error ? error.message : "Fetch failed" });
+    const message = error instanceof Error ? error.message : "Fetch failed";
+    // Only our own messages are safe to return; anything else could describe internal network state.
+    const safe = ["PDF too large", "Not a PDF", "Too many redirects", "That address isn't allowed", "Couldn't fetch that PDF"];
+    response.status(502).json({ error: safe.includes(message) ? message : "Couldn't fetch that PDF" });
   }
 });
