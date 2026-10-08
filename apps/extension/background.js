@@ -14,28 +14,53 @@ function toBase64(buffer) {
 
 // Private/loopback/link-local space. A credentialed fetch from the extension can reach the user's
 // own LAN and localhost services, so those are refused even for our own pages.
+//
+// Always test `new URL(...).hostname`, never the raw string: the URL parser folds 2130706433,
+// 0x7f000001, 0177.0.0.1 and 127.1 to 127.0.0.1, and checking before that would miss them.
+// Mirrors functions/safe-destination.js; keep the two in step.
+const BLOCKED_NAMES = new Set(["localhost", "localhost.localdomain", "metadata", "metadata.google.internal"]);
+
+function isPrivateIpv4(address) {
+  const parts = address.split(".");
+  if (parts.length !== 4) return false;
+  if (parts.some((p) => p === "" || !/^\d+$/.test(p) || Number(p) > 255)) return true;
+  const [a, b] = parts.map(Number);
+  if (a === 10 || a === 127 || a === 0 || a >= 224) return true;
+  if (a === 169 && b === 254) return true;
+  if (a === 172 && b >= 16 && b <= 31) return true;
+  if (a === 192 && b === 168) return true;
+  if (a === 100 && b >= 64 && b <= 127) return true;
+  return false;
+}
+
 function isPrivateAddress(hostname) {
-  const host = String(hostname).toLowerCase().replace(/^\[|\]$/g, "");
-  if (host === "localhost" || /\.(internal|local|localhost|home\.arpa)$/.test(host)) return true;
-  const v4 = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/.exec(host);
-  if (v4) {
-    const [a, b] = v4.slice(1).map(Number);
-    if (v4.slice(1).map(Number).some((n) => n > 255)) return true;
-    if (a === 10 || a === 127 || a === 0 || a >= 224) return true;
-    if (a === 169 && b === 254) return true;
-    if (a === 172 && b >= 16 && b <= 31) return true;
-    if (a === 192 && b === 168) return true;
-    if (a === 100 && b >= 64 && b <= 127) return true;
-    return false;
+  const host = String(hostname).toLowerCase().replace(/^\[|\]$/g, "").replace(/\.$/, "");
+  if (!host) return true;
+  if (BLOCKED_NAMES.has(host)) return true;
+  if (/\.(internal|local|localhost|home\.arpa)$/.test(host)) return true;
+  if (host.includes(":")) {
+    const v6 = host.split("%")[0];
+    if (v6 === "::1" || v6 === "::" || /^f[cd]/.test(v6) || /^fe[89ab]/.test(v6)) return true;
+    const mapped = /(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$/.exec(v6);
+    return mapped ? isPrivateIpv4(mapped[1]) : /^(0:)*0*:?:?1$/.test(v6.replace(/:+/g, ":"));
   }
-  if (host.includes(":")) return host === "::1" || host === "::" || /^f[cd]/.test(host) || /^fe[89ab]/.test(host);
+  if (/^\d+$/.test(host) || /^0x/i.test(host)) return true;
+  if (/^\d{1,3}(\.\d{1,3}){3}$/.test(host)) return isPrivateIpv4(host);
+  if (/^[\d.]+$/.test(host)) return true;
   return false;
 }
 
 async function fetchPdf(url) {
-  if (!/^https?:\/\//i.test(url)) throw new Error("Only http(s) URLs can be fetched.");
-  if (isPrivateAddress(new URL(url).hostname)) throw new Error("That address isn't allowed.");
-  const response = await fetch(url, { credentials: "include", redirect: "follow" });
+  let target;
+  try {
+    target = new URL(String(url));
+  } catch {
+    throw new Error("Only http(s) URLs can be fetched.");
+  }
+  if (!/^https?:$/.test(target.protocol)) throw new Error("Only http(s) URLs can be fetched.");
+  if (target.username || target.password) throw new Error("That address isn't allowed.");
+  if (isPrivateAddress(target.hostname)) throw new Error("That address isn't allowed.");
+  const response = await fetch(target, { credentials: "include", redirect: "follow" });
   if (!response.ok) throw new Error(`HTTP ${response.status}`);
   const buffer = await response.arrayBuffer();
   if (buffer.byteLength > MAX_BYTES) throw new Error("PDF is too large.");

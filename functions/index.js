@@ -4,7 +4,8 @@ const { onRequest } = require("firebase-functions/v2/https");
 // Last-resort fetcher for open-access PDFs whose hosts block browser downloads (CORS). Requires a
 // signed-in Firebase user, only returns real PDFs, and caps size. Deploying needs the Blaze plan.
 const admin = require("firebase-admin");
-const { safeDestination } = require("./safe-destination");
+const { lookup } = require("node:dns/promises");
+const { isPrivateAddress, safeDestination } = require("./safe-destination");
 if (!admin.apps.length) admin.initializeApp();
 
 const MAX_PDF_BYTES = 80 * 1024 * 1024;
@@ -28,7 +29,21 @@ exports.fetchPdf = onRequest({ cors: false, region: "us-central1", timeoutSecond
     response.status(400).json({ error: error.message });
     return;
   }
+  // A name that looks public can still resolve into private space (DNS rebinding), so check the
+  // addresses it actually resolves to, not just how it is spelled.
+  async function assertPublic(url) {
+    if (/^\[?[0-9a-f:.]+\]?$/i.test(url.hostname)) return; // already an IP literal, checked by name
+    let addresses;
+    try {
+      addresses = await lookup(url.hostname, { all: true });
+    } catch {
+      throw new Error("Couldn't fetch that PDF");
+    }
+    if (!addresses.length || addresses.some((entry) => isPrivateAddress(entry.address))) throw new Error("That address isn't allowed");
+  }
+
   try {
+    await assertPublic(target);
     // Follow redirects by hand: a public URL can redirect to a private one, so every hop is checked.
     let upstream;
     for (let hop = 0; ; hop += 1) {
@@ -38,6 +53,7 @@ exports.fetchPdf = onRequest({ cors: false, region: "us-central1", timeoutSecond
       const location = upstream.headers.get("location");
       if (!location) break;
       target = safeDestination(new URL(location, target).href);
+      await assertPublic(target);
     }
     // Don't echo the upstream status: it would turn this into a scanner for whoever is signed in.
     if (!upstream.ok) throw new Error("Couldn't fetch that PDF");
