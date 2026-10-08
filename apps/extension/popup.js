@@ -21,6 +21,13 @@ function summarize(paper) {
   return [who, paper.year, paper.venue].filter(Boolean).join(" · ");
 }
 
+function addChip(label) {
+  const chip = document.createElement("span");
+  chip.className = "chip";
+  chip.textContent = label;
+  $("chips").append(chip);
+}
+
 async function main() {
   const select = $("app");
   const hosted = $("hosted-app");
@@ -36,7 +43,7 @@ async function main() {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   let paper = null;
   try {
-    const [injection] = await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ["extract.js"] });
+    const [injection] = await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ["biblio-translate.js", "biblio-translators.js", "extract.js"] });
     paper = injection?.result ?? null;
   } catch {
     paper = null; // chrome:// pages, the Web Store, etc.
@@ -53,12 +60,7 @@ async function main() {
   $("found").hidden = false;
   $("title").textContent = paper.title;
   $("meta").textContent = summarize(paper);
-  for (const label of [paper.doi && "DOI", paper.arxivId && "arXiv", paper.pdfUrl && "PDF available"].filter(Boolean)) {
-    const chip = document.createElement("span");
-    chip.className = "chip";
-    chip.textContent = label;
-    $("chips").append(chip);
-  }
+  for (const label of [paper.translator, paper.doi && "DOI", paper.arxivId && "arXiv", paper.pmid && "PubMed", paper.pdfUrl && "PDF available"].filter(Boolean)) addChip(label);
   $("save").onclick = async () => {
     // The hash never reaches a server; the app reads it client-side.
     await chrome.tabs.create({ url: `${await appUrl()}/capture#${encode(paper)}` });

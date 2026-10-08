@@ -1,5 +1,8 @@
 // Fetches PDFs for the Biblio web app (via bridge.js). Extensions with host permissions aren't
 // bound by CORS, and `credentials: "include"` lets institutional/subscription access work too.
+//
+// This worker never looks at pages on its own: metadata is only ever read when you click the
+// extension (popup.js injects the translators into the active tab then, and only then).
 const MAX_BYTES = 80 * 1024 * 1024;
 
 function toBase64(buffer) {
