@@ -11,6 +11,12 @@ export interface PdfSource {
   url: string;
   host: string;
   label: string;
+  /**
+   * True when Biblio worked this URL out itself (arXiv from a verified id, or a location OpenAlex
+   * returned). A paper record can also carry a URL that came from outside — a captured page, an
+   * imported .bib — and those are never fetched with the user's cookies attached.
+   */
+  trusted?: boolean;
 }
 
 const MAX_BYTES = 80 * 1024 * 1024;
@@ -72,12 +78,12 @@ async function openAlexWork(paper: Paper): Promise<OpenAlexLocations | null> {
 /** Every plausible open-access PDF URL for a paper, best first, de-duplicated. */
 export async function findPdfSources(paper: Paper): Promise<PdfSource[]> {
   const urls: PdfSource[] = [];
-  const add = (url?: string | null, label?: string) => {
+  const add = (url?: string | null, label?: string, trusted = false) => {
     if (!url || !/^https?:/i.test(url) || urls.some((s) => s.url === url)) return;
-    urls.push(source(url, label));
+    urls.push({ ...source(url, label), trusted });
   };
   let arxivId = normalizeArxivId(paper.arxivId);
-  if (arxivId) add(`https://arxiv.org/pdf/${arxivId}`, "arXiv");
+  if (arxivId) add(`https://arxiv.org/pdf/${arxivId}`, "arXiv", true);
   add(paper.openAccessPdfUrl);
   add(pdfFromLandingPage(paper.url));
 
@@ -86,11 +92,11 @@ export async function findPdfSources(paper: Paper): Promise<PdfSource[]> {
     const arxivPage = work.locations?.map((l) => l.landing_page_url).find((u) => u?.includes("arxiv.org/abs/"));
     if (!arxivId && arxivPage) {
       arxivId = normalizeArxivId(arxivPage)?.replace(/v\d+$/, "");
-      if (arxivId) urls.unshift(source(`https://arxiv.org/pdf/${arxivId}`, "arXiv"));
+      if (arxivId) urls.unshift({ ...source(`https://arxiv.org/pdf/${arxivId}`, "arXiv"), trusted: true });
     }
-    add(work.best_oa_location?.pdf_url);
-    add(work.primary_location?.pdf_url);
-    for (const location of work.locations ?? []) add(location.pdf_url);
+    add(work.best_oa_location?.pdf_url, undefined, true);
+    add(work.primary_location?.pdf_url, undefined, true);
+    for (const location of work.locations ?? []) add(location.pdf_url, undefined, true);
   }
   return urls;
 }
@@ -131,7 +137,10 @@ export async function downloadPdf(sources: PdfSource[], onStep: FetchStep = () =
   const hasExtension = await extensionAvailable();
   for (const candidate of sources) {
     onStep(`Downloading from ${candidate.label}…`);
-    const attempts = [() => direct(candidate.url), ...(hasExtension ? [() => extensionFetch(candidate.url)] : []), () => viaFunction(candidate.url)];
+    // The extension fetch sends the user's cookies, so it is offered only for sources Biblio
+    // resolved itself. A URL carried on a paper record could have come from a crafted link.
+    const privileged = hasExtension && candidate.trusted;
+    const attempts = [() => direct(candidate.url), ...(privileged ? [() => extensionFetch(candidate.url)] : []), ...(candidate.trusted ? [() => viaFunction(candidate.url)] : [])];
     for (const attempt of attempts) {
       const blob = await attempt();
       if (blob && blob.size <= MAX_BYTES && (await isPdf(blob))) return { blob, source: candidate };

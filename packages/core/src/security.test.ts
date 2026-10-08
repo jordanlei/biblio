@@ -62,6 +62,10 @@ describe("capture payload validation", () => {
   });
 
   it("keeps ordinary http(s) links", () => {
+    // Note: an http(s) pdfUrl surviving validation is correct, but it is NOT a statement that the
+    // URL is safe to fetch with credentials. A capture link is attacker-supplyable, so the app
+    // must require a click before saving, and must not use the credentialed path for a URL that
+    // arrived this way (CaptureView's confirm phase; PdfSource.trusted in pdfFetch.ts).
     const out = parseCapturedPaper({ title: "X", pdfUrl: "https://arxiv.org/pdf/1234.pdf", url: "http://example.com/a" });
     expect(out.pdfUrl).toBe("https://arxiv.org/pdf/1234.pdf");
     expect(out.url).toBe("http://example.com/a");
@@ -87,5 +91,68 @@ describe("capture payload validation", () => {
     const hash = "#" + Buffer.from(json).toString("base64url");
     expect(decodeCaptureHash(hash).title).toBe("Attention Is All You Need");
     expect(() => decodeCaptureHash("#not-valid-base64!!")).toThrow();
+  });
+});
+
+// The extension's content script runs on pages the manifest allows, and the worker will make a
+// fetch carrying the user's cookies, so the worker must answer only its own content scripts.
+// Mirrors allowedOrigins()/trusted() in apps/extension/background.js.
+describe("extension sender validation", () => {
+  const build = (matches: string[]) => {
+    const origins = matches
+      .map((pattern) => {
+        const [scheme, rest] = pattern.split("://");
+        if (!scheme || !rest) return "";
+        const host = rest.split("/")[0];
+        if (scheme.includes("*") || host.includes("*") || !host) return "";
+        try {
+          return new URL(`${scheme}://${host}`).origin;
+        } catch {
+          return "";
+        }
+      })
+      .filter(Boolean);
+    return (sender: { id?: string; origin?: string; url?: string }) => {
+      if (sender?.id !== "self") return false;
+      let origin = sender.origin;
+      if (!origin && sender.url) {
+        try {
+          origin = new URL(sender.url).origin;
+        } catch {
+          return false;
+        }
+      }
+      if (!origin || origin === "null") return false;
+      return origins.includes(origin);
+    };
+  };
+
+  const trusted = build(["https://my-biblio.web.app/*", "https://my-biblio.firebaseapp.com/*"]);
+
+  it("accepts only the app's own origins", () => {
+    expect(trusted({ id: "self", origin: "https://my-biblio.web.app" })).toBe(true);
+    expect(trusted({ id: "self", origin: "https://my-biblio.firebaseapp.com" })).toBe(true);
+  });
+
+  it("refuses look-alikes, other schemes, and other extensions", () => {
+    for (const origin of ["https://my-biblio.web.app.evil.test", "https://evil.example", "http://my-biblio.web.app"]) {
+      expect(trusted({ id: "self", origin })).toBe(false);
+    }
+    expect(trusted({ id: "other", origin: "https://my-biblio.web.app" })).toBe(false);
+  });
+
+  it("refuses opaque origins and senders with no origin", () => {
+    expect(trusted({ id: "self", origin: "null" })).toBe(false);
+    expect(trusted({ id: "self", url: "about:blank" })).toBe(false);
+    expect(trusted({ id: "self", url: "data:text/html,x" })).toBe(false);
+    expect(trusted({ id: "self" })).toBe(false);
+  });
+
+  it("fails closed on a wildcard or malformed manifest", () => {
+    for (const matches of [["*://*/*"], ["<all_urls>"], ["https://*.example.com/*"], ["file:///*"], []]) {
+      const wild = build(matches);
+      expect(wild({ id: "self", origin: "https://evil.example" })).toBe(false);
+      expect(wild({ id: "self", origin: "https://my-biblio.web.app" })).toBe(false);
+    }
   });
 });
