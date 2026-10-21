@@ -19,8 +19,8 @@ export interface ListFilters {
 
 /** The three shelves. Anything more specific is a tag. */
 export const readingStatuses: Array<{ id: ReadingStatus; label: string; key: string }> = [
-  { id: "toRead", label: "To read", key: "1" },
-  { id: "skimming", label: "Skimming", key: "2" },
+  { id: "toRead", label: "To Read", key: "1" },
+  { id: "skimming", label: "Skim", key: "2" },
   { id: "read", label: "Read", key: "3" }
 ];
 

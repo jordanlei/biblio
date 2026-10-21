@@ -141,7 +141,7 @@ const features = [
     id: "organize",
     eyebrow: "Organize",
     title: "Three shelves, one keypress.",
-    text: "To read, Skimming, Read — press 1, 2, 3. That's the whole reading model; anything more specific is a tag. Folders hold stable projects.",
+    text: "To Read, Skim, Read — press 1, 2, 3. That's the whole reading model; anything more specific is a tag. Folders hold stable projects.",
     video: { name: "organize", width: 600, height: 602 }
   },
   {
@@ -334,7 +334,7 @@ npm run setup</pre>
           about — <a :href="PRIVACY_URL">the privacy page</a> spells out exactly what is and isn't private.
         </FaqItem>
         <FaqItem question="Why only three reading shelves?">
-          Because more shelves become a filing problem of their own. To read, Skimming, and Read cover how much attention a paper needs; everything else — reference, parked, to cite — is a tag, which you can combine and rename.
+          Because more shelves become a filing problem of their own. To Read, Skim, and Read cover how much attention a paper needs; everything else — reference, parked, to cite — is a tag, which you can combine and rename.
         </FaqItem>
         <FaqItem question="Can I add my own features?">
           Yes, and keep them through updates. Your code goes in <code>apps/web/src/custom/</code>, which upstream never touches, and can add pages, sidebar links, and panels. See <a :href="docUrl('EXTENDING.md')">EXTENDING.md</a>.
