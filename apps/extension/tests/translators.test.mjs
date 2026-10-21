@@ -59,3 +59,10 @@ test("PubMed translator keeps Jr. out of the family name", () => {
   const item = context.BiblioTranslate.run(document, url);
   assert.deepEqual(Array.from(item.authors), ["Warren, W H Jr"]);
 });
+
+test("structured PubMed XML keeps suffixes separate from family names", () => {
+  const context = vm.createContext({});
+  vm.runInContext(readFileSync(new URL("pubmed-xml.js", extensionRoot), "utf8"), context);
+  const item = context.BiblioPubMed.parse(`<PubmedArticle><MedlineCitation><PMID>6238127</PMID><Article><ArticleTitle>A paper</ArticleTitle><Journal><Title>J Med</Title><JournalIssue><Volume>2</Volume><Issue>1</Issue><PubDate><Year>1984</Year></PubDate></JournalIssue></Journal><AuthorList><Author><LastName>Warren</LastName><ForeName>W H</ForeName><Suffix>Jr</Suffix></Author></AuthorList></Article></MedlineCitation></PubmedArticle>`);
+  assert.deepEqual(Array.from(item.authors), ["Warren, W H Jr"]);
+});

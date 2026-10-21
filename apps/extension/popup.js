@@ -28,6 +28,17 @@ function addChip(label) {
   $("chips").append(chip);
 }
 
+async function enrichPubMed(paper) {
+  if (!paper?.pmid) return paper;
+  try {
+    const response = await chrome.runtime.sendMessage({ type: "fetch-pubmed", pmid: paper.pmid });
+    if (response?.ok && response.paper?.authors?.length) return { ...paper, ...response.paper, url: paper.url, pdfUrl: paper.pdfUrl };
+  } catch {
+    // The page translator remains a useful fallback when E-utilities is unavailable.
+  }
+  return paper;
+}
+
 async function main() {
   const select = $("app");
   const hosted = $("hosted-app");
@@ -44,7 +55,7 @@ async function main() {
   let paper = null;
   try {
     const [injection] = await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ["biblio-translate.js", "biblio-translators.js", "extract.js"] });
-    paper = injection?.result ?? null;
+    paper = await enrichPubMed(injection?.result ?? null);
   } catch {
     paper = null; // chrome:// pages, the Web Store, etc.
   }

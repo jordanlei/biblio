@@ -4,6 +4,7 @@
 // This worker never looks at pages on its own: metadata is only ever read when you click the
 // extension (popup.js injects the translators into the active tab then, and only then).
 importScripts("app-url.js");
+importScripts("pubmed-xml.js");
 
 const MAX_BYTES = 80 * 1024 * 1024;
 
@@ -23,11 +24,26 @@ chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({ id: "save-to-biblio", title: "Save to Biblio", contexts: ["page", "selection", "link"] });
 });
 
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message?.type !== "fetch-pubmed" || sender?.id !== chrome.runtime.id || !/^\d+$/.test(String(message.pmid))) return false;
+  enrichPubMed({ pmid: String(message.pmid) })
+    .then((paper) => sendResponse({ ok: true, paper }))
+    .catch((error) => sendResponse({ ok: false, error: String(error?.message ?? error) }));
+  return true;
+});
+
+async function enrichPubMed(paper) {
+  if (!paper?.pmid) return paper;
+  const response = await fetch(`https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=PubMed&tool=Biblio&retmode=xml&rettype=citation&id=${paper.pmid}`);
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  return { ...paper, ...BiblioPubMed.parse(await response.text()), url: paper.url, pdfUrl: paper.pdfUrl };
+}
+
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   if (info.menuItemId !== "save-to-biblio" || !tab?.id) return;
   try {
     const [injection] = await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ["biblio-translate.js", "biblio-translators.js", "extract.js"] });
-    const paper = injection?.result;
+    const paper = await enrichPubMed(injection?.result);
     if (!paper?.isPaper || !paper.title) {
       await chrome.tabs.create({ url: `${await appUrl()}/search` });
       return;
