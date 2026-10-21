@@ -14,7 +14,7 @@
     "build": "npm --workspace packages/core run build && npm --workspace apps/web run build",
     "test": "npm run test:core && npm run test:extension",
     "test:core": "node scripts/check-boundaries.mjs && node functions/safe-destination.test.mjs && npm --workspace packages/core run test",
-    "test:extension": "node --test apps/extension/tests/*.test.mjs",
+    "test:extension": "npm run build:extension && node --test apps/extension/tests/*.test.mjs",
     "test:final": "npm test && npm run typecheck && npm run build && npm run test:e2e",
     "typecheck": "npm --workspace packages/core run build && npm --workspace apps/web run typecheck && npm --workspace apps/site run typecheck",
     "bench:latency": "vitest run scripts/bench-latency.test.ts --pool=forks --reporter=dot",

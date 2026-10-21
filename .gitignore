@@ -4,6 +4,13 @@ dist-*/
 # Generated for this checkout by `npm run build:extension`.
 apps/extension/app-url.js
 apps/extension/manifest.json
+apps/extension/zotero-capture.js
+# Development metadata copied with the Zotero utilities checkout; only runtime files are vendored.
+apps/extension/vendor/zotero/utilities/.github/
+apps/extension/vendor/zotero/utilities/.gitignore
+apps/extension/vendor/zotero/utilities/.gitmodules
+apps/extension/vendor/zotero/utilities/package-lock.json
+apps/extension/vendor/zotero/utilities/test/
 .firebase/
 .firebaserc
 .firebaserc.local

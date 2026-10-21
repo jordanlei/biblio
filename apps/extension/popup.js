@@ -1,4 +1,4 @@
-// Popup: read the current tab's metadata (extract.js), then hand it to the web app's /capture page,
+// Popup: run the vendored Zotero translator runtime in the current tab, then hand the item to the web app's /capture page,
 // which is signed in, checks for duplicates, saves the paper, and pulls the PDF through this
 // extension. The extension itself never holds Firebase or Google credentials.
 const $ = (id) => document.getElementById(id);
@@ -28,15 +28,6 @@ function addChip(label) {
   $("chips").append(chip);
 }
 
-async function enrichPubMed(paper) {
-  if (!paper?.pmid) return paper;
-  try {
-    const response = await chrome.runtime.sendMessage({ type: "fetch-pubmed", pmid: paper.pmid });
-    if (response?.ok && response.paper?.authors?.length) return { ...paper, ...response.paper, url: paper.url, pdfUrl: paper.pdfUrl };
-  } catch { /* handled below */ }
-  return null;
-}
-
 async function main() {
   const select = $("app");
   const hosted = $("hosted-app");
@@ -52,8 +43,8 @@ async function main() {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   let paper = null;
   try {
-    const [injection] = await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ["biblio-translate.js", "biblio-translators.js", "extract.js"] });
-    paper = await enrichPubMed(injection?.result ?? null);
+    const [injection] = await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ["zotero-capture.js"] });
+    paper = injection?.result ?? null;
   } catch {
     paper = null; // chrome:// pages, the Web Store, etc.
   }

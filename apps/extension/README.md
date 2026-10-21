@@ -35,40 +35,27 @@ on the app's `/capture` page, where you can choose a collection before saving. T
 
 | File | Role |
 | --- | --- |
-| `extract.js` | Injected into the tab. Runs ordered Biblio translators (arXiv, PubMed, OpenReview, DOI pages) before falling back to generic Highwire `citation_*`, Dublin Core, JSON-LD, URL patterns, and direct PDF tabs. |
+| `zotero-capture.js` | Generated from the vendored Zotero Translate runtime and official translators. It detects and translates the active page without a Biblio-owned author or site parser. |
 | `popup.html/js` | Shows what was found and opens `/capture#<base64url JSON>`. The hash never reaches a server. |
 | `background.js` | Service worker that detects capturable pages for the toolbar badge and fetches PDFs (`credentials: "include"`), verifies `%PDF-`, and returns base64. |
 | `bridge.js` | Content script on the app's own origins. Relays `window.postMessage` requests (`ping`, `fetch-pdf`) to the background worker. |
 
 The extension never sees Firebase or Google credentials: saving happens in the signed-in web app. Host permission `<all_urls>` is required to fetch PDFs from any publisher.
 
-## Biblio Translate
-
-Capture reads a page's own metadata. Publishers already publish it for Google Scholar, so the
-extension mostly just reads standard tags:
-
-- **Highwire Press** (`citation_title`, `citation_author`, `citation_doi`, `citation_pdf_url`…) — what
-  Google Scholar asks publishers for, and what most journals emit.
-- **Dublin Core** (`dc.title`, `dc.creator`), **PRISM**, **EPrints**, and **JSON-LD**
-  (`schema.org/ScholarlyArticle`) as fallbacks.
-- A few site translators (arXiv, PubMed, OpenReview, DOI pages) for sites whose markup needs help.
-
-These are open web standards, not any one application's format.
-
-| File | Role |
-| --- | --- |
-| `biblio-translate.js` | The translator registry: `register()`, priority ordering, and normalising a translator's output into Biblio capture JSON. ~60 lines, no network access. |
-| `biblio-translators.js` | Bundled translators written against that interface. |
-| `extract.js` | Runs Biblio Translate, then the built-in site translators, then the generic metadata translator. Returns the first confident match. |
-
 ### On Zotero and licensing
 
-Biblio **never talks to Zotero**: no Zotero API, no `localhost:23119` connector endpoint, no Zotero
-runtime, and no live dependency on Zotero services. The PubMed translator is an adapted copy of
-Zotero's official `PubMed.js` translator and uses the same PMID detection and NCBI E-utilities
-strategy, rewritten for Biblio's small browser-native interface.
+Biblio **does not connect to a running Zotero installation** and has no live dependency on Zotero
+services. It vendors the official Zotero Translate runtime and the official PubMed, PubMed XML,
+Nature Publishing Group, Springer Link, Embedded Metadata, RDF, and RIS translators. The source
+files are preserved under `vendor/zotero/`; the build wraps them in static factories so Manifest
+V3's CSP does not block Zotero's translator sandbox.
 
-The extension is distributed under AGPL-3.0-or-later because of this adapted translator. See
+Cross-origin requests made by those translators go through Biblio's extension worker, preserving
+the translator request behavior while avoiding publisher CORS failures. If no official bundled
+translator detects the page, Biblio fails closed rather than guessing an author name.
+
+The extension is distributed under AGPL-3.0-or-later because of these vendored translators and
+runtime. See
 `LICENSE` and `THIRD_PARTY_NOTICES.md` for the license and attribution. The web app outside
 `apps/extension` remains MIT-licensed.
 
