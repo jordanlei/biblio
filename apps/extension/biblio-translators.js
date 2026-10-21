@@ -12,7 +12,18 @@
       .flatMap((name) => Array.from(doc.querySelectorAll(`meta[name="${name}" i], meta[property="${name}" i]`)).map((node) => node.content?.trim()))
       .filter(Boolean)[0] || "";
 
-  const authorsFromMeta = (doc) => Array.from(doc.querySelectorAll('meta[name="citation_author" i]')).map((node) => node.content);
+  const authorSuffixes = new Set(["jr", "jr.", "sr", "sr.", "ii", "iii", "iv", "v"]);
+  const normalizeAuthor = (value) => {
+    const name = value?.replace(/\s+/g, " ").trim() || "";
+    if (!name || name.includes(",")) return name;
+    const parts = name.split(" ");
+    const suffix = parts.at(-1)?.toLowerCase();
+    if (!suffix || !authorSuffixes.has(suffix) || parts.length < 3) return name;
+    const family = parts.at(-2);
+    const given = parts.slice(0, -2).join(" ");
+    return `${family}, ${[given, parts.at(-1)].filter(Boolean).join(" ")}`;
+  };
+  const authorsFromMeta = (doc) => Array.from(doc.querySelectorAll('meta[name="citation_author" i]')).map((node) => normalizeAuthor(node.content));
 
   // PubMed's current HTML is intentionally treated as a first-class translator. Older records
   // (including PMID 6238127) do not expose citation_* meta tags, while the visible author list
@@ -34,7 +45,7 @@
       if (!authors.length) {
         for (const selector of [".authors-list .full-name", ".authors-list a", ".author-list .full-name", "a.docsum-author"] ) {
           for (const node of doc.querySelectorAll(selector)) {
-            const name = node.textContent?.replace(/\s+/g, " ").trim();
+            const name = normalizeAuthor(node.textContent);
             if (name && !authors.includes(name)) authors.push(name);
           }
           if (authors.length) break;
