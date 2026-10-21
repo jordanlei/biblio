@@ -170,6 +170,7 @@ export function shortAuthors(creators: Creator[]): string {
 }
 
 export function parseCreators(value: string): Creator[] {
+  const suffixes = new Set(["jr", "jr.", "sr", "sr.", "ii", "iii", "iv", "v"]);
   return value
     .split(/\s*(?:;|\band\b)\s*/i)
     .map((part) => part.trim())
@@ -180,6 +181,14 @@ export function parseCreators(value: string): Creator[] {
         return given ? { family, given } : { family };
       }
       const pieces = name.split(/\s+/);
+      const last = pieces.at(-1)?.toLowerCase();
+      const beforeLast = pieces.at(-2)?.toLowerCase();
+      if (pieces.length >= 3 && last && suffixes.has(last)) {
+        return { given: `${pieces.slice(0, -2).join(" ")} ${pieces.at(-1)}`.trim(), family: pieces.at(-2) };
+      }
+      if (pieces.length >= 3 && beforeLast && suffixes.has(beforeLast)) {
+        return { given: pieces.slice(0, -1).join(" "), family: pieces.at(-1) };
+      }
       if (pieces.length === 1) return { literal: pieces[0] };
       return { given: pieces.slice(0, -1).join(" "), family: pieces.at(-1) };
     });
