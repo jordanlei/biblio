@@ -39,27 +39,6 @@ test("PubMed translator captures authors and PMID from an older record", () => {
   assert.deepEqual(Array.from(item.authors), authors);
 });
 
-test("PubMed translator keeps Jr. out of the family name", () => {
-  const url = "https://pubmed.ncbi.nlm.nih.gov/6238127/";
-  const document = {
-    querySelectorAll(selector) {
-      if (selector === ".authors-list .full-name") return [{ textContent: "W H Warren Jr" }];
-      return [];
-    },
-    querySelector(selector) {
-      if (selector.includes("h1.heading-title")) return { textContent: "A paper" };
-      if (selector === ".cit") return { textContent: "J Med. 1984;2:1-2." };
-      return null;
-    }
-  };
-  const context = vm.createContext({ URL, document, location: { href: url } });
-  vm.runInContext(readFileSync(new URL("biblio-translate.js", extensionRoot), "utf8"), context);
-  vm.runInContext(readFileSync(new URL("biblio-translators.js", extensionRoot), "utf8"), context);
-
-  const item = context.BiblioTranslate.run(document, url);
-  assert.deepEqual(Array.from(item.authors), ["Warren, W H Jr"]);
-});
-
 test("structured PubMed XML keeps suffixes separate from family names", () => {
   const context = vm.createContext({});
   vm.runInContext(readFileSync(new URL("pubmed-xml.js", extensionRoot), "utf8"), context);

@@ -16,12 +16,7 @@ function encode(data) {
 }
 
 function summarize(paper) {
-  const suffixes = new Set(["jr", "jr.", "sr", "sr.", "ii", "iii", "iv", "v"]);
-  const names = paper.authors.map((a) => {
-    if (a.includes(",")) return a.split(",")[0];
-    const parts = a.split(/\s+/);
-    return suffixes.has(parts.at(-1)?.toLowerCase()) ? parts.at(-2) : parts.at(-1);
-  });
+  const names = paper.authors.map((a) => (a.includes(",") ? a.split(",")[0] : a.split(" ").pop()));
   const who = names.length > 2 ? `${names[0]} et al.` : names.join(" & ");
   return [who, paper.year, paper.venue].filter(Boolean).join(" · ");
 }
@@ -38,10 +33,8 @@ async function enrichPubMed(paper) {
   try {
     const response = await chrome.runtime.sendMessage({ type: "fetch-pubmed", pmid: paper.pmid });
     if (response?.ok && response.paper?.authors?.length) return { ...paper, ...response.paper, url: paper.url, pdfUrl: paper.pdfUrl };
-  } catch {
-    // The page translator remains a useful fallback when E-utilities is unavailable.
-  }
-  return paper;
+  } catch { /* handled below */ }
+  return null;
 }
 
 async function main() {
