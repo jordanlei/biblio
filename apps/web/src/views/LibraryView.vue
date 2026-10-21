@@ -109,7 +109,6 @@ watch(() => [route.query.folder, route.query.tag, route.query.view], () => (sear
 const selected = computed(() => (ui.selectedId ? paperById.value.get(ui.selectedId) ?? null : null));
 const targetIds = computed(() => (checked.value.size ? [...checked.value] : selected.value ? [selected.value.id] : []));
 const checkedPapers = computed(() => visible.value.filter((p) => checked.value.has(p.id)));
-const pdfCount = computed(() => visible.value.filter((p) => p.pdf).length);
 
 function listAuthors(paper: Paper) {
   const names = paper.authors.slice(0, 3).map(familyName).filter(Boolean);
@@ -365,7 +364,7 @@ const scopeEyebrow = computed(() => (scope.value.kind === "folder" ? "Folder" : 
             <p class="eyebrow">{{ scopeEyebrow }}</p>
             <h1 class="display">{{ scope.label }}</h1>
             <p v-if="loaded" class="tally">
-              {{ visible.length }} {{ visible.length === 1 ? "paper" : "papers" }}<template v-if="visible.length"> · {{ pdfCount }} with PDF</template>
+              {{ visible.length }} {{ visible.length === 1 ? "paper" : "papers" }}
             </p>
           </div>
           <span class="spacer" />
