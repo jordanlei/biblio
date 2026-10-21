@@ -3,7 +3,40 @@
 //
 // This worker never looks at pages on its own: metadata is only ever read when you click the
 // extension (popup.js injects the translators into the active tab then, and only then).
+importScripts("app-url.js");
+
 const MAX_BYTES = 80 * 1024 * 1024;
+
+function encodeCapture(data) {
+  const bytes = new TextEncoder().encode(JSON.stringify(data));
+  let binary = "";
+  bytes.forEach((byte) => (binary += String.fromCharCode(byte)));
+  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
+async function appUrl() {
+  const { appUrl } = await chrome.storage.sync.get("appUrl");
+  return appUrl || DEFAULT_APP_URL;
+}
+
+chrome.runtime.onInstalled.addListener(() => {
+  chrome.contextMenus.create({ id: "save-to-biblio", title: "Save to Biblio", contexts: ["page", "selection", "link"] });
+});
+
+chrome.contextMenus.onClicked.addListener(async (info, tab) => {
+  if (info.menuItemId !== "save-to-biblio" || !tab?.id) return;
+  try {
+    const [injection] = await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ["biblio-translate.js", "biblio-translators.js", "extract.js"] });
+    const paper = injection?.result;
+    if (!paper?.isPaper || !paper.title) {
+      await chrome.tabs.create({ url: `${await appUrl()}/search` });
+      return;
+    }
+    await chrome.tabs.create({ url: `${await appUrl()}/capture#${encodeCapture(paper)}` });
+  } catch {
+    await chrome.tabs.create({ url: `${await appUrl()}/search` });
+  }
+});
 
 function toBase64(buffer) {
   const bytes = new Uint8Array(buffer);

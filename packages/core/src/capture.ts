@@ -19,6 +19,7 @@ export interface CapturedPaper {
   abstract?: string;
   pdfUrl?: string;
   url?: string;
+  collectionId?: string;
 }
 
 const MAX_TEXT = 6000;
@@ -54,7 +55,8 @@ export function parseCapturedPaper(raw: unknown): CapturedPaper {
     pmid: text("pmid"),
     abstract: text("abstract"),
     pdfUrl: link("pdfUrl"),
-    url: link("url")
+    url: link("url"),
+    collectionId: text("collectionId")
   };
 }
 

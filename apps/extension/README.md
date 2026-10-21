@@ -22,9 +22,9 @@ from the Chrome Web Store.
 
 ## Use
 
-On an article page (arXiv, a journal, PubMed, OpenReview, a PDF tab…), the extension button shows a
-**SAVE** badge when Biblio can translate the page. Click the extension and then **Save to Biblio**.
-A tab opens on the app's `/capture` page, which:
+On an article page (arXiv, a journal, PubMed, OpenReview, a PDF tab…), right-click the page and
+choose **Save to Biblio**, or click the extension button and then **Save to Biblio**. A tab opens
+on the app's `/capture` page, where you can choose a collection before saving. That page:
 
 1. checks your library for duplicates (“✓ Already in library”, or “may already be in your library”);
 2. saves the metadata;

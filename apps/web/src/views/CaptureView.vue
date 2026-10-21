@@ -14,7 +14,7 @@ import { useSession } from "../services/session";
 
 const route = useRoute();
 const session = useSession();
-const { loaded, paperById } = useLibrary();
+const { loaded, folders, paperById } = useLibrary();
 
 const captured = ref<CapturedPaper | null>(null);
 const error = ref("");
@@ -22,6 +22,7 @@ const phase = ref<"waiting" | "duplicate" | "probable" | "saving" | "saved">("wa
 const duplicate = ref<DuplicateResult | null>(null);
 const paperId = ref<string | null>(null);
 const pdf = ref<{ state: "idle" | "working" | "done" | "failed" | "skipped"; message: string }>({ state: "idle", message: "" });
+const selectedCollectionId = ref("");
 
 const paper = computed<Paper | null>(() => (paperId.value ? paperById.value.get(paperId.value) ?? null : null));
 
@@ -44,7 +45,8 @@ function toCandidate(c: CapturedPaper): PaperCandidate {
     url: c.url,
     openAccessPdfUrl: c.pdfUrl || undefined,
     readingStatus: "toRead",
-    source: "extension"
+    source: "extension",
+    folderIds: selectedCollectionId.value ? [selectedCollectionId.value] : []
   };
 }
 
@@ -95,11 +97,14 @@ function start() {
 onMounted(() => {
   try {
     captured.value = decodeCaptureHash(route.hash);
+    selectedCollectionId.value = captured.value.collectionId ?? "";
   } catch {
     error.value = "This link doesn't contain a paper. Use the Biblio extension's “Save” button on an article page.";
   }
 });
-watch([loaded, captured], start, { immediate: true });
+watch([loaded, captured], () => {
+  if (loaded.value && captured.value && !folders.value.length) start();
+}, { immediate: true });
 </script>
 
 <template>
@@ -110,6 +115,15 @@ watch([loaded, captured], start, { immediate: true });
     <template v-if="captured">
       <h1 class="display">{{ captured.title }}</h1>
       <p class="muted">{{ [shortAuthors(parseCreators(captured.authors.join("; "))), captured.year, captured.venue].filter(Boolean).join(" · ") }}</p>
+
+      <label v-if="phase === 'waiting' && folders.length" class="collection-picker">
+        <span>Add to collection</span>
+        <select v-model="selectedCollectionId" aria-label="Add to collection">
+          <option value="">No collection</option>
+          <option v-for="folder in folders" :key="folder.id" :value="folder.id">{{ folder.name }}</option>
+        </select>
+      </label>
+      <button v-if="phase === 'waiting' && folders.length" class="btn primary" type="button" @click="start">Add to library</button>
 
       <ol class="steps">
         <li v-if="phase === 'waiting'"><span class="spinner" /> Checking your library…</li>
@@ -170,6 +184,24 @@ h1 {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: var(--surface);
+}
+
+.collection-picker {
+  display: grid;
+  gap: 6px;
+  color: var(--text-2);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.collection-picker select {
+  min-height: 38px;
+  padding: 0 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
 }
 
 .steps li {
