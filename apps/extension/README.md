@@ -5,14 +5,16 @@ Save the paper you're reading, with its PDF, to Biblio.
 ## Install (developer mode)
 
 1. Build it for your copy of the app: `npm run build:extension` (setup does this too). It writes
-   `apps/extension/dist/`, pointed at the address in `biblio.config.json`.
+   the deployment-specific `manifest.json` and `app-url.js` files in this folder, pointed at the
+   address in `biblio.config.json`.
 2. Open `chrome://extensions`, turn on **Developer mode**.
-3. **Load unpacked** → choose `apps/extension/dist`. (Loading `apps/extension` itself gives a
-   version that saves to local test mode, `localhost:5173`.)
+3. **Load unpacked** → choose `apps/extension`.
 4. Pin the extension. In the popup, choose where to save: your app (default) or `localhost:5173`.
 
-`apps/extension` is the source. `apps/extension/dist` is a generated, gitignored install package;
-it is deleted and rebuilt by `npm run build:extension`. Do not edit files in `dist` directly.
+There is one extension folder and one copy of its code. `config/manifest.template.json` is the
+checked-in manifest template; `manifest.json` and `app-url.js` are generated and gitignored because
+they contain this checkout's deployment address. Re-run `npm run build:extension` after changing
+`biblio.config.json`, then click **Reload** on Biblio's card in `chrome://extensions`.
 
 Chrome may warn about unpacked developer-mode extensions when it starts. That is expected for the
 self-hosted install path; the extension is generated for your own Biblio copy rather than installed

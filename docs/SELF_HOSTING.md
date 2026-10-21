@@ -43,7 +43,7 @@ npm run setup
    `eur3` = Europe, or a single region).
 6. **Create the hosting site.**
 7. **Save `biblio.config.json`**, the one file that says which project this copy uses, and
-   build the Chrome extension for your address (`apps/extension/dist`).
+   configure the Chrome extension for your address (`apps/extension`).
 8. **Turn on Google sign-in.** This is the one step Google doesn't allow tools to do for you. Setup
    opens the right page: choose **Google → Enable**, pick your email as the support email, **Save**,
    then press Enter. Setup checks that it worked.
@@ -108,8 +108,8 @@ The service account can deploy hosting and Firestore rules, and nothing else. To
 - **Your own domain.** Add it under *Hosting* in the Firebase console, then add it to
   *Authentication → Settings → Authorized domains*.
 - **Cloud Functions** (`functions/`) are optional and need the paid Blaze plan; the app works without them.
-- **The Chrome extension:** setup builds it for your address into `apps/extension/dist`
-  (`npm run build:extension` to rebuild). Load that folder unpacked (see its README).
+- **The Chrome extension:** setup configures it for your address in `apps/extension`
+  (`npm run build:extension` to refresh it). Load that folder unpacked (see its README).
 - **Moving between copies.** Your copy only sees the Drive files it created, so a library moves as
   files: in the old copy, *Settings → Download library (.zip)*; in the new one, *Import a library*.
   No app at hand (say you deleted the old Firebase project)? Download the library folder from Google

@@ -31,7 +31,7 @@ function addChip(label) {
 async function main() {
   const select = $("app");
   const hosted = $("hosted-app");
-  // A build for a deployed copy adds its address; the source build only knows local test mode.
+  // The generated app-url.js supplies this checkout's deployed address.
   if (DEFAULT_APP_URL.startsWith("http://localhost")) hosted.remove();
   else {
     hosted.value = DEFAULT_APP_URL;

@@ -1,7 +1,9 @@
 node_modules/
 dist/
 dist-*/
-apps/extension/dist/
+# Generated for this checkout by `npm run build:extension`.
+apps/extension/app-url.js
+apps/extension/manifest.json
 .firebase/
 .firebaserc
 .firebaserc.local

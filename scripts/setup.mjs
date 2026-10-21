@@ -349,11 +349,11 @@ async function browserExtension(appUrl) {
     return;
   }
   run("scripts/configure-extension.mjs");
-  const dist = fileURLToPath(new URL("../apps/extension/dist", import.meta.url));
+  const extension = fileURLToPath(new URL("../apps/extension", import.meta.url));
   console.log("\n   To finish, in Chrome:");
   console.log("     1. Open chrome://extensions and turn on Developer mode (top right).");
   console.log("     2. Click “Load unpacked”.");
-  console.log(`     3. Choose: ${dist}`);
+  console.log(`     3. Choose: ${extension}`);
   console.log(`\n   It saves to ${appUrl}. Pin it to your toolbar and you're set.`);
   openInBrowser("chrome://extensions");
   await ask("   Press Enter when you've loaded it (or to skip).");

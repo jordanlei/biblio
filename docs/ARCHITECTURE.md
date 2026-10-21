@@ -83,7 +83,7 @@ A copy only sees Drive files it created (`drive.file`), so libraries move by cop
 
 ## Extension (`apps/extension`)
 
-The source points at local test mode; `npm run build:extension` writes `apps/extension/dist/` for this copy's address. The extension never holds Firebase or Google credentials. The popup runs `extract.js` in the tab (Highwire `citation_*`, Dublin Core, JSON-LD, arXiv and DOI URL patterns, direct PDFs) and opens `/capture#<base64url JSON>` in the signed-in app. The app saves the paper, then asks the extension (via `bridge.js` → `background.js`) to fetch the PDF with `credentials: "include"`, which works for CORS-blocked and subscription hosts.
+`npm run build:extension` writes the ignored `manifest.json` and `app-url.js` configuration directly into `apps/extension/`; that single folder is loaded into Chrome. The extension never holds Firebase or Google credentials. The popup runs `extract.js` in the tab (Highwire `citation_*`, Dublin Core, JSON-LD, arXiv and DOI URL patterns, direct PDFs) and opens `/capture#<base64url JSON>` in the signed-in app. The app saves the paper, then asks the extension (via `bridge.js` → `background.js`) to fetch the PDF with `credentials: "include"`, which works for CORS-blocked and subscription hosts.
 
 ## Testing
 

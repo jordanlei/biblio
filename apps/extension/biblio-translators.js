@@ -24,17 +24,17 @@
     target: "https?://(?:www\\.)?pubmed\\.ncbi\\.nlm\\.nih\\.gov/",
     priority: 10,
     detect(doc, url) {
-      return /pubmed\\.ncbi\\.nlm\\.nih\\.gov\\/\\d+\\/?(?:$|[?#])/i.test(url) && Boolean(
+      return /pubmed\.ncbi\.nlm\.nih\.gov\/\d+\/?(?:$|[?#])/i.test(url) && Boolean(
         doc.querySelector('meta[name="ncbi_uidlist" i], meta[name="ncbi_article_id" i], meta[name="uid" i], link[rel="canonical" i], input#absid, h1.heading-title, .article-details, .citation')
       );
     },
     extract(doc, url) {
-      const pmid = url.match(/\\/(\\d+)\\/?(?:$|[?#])/i)?.[1] || meta(doc, "citation_pmid");
+      const pmid = url.match(/\/(\d+)\/?(?:$|[?#])/i)?.[1] || meta(doc, "citation_pmid");
       const authors = authorsFromMeta(doc);
       if (!authors.length) {
         for (const selector of [".authors-list .full-name", ".authors-list a", ".author-list .full-name", "a.docsum-author"] ) {
           for (const node of doc.querySelectorAll(selector)) {
-            const name = node.textContent?.replace(/\\s+/g, " ").trim();
+            const name = node.textContent?.replace(/\s+/g, " ").trim();
             if (name && !authors.includes(name)) authors.push(name);
           }
           if (authors.length) break;
@@ -45,7 +45,7 @@
       return {
         title: meta(doc, "citation_title") || doc.querySelector("h1.heading-title")?.textContent,
         authors,
-        year: Number((meta(doc, "citation_publication_date") || doc.querySelector(".cit")?.textContent || "").match(/(1[89]|20)\\d{2}/)?.[0]),
+        year: Number((meta(doc, "citation_publication_date") || doc.querySelector(".cit")?.textContent || "").match(/(1[89]|20)\d{2}/)?.[0]),
         venue: meta(doc, "citation_journal_title"),
         volume: meta(doc, "citation_volume"),
         issue: meta(doc, "citation_issue"),
