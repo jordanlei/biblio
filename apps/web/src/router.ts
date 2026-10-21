@@ -33,6 +33,6 @@ router.beforeEach(async (to) => {
   await sessionReady;
   const { signedIn } = useSession();
   if (!to.meta.public && !signedIn.value) return { path: "/login", query: to.fullPath !== "/library" ? { next: to.fullPath } : {} };
-  if (to.path === "/login" && signedIn.value) return (to.query.next as string) || "/library";
+  if (to.path === "/login" && signedIn.value && to.query.handoff !== "1") return (to.query.next as string) || "/library";
   return true;
 });
