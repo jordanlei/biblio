@@ -5,7 +5,7 @@ import { computed, onMounted, ref, watch } from "vue";
 import { RouterLink, useRoute } from "vue-router";
 import AppIcon from "../components/AppIcon.vue";
 import { grabPdf } from "../services/drive";
-import { addPaper, checkDuplicate, parseCreators, shortAuthors, useLibrary } from "../services/library";
+import { addPaper, checkDuplicate, parseCreators, setPaperFolders, shortAuthors, useLibrary } from "../services/library";
 import { useSession } from "../services/session";
 
 // Landing page for the browser extension's "Save to Biblio". The extension passes the page's
@@ -46,7 +46,7 @@ function toCandidate(c: CapturedPaper): PaperCandidate {
     openAccessPdfUrl: c.pdfUrl || undefined,
     readingStatus: "toRead",
     source: "extension",
-    folderIds: selectedCollectionId.value ? [selectedCollectionId.value] : []
+    folderIds: []
   };
 }
 
@@ -103,8 +103,16 @@ onMounted(() => {
   }
 });
 watch([loaded, captured], () => {
-  if (loaded.value && captured.value && !folders.value.length) start();
+  if (loaded.value && captured.value) start();
 }, { immediate: true });
+
+function assignCollection() {
+  if (paper.value && selectedCollectionId.value) {
+    setPaperFolders([paper.value.id], selectedCollectionId.value, true).catch((e) => {
+      error.value = e instanceof Error ? e.message : "Couldn't add the paper to that collection.";
+    });
+  }
+}
 </script>
 
 <template>
@@ -116,14 +124,13 @@ watch([loaded, captured], () => {
       <h1 class="display">{{ captured.title }}</h1>
       <p class="muted">{{ [shortAuthors(parseCreators(captured.authors.join("; "))), captured.year, captured.venue].filter(Boolean).join(" · ") }}</p>
 
-      <label v-if="phase === 'waiting' && folders.length" class="collection-picker">
+      <label v-if="paper && folders.length" class="collection-picker">
         <span>Add to collection</span>
-        <select v-model="selectedCollectionId" aria-label="Add to collection">
+        <select v-model="selectedCollectionId" aria-label="Add to collection" @change="assignCollection">
           <option value="">No collection</option>
           <option v-for="folder in folders" :key="folder.id" :value="folder.id">{{ folder.name }}</option>
         </select>
       </label>
-      <button v-if="phase === 'waiting' && folders.length" class="btn primary" type="button" @click="start">Add to library</button>
 
       <ol class="steps">
         <li v-if="phase === 'waiting'"><span class="spinner" /> Checking your library…</li>
