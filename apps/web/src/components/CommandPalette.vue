@@ -197,12 +197,12 @@ onMounted(() => input.value?.focus());
 
 .group {
   padding: 8px 10px 4px;
-  font-family: var(--font-serif);
-  font-variant-caps: all-small-caps;
-  font-size: calc(15px * var(--text-scale));
-  font-weight: 600;
-  letter-spacing: 0.06em;
+  font-family: var(--font-ui);
+  font-size: calc(10.5px * var(--text-scale));
+  font-weight: 650;
+  letter-spacing: 0.08em;
   color: var(--text-2);
+  text-transform: uppercase;
 }
 
 .item {

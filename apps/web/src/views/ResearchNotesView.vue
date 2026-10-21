@@ -140,7 +140,7 @@ async function removeNote() {
             </span>
           </li>
         </ul>
-        <p v-else class="faint small">Papers you link with <code>@[</code> show up here, and the note shows up on their pages.</p>
+        <p v-else class="faint small">No linked papers.</p>
       </section>
 
       <button class="btn danger sm delete" type="button" @click="removeNote"><AppIcon name="trash" :size="13" /> Delete note</button>

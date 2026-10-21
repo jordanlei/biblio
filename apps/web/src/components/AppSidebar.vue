@@ -2,11 +2,11 @@
 import { computed, ref } from "vue";
 import { RouterLink, useRoute, useRouter } from "vue-router";
 import { usingEmulators } from "../firebase";
-import { createFolder, createResearchNote, setPaperFolders, useLibrary } from "../services/library";
+import { createFolder, setPaperFolders, useLibrary } from "../services/library";
 import { customNavItems } from "../custom";
 import { scopeFromQuery, smartViews } from "../services/scope";
 import { signOut, useSession } from "../services/session";
-import { openAdd, toastError, ui } from "../services/ui";
+import { openAdd, ui } from "../services/ui";
 import AppIcon from "./AppIcon.vue";
 import BrandMark from "./BrandMark.vue";
 import SyncIndicator from "./SyncIndicator.vue";
@@ -23,14 +23,6 @@ const collapsedFolders = ref(new Set<string>());
 const dropFolderId = ref<string | null>(null);
 const newFolderName = ref("");
 
-async function newNote() {
-  try {
-    const note = await createResearchNote();
-    await router.push({ path: `/research-notes/${note.id}`, query: { new: "1" } });
-  } catch (error) {
-    toastError(error);
-  }
-}
 const newFolderParent = ref<string | null>(null);
 // Focus the new-folder input with its placeholder name selected, so typing replaces it.
 const vSelectOnMount = { mounted: (el: HTMLInputElement) => el.select() };
@@ -43,7 +35,7 @@ const viewCounts = computed(() => {
   return counts;
 });
 
-const visibleTags = computed(() => (showAllTags.value ? tagCounts.value : tagCounts.value.slice(0, 12)));
+const visibleTags = computed(() => (showAllTags.value ? tagCounts.value : tagCounts.value.slice(0, 6)));
 const folderRows = computed(() => {
   const rows: Array<{ id: string; name: string; depth: number; count: number; hasChildren: boolean }> = [];
   const children = new Map<string | null, typeof folders.value>();
@@ -142,7 +134,6 @@ async function dropOnFolder(folderId: string, event: DragEvent) {
       <div class="group-head">
         <span>Collections</span>
         <span class="head-actions">
-          <button class="btn quiet icon mini" type="button" aria-label="New research note" title="New research note" @click="newNote"><AppIcon name="note" :size="12" /></button>
           <button class="btn quiet icon mini" type="button" aria-label="New folder" title="New folder" @click="newFolderName ? (newFolderName = '') : startFolder(null)"><AppIcon name="plus" :size="13" /></button>
         </span>
       </div>
@@ -192,7 +183,7 @@ async function dropOnFolder(folderId: string, event: DragEvent) {
         >
           <span class="hash">#</span> <span class="label">{{ tag }}</span> <span class="count tnum">{{ count }}</span>
         </RouterLink>
-        <button v-if="tagCounts.length > 12" class="nav-item more" type="button" @click="showAllTags = !showAllTags">
+        <button v-if="tagCounts.length > 6" class="nav-item more" type="button" @click="showAllTags = !showAllTags">
           {{ showAllTags ? "Show fewer" : `Show all ${tagCounts.length} tags` }}
         </button>
       </template>
@@ -291,12 +282,12 @@ async function dropOnFolder(folderId: string, event: DragEvent) {
   justify-content: space-between;
   height: 26px;
   padding: 0 4px 0 8px;
-  font-family: var(--font-serif);
-  font-variant-caps: all-small-caps;
-  font-size: calc(15px * var(--text-scale));
-  font-weight: 600;
-  letter-spacing: 0.06em;
+  font-family: var(--font-ui);
+  font-size: calc(10.5px * var(--text-scale));
+  font-weight: 650;
+  letter-spacing: 0.08em;
   color: var(--text-2);
+  text-transform: uppercase;
 }
 
 .head-actions {

@@ -230,7 +230,6 @@ function onKeydown(event: KeyboardEvent) {
         </li>
       </ul>
       <p v-else-if="suggest" class="suggest card empty small faint" :style="{ top: `${suggest.top + 6}px`, left: `${suggest.left}px` }">No papers match “{{ suggest.query }}”.</p>
-      <p class="faint small help">Markdown supported · <code>@[</code> links a paper · <kbd>⌘</kbd><kbd>S</kbd> saves (it also autosaves)</p>
     </div>
 
     <div v-show="mode === 'preview'" class="preview" @click="onPreviewClick">
@@ -298,23 +297,11 @@ function onKeydown(event: KeyboardEvent) {
   font-size: calc(14px * var(--text-scale));
 }
 
-.compact .help {
-  display: none;
-}
-
 .write .textarea {
   min-height: 280px;
   font-family: var(--font-ui);
   font-size: calc(15px * var(--text-scale));
   line-height: 1.65;
-}
-
-.help {
-  margin-top: 6px;
-}
-
-.help code {
-  font-family: var(--font-mono);
 }
 
 .suggest {

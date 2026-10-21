@@ -66,7 +66,7 @@ onMounted(() => {
       </div>
 
       <div class="setting">
-        <p class="label">Reading font <span class="faint">— titles, abstracts, notes</span></p>
+        <p class="label">Display &amp; reading font <span class="faint">— headings, paper titles, and abstracts</span></p>
         <div class="fonts" role="radiogroup" aria-label="Reading font">
           <button
             v-for="f in readingFonts"

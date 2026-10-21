@@ -389,7 +389,7 @@ const scopeEyebrow = computed(() => (scope.value.kind === "folder" ? "Folder" : 
         <div v-else class="toolbar">
           <div class="search" data-tour="search">
             <AppIcon name="search" />
-            <input ref="searchInput" v-model="search" type="search" placeholder="Search — try author:hinton, year:2015-2020, #rl" aria-label="Search library" />
+            <input ref="searchInput" v-model="search" type="search" placeholder="Search papers, authors, and notes…" aria-label="Search library" title="Search supports author:name, year:2015-2020, and #tag" />
             <kbd v-if="!search">/</kbd>
           </div>
           <div class="filters" role="group" aria-label="Filters" data-tour="filters">
@@ -504,7 +504,6 @@ const scopeEyebrow = computed(() => (scope.value.kind === "folder" ? "Folder" : 
           </li>
         </ol>
         <div v-if="rendered.length < visible.length" ref="sentinel" class="faint small more">Loading more…</div>
-        <p class="keys-hint faint small"><kbd>↑</kbd><kbd>↓</kbd> select · <kbd>Enter</kbd> open · <kbd>?</kbd> shortcuts</p>
       </template>
     </section>
 
@@ -543,9 +542,7 @@ const scopeEyebrow = computed(() => (scope.value.kind === "folder" ? "Folder" : 
 
 .tally {
   margin-top: 4px;
-  font-family: var(--font-serif);
-  font-style: italic;
-  font-size: calc(14px * var(--text-scale));
+  font-size: calc(13px * var(--text-scale));
   color: var(--text-3);
 }
 
@@ -611,13 +608,13 @@ const scopeEyebrow = computed(() => (scope.value.kind === "folder" ? "Folder" : 
 }
 
 .status-mark {
-  font-family: var(--font-serif);
-  font-variant-caps: all-small-caps;
-  font-size: calc(14.5px * var(--text-scale));
-  font-weight: 600;
-  letter-spacing: 0.05em;
+  font-family: var(--font-ui);
+  font-size: calc(10.5px * var(--text-scale));
+  font-weight: 650;
+  letter-spacing: 0.07em;
   line-height: 14px;
   color: var(--text-3);
+  text-transform: uppercase;
 }
 
 .status-mark.toRead {
@@ -643,7 +640,7 @@ const scopeEyebrow = computed(() => (scope.value.kind === "folder" ? "Folder" : 
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  height: 34px;
+  height: 40px;
   padding: 0 10px;
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -733,6 +730,11 @@ const scopeEyebrow = computed(() => (scope.value.kind === "folder" ? "Folder" : 
   display: flex;
   align-items: center;
   gap: 6px;
+}
+
+.sort .select.sm {
+  height: 40px;
+  padding-inline: 12px 32px;
 }
 
 .select.sm,
@@ -886,20 +888,6 @@ const scopeEyebrow = computed(() => (scope.value.kind === "folder" ? "Folder" : 
   text-align: center;
 }
 
-.keys-hint {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 4px;
-  margin-top: 20px;
-}
-
-.keys-hint kbd {
-  height: 18px;
-  min-width: 18px;
-  font-size: calc(10.5px * var(--text-scale));
-}
-
 .skeleton {
   display: grid;
   gap: 10px;
@@ -953,7 +941,6 @@ const scopeEyebrow = computed(() => (scope.value.kind === "folder" ? "Folder" : 
   }
 
   .side,
-  .keys-hint,
   .filters {
     display: none;
   }
