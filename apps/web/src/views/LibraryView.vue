@@ -733,8 +733,9 @@ const scopeEyebrow = computed(() => (scope.value.kind === "folder" ? "Folder" : 
 }
 
 .sort .select.sm {
+  width: 116px;
   height: 34px;
-  padding-inline: 10px 28px;
+  padding-inline: 8px;
 }
 
 .select.sm,
