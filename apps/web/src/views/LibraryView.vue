@@ -640,7 +640,7 @@ const scopeEyebrow = computed(() => (scope.value.kind === "folder" ? "Folder" : 
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  height: 40px;
+  height: 34px;
   padding: 0 10px;
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -733,8 +733,8 @@ const scopeEyebrow = computed(() => (scope.value.kind === "folder" ? "Folder" : 
 }
 
 .sort .select.sm {
-  height: 40px;
-  padding-inline: 12px 32px;
+  height: 34px;
+  padding-inline: 10px 28px;
 }
 
 .select.sm,
