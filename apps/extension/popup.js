@@ -8,11 +8,6 @@ async function appUrl() {
   return appUrl || DEFAULT_APP_URL;
 }
 
-async function showOverlay(tabId, url) {
-  await chrome.scripting.executeScript({ target: { tabId }, files: ["overlay.js"] });
-  await chrome.tabs.sendMessage(tabId, { type: "show-biblio-overlay", url });
-}
-
 function encode(data) {
   const bytes = new TextEncoder().encode(JSON.stringify(data));
   let binary = "";
@@ -60,14 +55,8 @@ async function main() {
 
   if (!paper?.isPaper || !paper.title) {
     $("none").hidden = false;
-    $("open").onclick = async () => {
-      await showOverlay(tab.id, `${await appUrl()}/library`);
-      window.close();
-    };
-    $("add").onclick = async () => {
-      await showOverlay(tab.id, `${await appUrl()}/search`);
-      window.close();
-    };
+    $("open").onclick = async () => chrome.tabs.create({ url: `${await appUrl()}/library` });
+    $("add").onclick = async () => chrome.tabs.create({ url: `${await appUrl()}/search` });
     return;
   }
 
@@ -77,7 +66,7 @@ async function main() {
   for (const label of [paper.translator, paper.doi && "DOI", paper.arxivId && "arXiv", paper.pmid && "PubMed", paper.pdfUrl && "PDF available"].filter(Boolean)) addChip(label);
   $("save").onclick = async () => {
     // The hash never reaches a server; the app reads it client-side.
-    await showOverlay(tab.id, `${await appUrl()}/capture#${encode(paper)}`);
+    await chrome.tabs.create({ url: `${await appUrl()}/capture#${encode(paper)}` });
     window.close();
   };
 }

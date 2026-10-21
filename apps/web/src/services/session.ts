@@ -3,7 +3,6 @@ import {
   deleteUser,
   onAuthStateChanged,
   reauthenticateWithPopup,
-  signInWithCredential,
   signInWithPopup,
   signOut as firebaseSignOut,
   type User,
@@ -98,13 +97,6 @@ export function requireUid(): string {
 export async function signIn() {
   const result = await signInWithPopup(auth, makeGoogleProvider());
   rememberToken(result);
-  await sessionPublished(result.user.uid);
-  return result.user;
-}
-
-/** Complete an embedded sign-in handoff with a Google ID token from the top-level auth tab. */
-export async function signInWithGoogleIdToken(idToken: string) {
-  const result = await signInWithCredential(auth, GoogleAuthProvider.credential(idToken));
   await sessionPublished(result.user.uid);
   return result.user;
 }

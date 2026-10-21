@@ -23,7 +23,6 @@ const route = useRoute();
 const drawerOpen = ref(false);
 const session = useSession();
 const { loaded } = useLibrary();
-const embedded = computed(() => route.query.embed === "1");
 const showTour = computed(
   () => route.path === "/library" && loaded.value && Boolean(session.profile.value) && !session.profile.value?.onboardingCompleted && !ui.addOpen
 );
@@ -63,7 +62,7 @@ onBeforeUnmount(() => window.removeEventListener("keydown", onKey));
 </script>
 
 <template>
-  <RouterView v-if="route.meta.public || embedded" />
+  <RouterView v-if="route.meta.public" />
   <div v-else class="shell" :class="{ 'drawer-open': drawerOpen }">
     <header class="mobile-bar">
       <button class="btn quiet icon" type="button" aria-label="Open navigation" @click="drawerOpen = !drawerOpen"><AppIcon name="menu" /></button>
@@ -83,7 +82,7 @@ onBeforeUnmount(() => window.removeEventListener("keydown", onKey));
     <ConfirmDialog />
     <CommandPalette v-if="ui.paletteOpen" @close="ui.paletteOpen = false" />
   </div>
-  <ToastStack v-if="!embedded" />
+  <ToastStack />
 </template>
 
 <style scoped>
