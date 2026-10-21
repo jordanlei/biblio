@@ -18,23 +18,12 @@ const { loaded, paperById } = useLibrary();
 
 const captured = ref<CapturedPaper | null>(null);
 const error = ref("");
-const phase = ref<"waiting" | "confirm" | "duplicate" | "probable" | "saving" | "saved">("waiting");
+const phase = ref<"waiting" | "duplicate" | "probable" | "saving" | "saved">("waiting");
 const duplicate = ref<DuplicateResult | null>(null);
 const paperId = ref<string | null>(null);
 const pdf = ref<{ state: "idle" | "working" | "done" | "failed" | "skipped"; message: string }>({ state: "idle", message: "" });
 
 const paper = computed<Paper | null>(() => (paperId.value ? paperById.value.get(paperId.value) ?? null : null));
-
-/** Where the PDF would come from, so the person can see it before agreeing. */
-const pdfHost = computed(() => {
-  const href = captured.value?.pdfUrl;
-  if (!href) return "";
-  try {
-    return new URL(href).host;
-  } catch {
-    return "";
-  }
-});
 
 function toCandidate(c: CapturedPaper): PaperCandidate {
   const arxivId = normalizeArxivId(c.arxivId || undefined);
@@ -88,9 +77,9 @@ async function fetchPdf(target: Paper) {
 }
 
 /**
- * Anyone can send someone a /capture# link, so this never saves or fetches on its own: the page
- * shows what it would add, and the person decides. Saving a paper also tries to download its PDF,
- * which would otherwise let a crafted link aim a request at a host of the sender's choosing.
+ * A capture from the extension is an intentional save action, so normal captures add themselves
+ * after duplicate checking. Saving also tries to download the PDF, which is constrained by the
+ * PDF fetcher's safe-destination checks.
  */
 function start() {
   if (!captured.value || !loaded.value || phase.value !== "waiting") return;
@@ -100,7 +89,7 @@ function start() {
     paperId.value = duplicate.value.paper!.id;
     phase.value = "duplicate";
   } else if (duplicate.value.kind === "probable") phase.value = "probable";
-  else phase.value = "confirm";
+  else void save();
 }
 
 onMounted(() => {
@@ -125,17 +114,6 @@ watch([loaded, captured], start, { immediate: true });
       <ol class="steps">
         <li v-if="phase === 'waiting'"><span class="spinner" /> Checking your library…</li>
 
-        <template v-else-if="phase === 'confirm'">
-          <li>
-            Add this to your library?
-            <p v-if="pdfHost" class="faint small" style="margin-top: 6px">Biblio will also try to download the PDF from <strong>{{ pdfHost }}</strong>.</p>
-            <div class="row" style="margin-top: 10px">
-              <button class="btn primary" type="button" @click="save">Add to library</button>
-              <RouterLink class="btn quiet" to="/library">Cancel</RouterLink>
-            </div>
-          </li>
-        </template>
-
         <template v-else-if="phase === 'duplicate'">
           <li class="ok"><AppIcon name="check" /> Already in your library</li>
           <li v-if="pdf.state !== 'idle'" :class="pdf.state">
@@ -154,7 +132,7 @@ watch([loaded, captured], start, { immediate: true });
         </template>
 
         <template v-else>
-          <li :class="paper ? 'ok' : ''"><span v-if="!paper" class="spinner" /><AppIcon v-else name="check" /> {{ paper ? "Saved to your library" : "Saving metadata…" }}</li>
+          <li :class="paper ? 'ok' : ''"><span v-if="!paper" class="spinner" /><AppIcon v-else name="check" /> {{ paper ? "Saved to your library" : "Adding to your library…" }}</li>
           <li v-if="pdf.state !== 'idle'" :class="pdf.state">
             <span v-if="pdf.state === 'working'" class="spinner" /><AppIcon v-else :name="pdf.state === 'done' ? 'check' : 'pdf-missing'" /> {{ pdf.message }}
           </li>
