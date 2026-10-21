@@ -38,6 +38,7 @@ const searchInput = ref<HTMLInputElement | null>(null);
 const listEl = ref<HTMLElement | null>(null);
 const pdfDropTarget = ref<string | null>(null);
 const bulkTag = ref("");
+const showAdvancedFilters = ref(false);
 
 function readSort(): SortKey {
   try {
@@ -288,6 +289,7 @@ function setFilter(patch: Partial<ListFilters>) {
   void router.replace({ path: "/library", query });
 }
 const anyFilter = computed(() => Boolean(filters.value.pdf || filters.value.notes || filters.value.untagged || filters.value.status));
+const activeFilterCount = computed(() => [filters.value.pdf, filters.value.notes, filters.value.untagged, filters.value.status].filter(Boolean).length);
 const clearFilters = { pdf: "", notes: false, untagged: false, status: "" } as const;
 
 // --- Drag & drop ---
@@ -367,8 +369,8 @@ const scopeEyebrow = computed(() => (scope.value.kind === "folder" ? "Folder" : 
             </p>
           </div>
           <span class="spacer" />
-          <button class="btn sm quiet" type="button" :disabled="!visible.length" title="Export these papers as references.bib" @click="exportVisible">
-            <AppIcon name="download" :size="14" /> Export .bib
+          <button class="btn quiet icon" type="button" :disabled="!visible.length" aria-label="Export visible papers" title="Export visible papers as references.bib" @click="exportVisible">
+            <AppIcon name="download" :size="15" />
           </button>
         </header>
 
@@ -391,23 +393,20 @@ const scopeEyebrow = computed(() => (scope.value.kind === "folder" ? "Folder" : 
             <kbd v-if="!search">/</kbd>
           </div>
           <div class="filters" role="group" aria-label="Filters" data-tour="filters">
-            <button
-              v-for="s in readingStatuses"
-              :key="s.id"
-              type="button"
-              class="filter"
-              :class="{ on: filters.status === s.id }"
-              @click="setFilter({ status: filters.status === s.id ? '' : s.id })"
-            >
-              {{ s.label }}
+            <button type="button" class="toolbar-control" :class="{ on: anyFilter }" :aria-expanded="showAdvancedFilters" @click="showAdvancedFilters = !showAdvancedFilters">
+              <AppIcon name="filter" :size="15" /> Filters <span v-if="activeFilterCount" class="control-count">{{ activeFilterCount }}</span>
             </button>
-            <span class="divider" />
-            <button type="button" class="filter" :class="{ on: filters.pdf === 'has' }" @click="setFilter({ pdf: filters.pdf === 'has' ? '' : 'has' })">PDF</button>
-            <button type="button" class="filter" :class="{ on: filters.notes }" @click="setFilter({ notes: !filters.notes })">Notes</button>
-            <button type="button" class="filter" :class="{ on: filters.untagged }" @click="setFilter({ untagged: !filters.untagged })">Untagged</button>
+            <div v-if="showAdvancedFilters" class="filter-menu" role="group" aria-label="More filters">
+              <p class="menu-label">Reading status</p>
+              <button v-for="s in readingStatuses" :key="s.id" type="button" class="filter" :class="{ on: filters.status === s.id }" @click="setFilter({ status: filters.status === s.id ? '' : s.id })">{{ s.label }}</button>
+              <p class="menu-label">Availability</p>
+              <button type="button" class="filter" :class="{ on: filters.pdf === 'has' }" @click="setFilter({ pdf: filters.pdf === 'has' ? '' : 'has' })">PDF</button>
+              <button type="button" class="filter" :class="{ on: filters.notes }" @click="setFilter({ notes: !filters.notes })">Notes</button>
+              <button type="button" class="filter" :class="{ on: filters.untagged }" @click="setFilter({ untagged: !filters.untagged })">Untagged</button>
+              <button v-if="anyFilter" type="button" class="clear-filter" @click="setFilter(clearFilters)">Clear filters</button>
+            </div>
           </div>
-          <label class="sort small">
-            <span class="faint">Sort</span>
+          <label class="sort small" aria-label="Sort papers">
             <select v-model="activeSort" class="select sm">
               <option v-if="searching" value="relevance">Best match</option>
               <option v-for="o in sortOptions" :key="o.id" :value="o.id">{{ o.label }}</option>
@@ -477,7 +476,6 @@ const scopeEyebrow = computed(() => (scope.value.kind === "folder" ? "Folder" : 
             <input class="check" type="checkbox" :checked="checked.has(paper.id)" :aria-label="`Select ${paper.title}`" @click.stop="toggleCheck(paper, ($event as MouseEvent).shiftKey)" />
             <span class="year tnum">{{ paper.issued?.year ?? "n.d." }}</span>
             <div class="body">
-              <button class="key-eyebrow mono" type="button" title="Copy \cite{…}" @click.stop="copyText(`\\cite{${paper.citationKey}}`)">{{ paper.citationKey }}</button>
               <p class="title">
                 <template v-for="(seg, i) in highlight(paper.title, searching ? query : null)" :key="i"><mark v-if="seg.hit">{{ seg.text }}</mark><template v-else>{{ seg.text }}</template></template>
               </p>
@@ -490,8 +488,8 @@ const scopeEyebrow = computed(() => (scope.value.kind === "folder" ? "Folder" : 
               <div v-if="paper.tags.length || pdfDropTarget === paper.id" class="tag-list row-tags">
                 <span v-if="pdfDropTarget === paper.id" class="chip accent">Drop to attach PDF</span>
                 <template v-else>
-                  <span v-for="tag in paper.tags.slice(0, 4)" :key="tag" class="tag" :title="tag"><span class="tag-text">{{ tag }}</span></span>
-                  <span v-if="paper.tags.length > 4" class="tag more" :title="paper.tags.slice(4).join(', ')">+{{ paper.tags.length - 4 }}</span>
+                  <span v-for="tag in paper.tags.slice(0, 2)" :key="tag" class="tag" :title="tag"><span class="tag-text">{{ tag }}</span></span>
+                  <span v-if="paper.tags.length > 2" class="tag more" :title="paper.tags.slice(2).join(', ')">+{{ paper.tags.length - 2 }}</span>
                 </template>
               </div>
               <p v-if="paper.savedBecause" class="saved-because">Saved because: {{ paper.savedBecause }}</p>
@@ -522,12 +520,12 @@ const scopeEyebrow = computed(() => (scope.value.kind === "folder" ? "Folder" : 
 }
 
 .library.has-inspector {
-  grid-template-columns: minmax(0, 1fr) minmax(340px, 430px);
+  grid-template-columns: minmax(0, 1fr) minmax(390px, 470px);
 }
 
 .list-pane {
   min-width: 0;
-  padding: 32px 40px 56px;
+  padding: 30px clamp(24px, 4vw, 56px) 56px;
 }
 
 .list-head {
@@ -559,10 +557,11 @@ const scopeEyebrow = computed(() => (scope.value.kind === "folder" ? "Folder" : 
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
-  margin: 0 -40px;
-  padding: 10px 40px;
-  background: var(--bg);
-  border-bottom: 1px solid var(--border);
+  margin: 0 calc(clamp(24px, 4vw, 56px) * -1);
+  padding: 10px clamp(24px, 4vw, 56px);
+  background: color-mix(in srgb, var(--bg) 90%, transparent);
+  border-bottom: 1px solid transparent;
+  backdrop-filter: blur(14px);
 }
 
 .toolbar.bulk {
@@ -577,10 +576,10 @@ const scopeEyebrow = computed(() => (scope.value.kind === "folder" ? "Folder" : 
   min-width: 240px;
   align-items: center;
   gap: 8px;
-  height: 36px;
-  padding: 0 10px;
+  height: 40px;
+  padding: 0 12px;
   border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
+  border-radius: 9px;
   background: var(--surface);
   color: var(--text-3);
 }
@@ -600,6 +599,7 @@ const scopeEyebrow = computed(() => (scope.value.kind === "folder" ? "Folder" : 
 }
 
 .filters {
+  position: relative;
   display: flex;
   gap: 4px;
 }
@@ -639,6 +639,38 @@ const scopeEyebrow = computed(() => (scope.value.kind === "folder" ? "Folder" : 
   cursor: pointer;
 }
 
+.toolbar-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text-2);
+  font-size: calc(12.5px * var(--text-scale));
+  cursor: pointer;
+}
+
+.toolbar-control.on {
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+
+.control-count {
+  display: grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--accent-text);
+  font-size: 10px;
+  font-weight: 700;
+}
+
 .filter:hover {
   border-color: var(--border-strong);
   color: var(--text);
@@ -649,6 +681,52 @@ const scopeEyebrow = computed(() => (scope.value.kind === "folder" ? "Folder" : 
   background: var(--accent-soft);
   color: var(--accent-ink);
   font-weight: 550;
+}
+
+.icon-filter {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  padding: 0;
+}
+
+.filter-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 10;
+  display: grid;
+  grid-template-columns: repeat(3, auto);
+  gap: 6px;
+  min-width: 260px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.menu-label {
+  grid-column: 1 / -1;
+  margin-top: 4px;
+  color: var(--text-3);
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+
+.clear-filter {
+  grid-column: 1 / -1;
+  margin-top: 4px;
+  padding: 7px 0 0;
+  border: 0;
+  border-top: 1px solid var(--border);
+  background: none;
+  color: var(--accent-ink);
+  text-align: left;
+  cursor: pointer;
 }
 
 .sort {
@@ -670,7 +748,7 @@ const scopeEyebrow = computed(() => (scope.value.kind === "folder" ? "Folder" : 
 
 /* Bibliography-style entries: year in the margin, title in the serif, a hairline between. */
 .papers {
-  margin: 8px -12px 0;
+  margin: 12px -12px 0;
   padding: 0;
   list-style: none;
 }
@@ -680,19 +758,19 @@ const scopeEyebrow = computed(() => (scope.value.kind === "folder" ? "Folder" : 
   grid-template-columns: 16px 46px minmax(0, 1fr) auto;
   gap: 14px;
   align-items: baseline;
-  padding: 14px 12px;
+  padding: 17px 12px;
   border-bottom: 1px solid var(--border);
   cursor: default;
   user-select: none;
 }
 
 .entry:hover {
-  background: color-mix(in srgb, var(--surface) 70%, transparent);
+  background: var(--surface);
 }
 
 .entry.selected {
-  background: var(--select);
-  box-shadow: inset 2px 0 0 var(--accent);
+  background: var(--surface);
+  box-shadow: inset 3px 0 0 var(--accent), var(--shadow-subtle);
 }
 
 .entry.checked {
@@ -727,7 +805,7 @@ const scopeEyebrow = computed(() => (scope.value.kind === "folder" ? "Folder" : 
 
 .title {
   font-family: var(--font-serif);
-  font-size: calc(16.5px * var(--text-scale));
+  font-size: calc(17px * var(--text-scale));
   font-weight: 550;
   line-height: 1.35;
   letter-spacing: -0.005em;

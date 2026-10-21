@@ -1,0 +1,9 @@
+SPDX-License-Identifier: AGPL-3.0-or-later
+
+The Biblio browser extension is licensed under the GNU Affero General Public License,
+version 3 or later. The complete license text is available at:
+
+https://www.gnu.org/licenses/agpl-3.0.html
+
+This file identifies the license for the extension component. See THIRD_PARTY_NOTICES.md
+for the upstream Zotero translator attribution.

@@ -11,28 +11,30 @@
   /* Set by Settings → Appearance (services/appearance.ts). */
   --text-scale: 1;
 
-  /* "University press": ivory laid paper, ink, oxblood cloth, a little gold leaf. */
-  --bg: #f4f0e6;
-  --surface: #fbf8f1;
-  --surface-2: #ebe5d7;
-  --surface-3: #e0d8c5;
-  --border: #e2dac8;
-  --border-strong: #cbbfa5;
-  --text: #1f1c17;
-  --text-2: #5a554b;
-  --text-3: #8b8475;
-  --accent: #7b2a20;
-  --accent-hover: #64211a;
-  --accent-text: #fdf7ee;
-  --accent-soft: #f1e2d7;
-  --accent-ink: #7b2a20;
-  --select: #ece2cc;
+  /* Warm paper, quieter contrast, one consistent library-green accent. */
+  --bg: #f6f4ee;
+  --surface: #fffdf8;
+  --surface-2: #eeece5;
+  --surface-3: #e4e1d8;
+  --sidebar: #eeece5;
+  --border: #dedbd2;
+  --border-strong: #c7c2b7;
+  --text: #20221f;
+  --text-2: #5a5f58;
+  --text-3: #858a82;
+  --accent: #28624f;
+  --accent-hover: #1f5040;
+  --accent-text: #f8fffb;
+  --accent-soft: #dfece6;
+  --accent-ink: #245846;
+  --select: #e5eee9;
   --mark: #f3dc93;
   --danger: #a02c22;
   --danger-soft: #f6e1dc;
   --warn-soft: #f6ead0;
   --warn-ink: #77520f;
   --shadow: 0 1px 2px rgba(48, 36, 18, 0.06), 0 10px 28px rgba(48, 36, 18, 0.08);
+  --shadow-subtle: 0 8px 24px rgba(32, 34, 31, 0.045);
   --shadow-lg: 0 28px 70px rgba(48, 36, 18, 0.24);
   --radius: 6px;
   --radius-sm: 5px;
@@ -55,17 +57,18 @@
     --surface: #1d1a16;
     --surface-2: #23201b;
     --surface-3: #2d2822;
+    --sidebar: #1b1a17;
     --border: #312c25;
     --border-strong: #4a4237;
     --text: #ece5d6;
     --text-2: #b4ab99;
     --text-3: #857c6d;
-    --accent: #df947b;
-    --accent-hover: #eaa992;
-    --accent-text: #1c120e;
-    --accent-soft: #3a251e;
-    --accent-ink: #e9a58d;
-    --select: #2b251d;
+    --accent: #82bda5;
+    --accent-hover: #9bcdb8;
+    --accent-text: #102019;
+    --accent-soft: #203a31;
+    --accent-ink: #9bcdb8;
+    --select: #24352e;
     --mark: #5b4a17;
     --danger: #e27c70;
     --danger-soft: #3b211e;
@@ -82,17 +85,18 @@
   --surface: #1d1a16;
   --surface-2: #23201b;
   --surface-3: #2d2822;
+  --sidebar: #1b1a17;
   --border: #312c25;
   --border-strong: #4a4237;
   --text: #ece5d6;
   --text-2: #b4ab99;
   --text-3: #857c6d;
-  --accent: #df947b;
-  --accent-hover: #eaa992;
-  --accent-text: #1c120e;
-  --accent-soft: #3a251e;
-  --accent-ink: #e9a58d;
-  --select: #2b251d;
+  --accent: #82bda5;
+  --accent-hover: #9bcdb8;
+  --accent-text: #102019;
+  --accent-soft: #203a31;
+  --accent-ink: #9bcdb8;
+  --select: #24352e;
   --mark: #5b4a17;
   --danger: #e27c70;
   --danger-soft: #3b211e;
@@ -520,7 +524,7 @@ a.tag:hover {
 /* ---------- Shell ---------- */
 .shell {
   display: grid;
-  grid-template-columns: 252px minmax(0, 1fr);
+  grid-template-columns: 232px minmax(0, 1fr);
   height: 100vh;
 }
 

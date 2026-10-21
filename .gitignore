@@ -1,6 +1,7 @@
 node_modules/
 dist/
 dist-*/
+apps/extension/dist/
 .firebase/
 .firebaserc
 .firebaserc.local

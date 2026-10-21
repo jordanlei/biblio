@@ -357,8 +357,78 @@ async function lookupArxiv(id: string): Promise<PaperCandidate> {
 }
 
 async function lookupPmid(pmid: string): Promise<PaperCandidate> {
-  const work = await getJson<OpenAlexWork>(`https://api.openalex.org/works/pmid:${pmid}?select=${OPENALEX_SELECT}`);
-  return { ...fromOpenAlex(work), pmid };
+  // OpenAlex is useful for OA locations, but older PubMed records can have incomplete
+  // authorships there. PubMed itself is the source of truth for PMID metadata.
+  const [pubmed, openAlex] = await Promise.all([
+    lookupPubmedXml(pmid),
+    getJson<OpenAlexWork>(`https://api.openalex.org/works/pmid:${pmid}?select=${OPENALEX_SELECT}`).catch(() => null)
+  ]);
+  if (!pubmed && !openAlex) throw new Error("PubMed and OpenAlex returned no record");
+  const candidate = openAlex ? fromOpenAlex(openAlex) : undefined;
+  if (!pubmed) return { ...candidate!, pmid };
+  return {
+    ...candidate,
+    title: pubmed.title ?? candidate?.title ?? "Untitled",
+    type: "article",
+    authors: pubmed.authors.length ? pubmed.authors : candidate?.authors ?? [],
+    issued: pubmed.year ? { year: pubmed.year, month: pubmed.month } : candidate?.issued,
+    containerTitle: pubmed.journal ?? candidate?.containerTitle,
+    volume: pubmed.volume ?? candidate?.volume,
+    issue: pubmed.issue ?? candidate?.issue,
+    pages: pubmed.pages ?? candidate?.pages,
+    doi: pubmed.doi ?? candidate?.doi,
+    url: `https://pubmed.ncbi.nlm.nih.gov/${pmid}/`,
+    pmid,
+    abstract: pubmed.abstract ?? candidate?.abstract,
+    source: "manual"
+  };
+}
+
+interface PubmedRecord {
+  title?: string;
+  authors: Creator[];
+  year?: number;
+  month?: number;
+  journal?: string;
+  volume?: string;
+  issue?: string;
+  pages?: string;
+  doi?: string;
+  abstract?: string;
+}
+
+const xmlText = (xml: string, tag: string) => {
+  const match = new RegExp(`<${tag}[^>]*>([\\s\\S]*?)</${tag}>`, "i").exec(xml);
+  return match?.[1]?.replace(/<[^>]+>/g, " ").replace(/&amp;/g, "&").replace(/&#x27;|&#39;/g, "'").replace(/&quot;/g, '"').replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/\s+/g, " ").trim();
+};
+
+async function lookupPubmedXml(pmid: string): Promise<PubmedRecord | null> {
+  try {
+    const xml = await (await fetch(`https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id=${encodeURIComponent(pmid)}&retmode=xml`)).text();
+    if (!/<PubmedArticle>/i.test(xml)) return null;
+    const article = xml.match(/<PubmedArticle>[\s\S]*?<\/PubmedArticle>/i)?.[0] ?? xml;
+    const authors = [...article.matchAll(/<Author\b[^>]*>[\s\S]*?<LastName>([\s\S]*?)<\/LastName>[\s\S]*?<ForeName>([\s\S]*?)<\/ForeName>[\s\S]*?<\/Author>/gi)].map((m) => ({
+      family: xmlText(m[1], "LastName"),
+      given: xmlText(m[2], "ForeName")
+    }));
+    const monthName = xmlText(article, "Month");
+    const months = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+    const doi = [...article.matchAll(/<ArticleId\b[^>]*IdType=["']doi["'][^>]*>([\s\S]*?)<\/ArticleId>/gi)][0]?.[1];
+    return {
+      title: xmlText(article, "ArticleTitle"),
+      authors,
+      year: Number(xmlText(article, "PubDate")?.match(/\b\d{4}\b/)?.[0]) || undefined,
+      month: monthName ? months.indexOf(monthName.slice(0, 3).toLowerCase()) + 1 || undefined : undefined,
+      journal: xmlText(article, "Title"),
+      volume: xmlText(article, "Volume"),
+      issue: xmlText(article, "Issue"),
+      pages: xmlText(article, "MedlinePgn") ?? [xmlText(article, "StartPage"), xmlText(article, "EndPage")].filter(Boolean).join("-"),
+      doi: normalizeDoi(doi),
+      abstract: xmlText(article, "AbstractText")
+    };
+  } catch {
+    return null;
+  }
 }
 
 export async function lookupIdentifier(identifier: Identifier): Promise<PaperCandidate> {

@@ -86,6 +86,10 @@ export async function findPdfSources(paper: Paper): Promise<PdfSource[]> {
   if (arxivId) add(`https://arxiv.org/pdf/${arxivId}`, "arXiv", true);
   add(paper.openAccessPdfUrl);
   add(pdfFromLandingPage(paper.url));
+  // These are useful fallbacks for older records without an OA PDF. They will not be
+  // downloaded as PDFs, but they remain available to open manually after a failed search.
+  if (paper.doi) add(`https://doi.org/${paper.doi}`, "Publisher");
+  if (paper.pmid) add(`https://pubmed.ncbi.nlm.nih.gov/${paper.pmid}/`, "PubMed");
 
   const work = await openAlexWork(paper);
   if (work) {

@@ -83,31 +83,6 @@
       }
     },
     {
-      label: "PubMed",
-      detect: () => /(^|\.)pubmed\.ncbi\.nlm\.nih\.gov$/i.test(location.hostname) && /\/\d+\/?$/i.test(location.pathname),
-      extract: () =>
-        compact(
-          {
-            title: meta("citation_title") || document.querySelector("h1.heading-title")?.textContent,
-            authors: metas(["citation_author"]).length
-              ? metas(["citation_author"])
-              : Array.from(document.querySelectorAll(".authors-list .full-name")).map((a) => a.textContent),
-            year: Number((meta("citation_publication_date") || document.querySelector(".cit")?.textContent || "").match(/(1[89]|20)\d{2}/)?.[0]),
-            venue: meta("citation_journal_title"),
-            volume: meta("citation_volume"),
-            issue: meta("citation_issue"),
-            pages: meta("citation_firstpage"),
-            doi: meta("citation_doi"),
-            pmid: location.pathname.match(/\/(\d+)\/?$/)?.[1],
-            abstract: meta("citation_abstract") || document.querySelector("#enc-abstract, .abstract")?.textContent,
-            pdfUrl: meta("citation_pdf_url"),
-            url,
-            isPaper: true
-          },
-          "PubMed"
-        )
-    },
-    {
       label: "OpenReview",
       detect: () => /(^|\.)openreview\.net$/i.test(location.hostname) && /[?&]id=/.test(location.search),
       extract: () =>

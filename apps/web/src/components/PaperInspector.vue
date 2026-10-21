@@ -30,8 +30,8 @@ watch(
 
 const authors = computed(() => {
   const list = props.paper.authors;
-  const text = creatorsToText(list.slice(0, 10)).replace(/; /g, ", ");
-  return list.length > 10 ? `${text}, and ${list.length - 10} more` : text;
+  const text = creatorsToText(list.slice(0, 3)).replace(/; /g, ", ");
+  return list.length > 3 ? `${text} et al.` : text;
 });
 const venue = computed(() => {
   const p = props.paper;
@@ -60,6 +60,7 @@ function followCite(event: MouseEvent) {
       <p class="eyebrow">{{ paperTypeLabels[paper.type] }}<template v-if="paper.issued?.year"> · {{ paper.issued.year }}</template></p>
       <span class="spacer" />
       <RouterLink class="btn sm" :to="`/paper/${paper.id}`">Open <AppIcon name="chevron-right" :size="13" /></RouterLink>
+      <button class="btn quiet icon" type="button" aria-label="Copy BibTeX" title="Copy BibTeX" @click="copyText(paperToBibtex(paper), 'Copied BibTeX')"><AppIcon name="copy" :size="14" /></button>
       <button class="btn quiet icon" type="button" aria-label="Close preview" @click="emit('close')"><AppIcon name="x" /></button>
     </header>
 
@@ -82,19 +83,10 @@ function followCite(event: MouseEvent) {
       </section>
       <section class="block"><PdfPanel :paper="paper" /></section>
 
-      <section class="block cite">
-        <button class="btn sm quiet" type="button" @click="copyText(paperToBibtex(paper), 'Copied BibTeX')"><AppIcon name="copy" :size="13" /> BibTeX</button>
-      </section>
-
       <section v-if="paper.abstract" class="block">
         <p class="section-label">Abstract</p>
         <p class="abstract" :class="{ clamp: !abstractOpen }">{{ paper.abstract }}</p>
         <button v-if="paper.abstract.length > 420" class="link-btn small" type="button" @click="abstractOpen = !abstractOpen">{{ abstractOpen ? "Less" : "More" }}</button>
-      </section>
-
-      <section class="block">
-        <p class="section-label">Tags</p>
-        <TagEditor :paper="paper" />
       </section>
 
       <section class="block notes-block">
@@ -116,6 +108,11 @@ function followCite(event: MouseEvent) {
         <p v-else class="faint small empty-notes" title="Double-click to write" @dblclick="editingNotes = true">No notes yet — double-click to write.</p>
       </section>
 
+      <section class="block">
+        <p class="section-label">Tags</p>
+        <TagEditor :paper="paper" />
+      </section>
+
       <section v-if="mentionedIn.length" class="block">
         <p class="section-label">Mentioned in notes</p>
         <BacklinkList :paper="paper" compact />
@@ -129,6 +126,7 @@ function followCite(event: MouseEvent) {
   display: flex;
   flex-direction: column;
   min-width: 0;
+  min-height: 0;
   height: 100vh;
   border-left: 1px solid var(--border);
   background: var(--surface);
@@ -140,18 +138,23 @@ function followCite(event: MouseEvent) {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 12px 14px 8px 20px;
+  min-height: 54px;
+  padding: 10px 16px 10px 24px;
+  border-bottom: 1px solid var(--border);
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  backdrop-filter: blur(14px);
 }
 
 .ins-scroll {
   flex: 1;
   overflow-y: auto;
-  padding: 4px 20px 32px;
+  overscroll-behavior: contain;
+  padding: 24px 28px 48px;
 }
 
 .title {
   font-family: var(--font-serif);
-  font-size: calc(21px * var(--text-scale));
+  font-size: calc(25px * var(--text-scale));
   font-weight: 600;
   line-height: 1.25;
   letter-spacing: -0.01em;
@@ -183,13 +186,9 @@ function followCite(event: MouseEvent) {
 }
 
 .block {
-  margin-top: 20px;
-}
-
-.cite {
-  display: flex;
-  align-items: center;
-  gap: 6px;
+  margin-top: 26px;
+  padding-top: 22px;
+  border-top: 1px solid var(--border);
 }
 
 .key-eyebrow {
@@ -235,9 +234,7 @@ function followCite(event: MouseEvent) {
 
 .notes {
   font-size: calc(14.5px * var(--text-scale));
-  max-height: 260px;
-  overflow: hidden;
-  mask-image: linear-gradient(to bottom, black 80%, transparent);
+  line-height: 1.65;
 }
 
 </style>

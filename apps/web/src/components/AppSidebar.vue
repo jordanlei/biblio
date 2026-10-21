@@ -22,7 +22,6 @@ const accountOpen = ref(false);
 const collapsedFolders = ref(new Set<string>());
 const dropFolderId = ref<string | null>(null);
 const newFolderName = ref("");
-const recentNotes = computed(() => [...researchNotes.value].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)).slice(0, 6));
 
 async function newNote() {
   try {
@@ -133,30 +132,19 @@ async function dropOnFolder(folderId: string, event: DragEvent) {
         <AppIcon :name="view.icon" /> <span class="label">{{ view.label }}</span>
         <span class="count tnum">{{ viewCounts[view.id] }}</span>
       </RouterLink>
+      <RouterLink class="nav-item" :class="{ active: route.path.startsWith('/research-notes') }" to="/research-notes">
+        <AppIcon name="note" /> <span class="label">Research notes</span>
+        <span class="count tnum">{{ researchNotes.length || '' }}</span>
+      </RouterLink>
     </nav>
 
     <section class="nav-group">
       <div class="group-head">
-        <RouterLink class="group-link" to="/research-notes">Notes</RouterLink>
-        <button class="btn quiet icon mini" type="button" aria-label="New note" title="New note" @click="newNote"><AppIcon name="plus" :size="13" /></button>
-      </div>
-      <RouterLink
-        v-for="note in recentNotes"
-        :key="note.id"
-        class="nav-item"
-        :class="{ active: route.path === `/research-notes/${note.id}` }"
-        :to="`/research-notes/${note.id}`"
-      >
-        <AppIcon name="note" /> <span class="label">{{ note.title }}</span>
-      </RouterLink>
-      <RouterLink v-if="researchNotes.length > recentNotes.length" class="nav-item more" to="/research-notes">All {{ researchNotes.length }} notes</RouterLink>
-      <p v-if="!researchNotes.length" class="hint">Notes for questions and projects. Link papers with @[.</p>
-    </section>
-
-    <section class="nav-group">
-      <div class="group-head">
-        <span>Folders</span>
-        <button class="btn quiet icon mini" type="button" aria-label="New folder" title="New folder" @click="newFolderName ? (newFolderName = '') : startFolder(null)"><AppIcon name="plus" :size="13" /></button>
+        <span>Collections</span>
+        <span class="head-actions">
+          <button class="btn quiet icon mini" type="button" aria-label="New research note" title="New research note" @click="newNote"><AppIcon name="note" :size="12" /></button>
+          <button class="btn quiet icon mini" type="button" aria-label="New folder" title="New folder" @click="newFolderName ? (newFolderName = '') : startFolder(null)"><AppIcon name="plus" :size="13" /></button>
+        </span>
       </div>
       <form v-if="newFolderName" class="nav-item" @submit.prevent="addFolder">
         <input v-model="newFolderName" v-select-on-mount class="input folder-input" :aria-label="newFolderParent ? 'Subfolder name' : 'Folder name'" @keydown.esc="newFolderName = ''" />
@@ -184,7 +172,6 @@ async function dropOnFolder(folderId: string, event: DragEvent) {
           </span>
         </div>
       </template>
-      <p v-else class="hint">Use folders for stable projects or broad areas.</p>
     </section>
 
     <section v-if="customNavItems.length" class="nav-group">
@@ -193,8 +180,8 @@ async function dropOnFolder(folderId: string, event: DragEvent) {
       </RouterLink>
     </section>
 
-    <section class="nav-group">
-      <div class="group-head"><span>Tags</span></div>
+    <details v-if="tagCounts.length" class="nav-group tag-browser">
+      <summary class="group-head"><span>Tags</span><span class="count tnum">{{ tagCounts.length }}</span></summary>
       <template v-if="tagCounts.length">
         <RouterLink
           v-for="[tag, count] in visibleTags"
@@ -209,8 +196,7 @@ async function dropOnFolder(folderId: string, event: DragEvent) {
           {{ showAllTags ? "Show fewer" : `Show all ${tagCounts.length} tags` }}
         </button>
       </template>
-      <p v-else class="hint">Tags appear when you add them to papers.</p>
-    </section>
+    </details>
 
     <div class="sidebar-foot">
       <SyncIndicator />
@@ -236,12 +222,12 @@ async function dropOnFolder(folderId: string, event: DragEvent) {
 .sidebar {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 14px;
   height: 100vh;
-  padding: 16px 12px 12px;
+  padding: 18px 12px 12px;
   overflow-y: auto;
   border-right: 1px solid var(--border);
-  background: var(--surface-2);
+  background: var(--sidebar);
 }
 
 .brand-row {
@@ -311,6 +297,20 @@ async function dropOnFolder(folderId: string, event: DragEvent) {
   font-weight: 600;
   letter-spacing: 0.06em;
   color: var(--text-2);
+}
+
+.head-actions {
+  display: flex;
+  gap: 2px;
+}
+
+.tag-browser summary {
+  list-style: none;
+  cursor: pointer;
+}
+
+.tag-browser summary::-webkit-details-marker {
+  display: none;
 }
 
 .mini {

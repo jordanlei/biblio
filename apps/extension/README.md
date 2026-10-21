@@ -11,6 +11,9 @@ Save the paper you're reading, with its PDF, to Biblio.
    version that saves to local test mode, `localhost:5173`.)
 4. Pin the extension. In the popup, choose where to save: your app (default) or `localhost:5173`.
 
+`apps/extension` is the source. `apps/extension/dist` is a generated, gitignored install package;
+it is deleted and rebuilt by `npm run build:extension`. Do not edit files in `dist` directly.
+
 Chrome may warn about unpacked developer-mode extensions when it starts. That is expected for the
 self-hosted install path; the extension is generated for your own Biblio copy rather than installed
 from the Chrome Web Store.
@@ -56,15 +59,16 @@ These are open web standards, not any one application's format.
 | `biblio-translators.js` | Bundled translators written against that interface. |
 | `extract.js` | Runs Biblio Translate, then the built-in site translators, then the generic metadata translator. Returns the first confident match. |
 
-### On Zotero
+### On Zotero and licensing
 
 Biblio **never talks to Zotero**: no Zotero API, no `localhost:23119` connector endpoint, no Zotero
-runtime, no Zotero data. Biblio reads public metadata standards and writes its own format.
+runtime, and no live dependency on Zotero services. The PubMed translator is an adapted copy of
+Zotero's official `PubMed.js` translator and uses the same PMID detection and NCBI E-utilities
+strategy, rewritten for Biblio's small browser-native interface.
 
-Zotero's *ecosystem* is a good model — small page translators run in priority order — and their
-translator repository is CC0. If you port logic from one, rewrite it against the interface above
-rather than vendoring Zotero's runtime, and keep the attribution with it. A translator shaped like
-`detect(doc, url)` / `extract(doc, url)` is Biblio's own, whatever inspired it.
+The extension is distributed under AGPL-3.0-or-later because of this adapted translator. See
+`LICENSE` and `THIRD_PARTY_NOTICES.md` for the license and attribution. The web app outside
+`apps/extension` remains MIT-licensed.
 
 ### Privacy
 
