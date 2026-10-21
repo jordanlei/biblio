@@ -81,7 +81,7 @@ export interface CslItem {
   custom?: { biblio?: BiblioFields } & Record<string, unknown>;
 }
 
-type CslName = { family?: string; given?: string; literal?: string };
+type CslName = { family?: string; given?: string; suffix?: string; literal?: string };
 
 const CSL_TYPES: Record<PaperType, string> = {
   article: "article-journal",
@@ -109,7 +109,7 @@ const FROM_CSL: Record<string, PaperType> = {
 const compact = <T extends object>(value: T): T =>
   Object.fromEntries(Object.entries(value).filter(([, v]) => v !== undefined && v !== "" && !(Array.isArray(v) && !v.length))) as T;
 
-const names = (list?: Creator[]): CslName[] | undefined => (list?.length ? list.map((c) => compact({ family: c.family, given: c.given, literal: c.literal })) : undefined);
+const names = (list?: Creator[]): CslName[] | undefined => (list?.length ? list.map((c) => compact({ family: c.family, given: c.given, suffix: c.suffix, literal: c.literal })) : undefined);
 
 function issued(date?: PartialDate): CslItem["issued"] {
   if (!date) return undefined;
@@ -180,7 +180,7 @@ export function paperToCsl(paper: Paper, paths: PaperPaths = {}): CslItem {
   });
 }
 
-const fromNames = (list?: CslName[]): Creator[] => (list ?? []).map((n) => compact({ family: n.family, given: n.given, literal: n.literal }));
+const fromNames = (list?: CslName[]): Creator[] => (list ?? []).map((n) => compact({ family: n.family, given: n.given, suffix: n.suffix, literal: n.literal }));
 
 /**
  * CSL-JSON item → Paper. Works for any CSL-JSON (e.g. exported from Zotero); Biblio's own

@@ -158,7 +158,8 @@ export function creatorsToText(creators: Creator[]): string {
 }
 
 export function familyName(creator: Creator): string {
-  return creator.family ?? creator.literal ?? creator.given ?? "";
+  if (creator.literal) return creator.literal;
+  return [creator.family, creator.suffix].filter(Boolean).join(" ") || creator.given || "";
 }
 
 /** "Vaswani", "Vaswani & Shazeer", "Vaswani et al." */
@@ -176,8 +177,11 @@ export function parseCreators(value: string): Creator[] {
     .filter(Boolean)
     .map((name) => {
       if (name.includes(",")) {
-        const [family, given] = name.split(",").map((piece) => piece.trim());
-        return given ? { family, given } : { family };
+        const [family, ...parts] = name.split(",").map((piece) => piece.trim());
+        const suffix = parts.length > 1 ? parts.at(-1) : undefined;
+        const givenParts = suffix ? parts.slice(0, -1) : parts;
+        const given = givenParts.join(", ").trim();
+        return { family, given: given || undefined, suffix: suffix || undefined };
       }
       const pieces = name.split(/\s+/);
       if (pieces.length === 1) return { literal: pieces[0] };

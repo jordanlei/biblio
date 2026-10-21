@@ -8,6 +8,11 @@ async function appUrl() {
   return appUrl || DEFAULT_APP_URL;
 }
 
+async function showOverlay(tabId, url) {
+  await chrome.scripting.executeScript({ target: { tabId }, files: ["overlay.js"] });
+  await chrome.tabs.sendMessage(tabId, { type: "show-biblio-overlay", url });
+}
+
 function encode(data) {
   const bytes = new TextEncoder().encode(JSON.stringify(data));
   let binary = "";
@@ -16,7 +21,10 @@ function encode(data) {
 }
 
 function summarize(paper) {
-  const names = paper.authors.map((a) => (a.includes(",") ? a.split(",")[0] : a.split(" ").pop()));
+  const names = paper.authors.map((a) => {
+    const parts = a.split(",").map((part) => part.trim());
+    return parts.length > 2 ? `${parts[0]} ${parts.at(-1)}` : parts[0] || a.split(" ").pop();
+  });
   const who = names.length > 2 ? `${names[0]} et al.` : names.join(" & ");
   return [who, paper.year, paper.venue].filter(Boolean).join(" · ");
 }
@@ -52,8 +60,14 @@ async function main() {
 
   if (!paper?.isPaper || !paper.title) {
     $("none").hidden = false;
-    $("open").onclick = async () => chrome.tabs.create({ url: `${await appUrl()}/library` });
-    $("add").onclick = async () => chrome.tabs.create({ url: `${await appUrl()}/search` });
+    $("open").onclick = async () => {
+      await showOverlay(tab.id, `${await appUrl()}/library`);
+      window.close();
+    };
+    $("add").onclick = async () => {
+      await showOverlay(tab.id, `${await appUrl()}/search`);
+      window.close();
+    };
     return;
   }
 
@@ -63,7 +77,7 @@ async function main() {
   for (const label of [paper.translator, paper.doi && "DOI", paper.arxivId && "arXiv", paper.pmid && "PubMed", paper.pdfUrl && "PDF available"].filter(Boolean)) addChip(label);
   $("save").onclick = async () => {
     // The hash never reaches a server; the app reads it client-side.
-    await chrome.tabs.create({ url: `${await appUrl()}/capture#${encode(paper)}` });
+    await showOverlay(tab.id, `${await appUrl()}/capture#${encode(paper)}`);
     window.close();
   };
 }

@@ -23,8 +23,9 @@ from the Chrome Web Store.
 ## Use
 
 On an article page (arXiv, a journal, PubMed, OpenReview, a PDF tab…), right-click the page and
-choose **Save to Biblio**, or click the extension button and then **Save to Biblio**. A tab opens
-on the app's `/capture` page, where you can choose a collection before saving. That page:
+choose **Save to Biblio**, or click the extension button and then **Save to Biblio**. An in-page
+overlay opens over the article, where you can choose a collection before saving. The
+original article stays visible underneath; the embedded app surface:
 
 1. checks your library for duplicates (“✓ Already in library”, or “may already be in your library”);
 2. saves the metadata;
@@ -36,7 +37,8 @@ on the app's `/capture` page, where you can choose a collection before saving. T
 | File | Role |
 | --- | --- |
 | `zotero-capture.js` | Generated from the vendored Zotero Translate runtime and official translators. It detects and translates the active page without a Biblio-owned author or site parser. |
-| `popup.html/js` | Shows what was found and opens `/capture#<base64url JSON>`. The hash never reaches a server. |
+| `popup.html/js` | Shows what was found and opens the in-page Biblio overlay. The capture hash never reaches a server. |
+| `overlay.js` | Dynamically injected into the current article page to render the embedded Biblio capture surface. |
 | `background.js` | Service worker that detects capturable pages for the toolbar badge and fetches PDFs (`credentials: "include"`), verifies `%PDF-`, and returns base64. |
 | `bridge.js` | Content script on the app's own origins. Relays `window.postMessage` requests (`ping`, `fetch-pdf`) to the background worker. |
 

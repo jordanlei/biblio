@@ -72,6 +72,12 @@ function processAuthors(newItem, authorsLists) {
 
 			if (firstName || lastName) {
 				var creator = ZU.cleanAuthor(lastName + ', ' + firstName, type, true);
+				// PubMed represents suffixes separately. Zotero's creator model stores them
+				// after the given name, so retain the field after cleanAuthor has split the
+				// inverted name rather than silently dropping it.
+				if (suffix) {
+					creator.firstName = [creator.firstName, suffix].filter(Boolean).join(', ');
+				}
 				if (creator.lastName.toUpperCase() == creator.lastName) {
 					creator.lastName = ZU.capitalizeTitle(creator.lastName, true);
 				}

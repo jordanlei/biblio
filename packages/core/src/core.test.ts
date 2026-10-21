@@ -44,6 +44,11 @@ describe("core", () => {
     expect(exportBibtex([basePaper])).toContain("@article{vaswaniAttentionNeed2017");
   });
 
+  it("retains author suffixes in normalized and BibTeX output", () => {
+    const paper = { ...basePaper, authors: [{ family: "Warren", given: "W. H.", suffix: "Jr" }] };
+    expect(exportBibtex([paper])).toContain("Warren, W. H., Jr");
+  });
+
   it("keeps shelf and saved-because intent from candidates", () => {
     const paper = buildPaper(
       { title: "A Useful Paper", readingStatus: "inbox", savedBecause: "Compare against baseline." },

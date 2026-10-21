@@ -18,6 +18,11 @@ async function appUrl() {
   return appUrl || DEFAULT_APP_URL;
 }
 
+async function showOverlay(tabId, url) {
+  await chrome.scripting.executeScript({ target: { tabId }, files: ["overlay.js"] });
+  await chrome.tabs.sendMessage(tabId, { type: "show-biblio-overlay", url });
+}
+
 chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({ id: "save-to-biblio", title: "Save to Biblio", contexts: ["page", "selection", "link"] });
 });
@@ -28,12 +33,16 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
     const [injection] = await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ["zotero-capture.js"] });
     const paper = injection?.result;
     if (!paper?.isPaper || !paper.title) {
-      await chrome.tabs.create({ url: `${await appUrl()}/search` });
+      await showOverlay(tab.id, `${await appUrl()}/search`);
       return;
     }
-    await chrome.tabs.create({ url: `${await appUrl()}/capture#${encodeCapture(paper)}` });
+    await showOverlay(tab.id, `${await appUrl()}/capture#${encodeCapture(paper)}`);
   } catch {
-    await chrome.tabs.create({ url: `${await appUrl()}/search` });
+    try {
+      await showOverlay(tab.id, `${await appUrl()}/search`);
+    } catch {
+      // chrome:// pages and the Web Store refuse script injection; there is nowhere to render an overlay.
+    }
   }
 });
 

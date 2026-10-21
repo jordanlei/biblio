@@ -69,11 +69,11 @@ const cache = new WeakMap<Paper, Indexed>();
 function index(paper: Paper): Indexed {
   let entry = cache.get(paper);
   if (!entry) {
-    const names = paper.authors.map((a) => fold(a.literal ?? [a.given, a.family].filter(Boolean).join(" ")));
+    const names = paper.authors.map((a) => fold(a.literal ?? [a.given, a.family, a.suffix].filter(Boolean).join(" ")));
     entry = {
       title: fold(paper.title),
       authors: names.join(" · "),
-      families: paper.authors.map((a) => fold(a.family ?? a.literal ?? a.given ?? "")),
+      families: paper.authors.map((a) => fold(a.family ? [a.family, a.suffix].filter(Boolean).join(" ") : a.literal ?? a.given ?? "")),
       venue: fold(paper.containerTitle ?? ""),
       tags: paper.tags.map(fold),
       key: fold(paper.citationKey),

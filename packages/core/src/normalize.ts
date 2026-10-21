@@ -40,7 +40,7 @@ export function normalizeTitleKey(value: string): string {
 
 export function normalizeCreatorName(creator: Creator): string {
   if (creator.literal) return creator.literal.trim();
-  return [creator.given, creator.family].filter(Boolean).join(" ").trim();
+  return [creator.given, creator.family, creator.suffix].filter(Boolean).join(" ").trim();
 }
 
 export function firstCreatorFamily(creators: Creator[]): string {

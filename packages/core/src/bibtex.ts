@@ -30,7 +30,9 @@ function formatCreators(creators: Creator[]): string | undefined {
   return creators
     .map((creator) => {
       if (creator.literal) return `{${escapeBibtex(creator.literal)}}`;
-      if (creator.family && creator.given) return `${escapeBibtex(creator.family)}, ${escapeBibtex(creator.given)}`;
+      if (creator.family && creator.given) {
+        return `${escapeBibtex(creator.family)}, ${escapeBibtex(creator.given)}${creator.suffix ? `, ${escapeBibtex(creator.suffix)}` : ""}`;
+      }
       return escapeBibtex(normalizeCreatorName(creator));
     })
     .join(" and ");

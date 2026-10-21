@@ -18,6 +18,8 @@ export type ReadingStatus = "toRead" | "skimming" | "read" | "inbox" | "readNext
 export interface Creator {
   given?: string;
   family?: string;
+  /** Name suffix such as "Jr" or "III", retained separately from the family name. */
+  suffix?: string;
   literal?: string;
   orcid?: string;
 }

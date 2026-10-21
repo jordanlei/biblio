@@ -32,4 +32,15 @@ test("the official PubMed XML translator retains structured author fields", () =
   const source = readFileSync(`${vendorRoot}translators/PubMed XML.js`, "utf8");
   assert.match(source, /var suffix = ZU\.xpathText\(author, 'Suffix'\)/);
   assert.match(source, /ZU\.cleanAuthor\(lastName \+ ', ' \+ firstName/);
+  assert.match(source, /creator\.firstName = \[creator\.firstName, suffix\]/);
+});
+
+test("the extension keeps capture in the active tab", () => {
+  const popup = readFileSync(`${extensionRoot}popup.js`, "utf8");
+  const background = readFileSync(`${extensionRoot}background.js`, "utf8");
+  assert.match(popup, /showOverlay\(tab\.id/);
+  assert.match(background, /showOverlay\(tab\.id/);
+  assert.doesNotMatch(popup, /chrome\.tabs\.create/);
+  assert.doesNotMatch(background, /chrome\.tabs\.create/);
+  assert.match(readFileSync(`${extensionRoot}overlay.js`, "utf8"), /show-biblio-overlay/);
 });
