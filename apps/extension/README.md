@@ -11,6 +11,9 @@ Save the paper you're reading, with its PDF, to Biblio.
 3. **Load unpacked** → choose `apps/extension`.
 4. Pin the extension. In the popup, choose where to save: your app (default) or `localhost:5173`.
 
+There is no `dist/` extension to load. If the popup says it could not read a page, remove the old
+unpacked Biblio entry, run `npm run build:extension`, and load this exact folder: `apps/extension`.
+
 There is one extension folder and one copy of its code. `config/manifest.template.json` is the
 checked-in manifest template; `manifest.json` and `app-url.js` are generated and gitignored because
 they contain this checkout's deployment address. Re-run `npm run build:extension` after changing

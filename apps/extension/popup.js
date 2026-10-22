@@ -45,15 +45,22 @@ async function main() {
 
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   let paper = null;
+  let captureError = null;
   try {
     const [injection] = await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ["zotero-capture.js"] });
     paper = injection?.result ?? null;
-  } catch {
+  } catch (error) {
+    captureError = error;
     paper = null; // chrome:// pages, the Web Store, etc.
   }
   $("loading").hidden = true;
 
   if (!paper?.isPaper || !paper.title) {
+    if (captureError) {
+      $("none-title").textContent = "Biblio could not read this page.";
+      $("none-meta").textContent = "Reload the current Biblio extension from apps/extension (not dist/), then run npm run build:extension and try again.";
+      $("none-meta").title = captureError?.message ?? String(captureError);
+    }
     $("none").hidden = false;
     $("open").onclick = async () => chrome.tabs.create({ url: `${await appUrl()}/library` });
     $("add").onclick = async () => chrome.tabs.create({ url: `${await appUrl()}/search` });
