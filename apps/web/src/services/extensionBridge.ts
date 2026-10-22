@@ -53,8 +53,8 @@ export async function extensionAvailable(): Promise<boolean> {
 }
 
 /** Fetch a URL through the extension. Resolves null when the extension is missing or the fetch fails. */
-export async function extensionFetch(url: string): Promise<Blob | null> {
-  const reply = await request({ type: "fetch-pdf", url }, 90_000);
+export async function extensionFetch(url: string, captureToken?: string): Promise<Blob | null> {
+  const reply = await request({ type: "fetch-pdf", url, captureToken }, 90_000);
   if (!reply?.ok || !reply.base64) return null;
   const bytes = Uint8Array.from(atob(reply.base64), (c) => c.charCodeAt(0));
   return new Blob([bytes], { type: reply.contentType || "application/pdf" });

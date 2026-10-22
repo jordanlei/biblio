@@ -97,9 +97,9 @@ export async function attachPdf(paper: Paper, file: File, sourceUrl?: string) {
  * Find an open-access copy of the paper and save it to Drive. `onStep` reports progress
  * ("Looking for an open-access copy…", "Downloading from arXiv…", "Saving to Drive…").
  */
-export async function grabPdf(paper: Paper, onStep: (message: string) => void = () => undefined) {
+export async function grabPdf(paper: Paper, onStep: (message: string) => void = () => undefined, captureToken?: string) {
   onStep("Looking for an open-access copy…");
-  const sources = await findPdfSources(paper);
+  const sources = await findPdfSources(paper, captureToken);
   const { blob, source } = await downloadPdf(sources, onStep);
   onStep("Saving to your Drive…");
   await attachPdf(paper, new File([blob], `${paper.citationKey}.pdf`, { type: "application/pdf" }), source.url);

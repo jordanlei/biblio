@@ -12,7 +12,7 @@
     if (event.source !== window || data?.source !== APP) return;
     if (data.type === "ping") return reply({ type: "pong", id: data.id });
     if (data.type === "fetch-pdf") {
-      chrome.runtime.sendMessage({ type: "fetch-pdf", url: data.url }, (response) => {
+      chrome.runtime.sendMessage({ type: "fetch-pdf", url: data.url, captureToken: data.captureToken }, (response) => {
         const error = chrome.runtime.lastError?.message;
         reply({ type: "fetch-pdf-result", id: data.id, ...(response ?? { ok: false, error: error ?? "No response" }) });
       });

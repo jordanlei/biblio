@@ -41,3 +41,11 @@ test("the extension opens capture in a new Biblio tab", () => {
   assert.match(popup, /chrome\.tabs\.create\(\{ url: .*\/capture/);
   assert.match(background, /chrome\.tabs\.create\(\{ url: .*\/capture/);
 });
+
+test("captured PDF URLs can use a short-lived extension token", () => {
+  const background = readFileSync(`${extensionRoot}background.js`, "utf8");
+  const bridge = readFileSync(`${extensionRoot}bridge.js`, "utf8");
+  assert.match(background, /register-capture/);
+  assert.match(background, /capturedUrlMatches/);
+  assert.match(bridge, /captureToken/);
+});

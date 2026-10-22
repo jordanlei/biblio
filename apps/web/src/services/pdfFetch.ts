@@ -2,10 +2,9 @@ import { normalizeArxivId, normalizeDoi, type Paper } from "@biblio/core";
 import { auth } from "../firebase";
 import { extensionFetch, extensionAvailable } from "./extensionBridge";
 
-// Finding and downloading open-access PDFs. Sources, best first: arXiv by ID, the link saved at
-// import, then every OA location OpenAlex knows for the DOI. Each URL is tried directly (works for
-// CORS-friendly hosts like arXiv), then through the Biblio extension (works for any host the
-// browser can reach), then through the optional `fetchPdf` Cloud Function.
+// Finding and downloading open-access PDFs. A URL supplied by the source translator comes first;
+// discovered OA locations are fallbacks. Each URL is tried directly, then through the Biblio
+// extension when it is trusted, then through the optional `fetchPdf` Cloud Function.
 
 export interface PdfSource {
   url: string;
@@ -13,17 +12,19 @@ export interface PdfSource {
   label: string;
   /**
    * True when Biblio worked this URL out itself (arXiv from a verified id, or a location OpenAlex
-   * returned). A paper record can also carry a URL that came from outside — a captured page, an
-   * imported .bib — and those are never fetched with the user's cookies attached.
+   * returned). A captured translator URL is trusted only when its short-lived extension token is
+   * present; ordinary paper/import URLs are never fetched with the user's cookies attached.
    */
   trusted?: boolean;
+  /** Short-lived capability from the extension for the captured translator URL. */
+  captureToken?: string;
 }
 
 const MAX_BYTES = 80 * 1024 * 1024;
 
-function source(url: string, label?: string): PdfSource {
+function source(url: string, label?: string, trusted = false, captureToken?: string): PdfSource {
   const host = new URL(url).hostname.replace(/^www\./, "");
-  return { url, host, label: label ?? host };
+  return { url, host, label: label ?? host, trusted, captureToken };
 }
 
 interface OpenAlexLocations {
@@ -76,16 +77,18 @@ async function openAlexWork(paper: Paper): Promise<OpenAlexLocations | null> {
 }
 
 /** Every plausible open-access PDF URL for a paper, best first, de-duplicated. */
-export async function findPdfSources(paper: Paper): Promise<PdfSource[]> {
+export async function findPdfSources(paper: Paper, captureToken?: string): Promise<PdfSource[]> {
   const urls: PdfSource[] = [];
-  const add = (url?: string | null, label?: string, trusted = false) => {
+  const add = (url?: string | null, label?: string, trusted = false, token?: string) => {
     if (!url || !/^https?:/i.test(url) || urls.some((s) => s.url === url)) return;
-    urls.push({ ...source(url, label), trusted });
+    urls.push(source(url, label, trusted, token));
   };
   let arxivId = normalizeArxivId(paper.arxivId);
-  if (arxivId) add(`https://arxiv.org/pdf/${arxivId}`, "arXiv", true);
-  add(paper.openAccessPdfUrl);
+  // Keep the translator-provided URL first. The capture token lets the extension fetch that exact
+  // URL with the browser's cookies when a publisher requires an institutional session.
+  add(paper.openAccessPdfUrl, undefined, Boolean(captureToken), captureToken);
   add(pdfFromLandingPage(paper.url));
+  if (arxivId) add(`https://arxiv.org/pdf/${arxivId}`, "arXiv", true);
   // These are useful fallbacks for older records without an OA PDF. They will not be
   // downloaded as PDFs, but they remain available to open manually after a failed search.
   if (paper.doi) add(`https://doi.org/${paper.doi}`, "Publisher");
@@ -96,7 +99,7 @@ export async function findPdfSources(paper: Paper): Promise<PdfSource[]> {
     const arxivPage = work.locations?.map((l) => l.landing_page_url).find((u) => u?.includes("arxiv.org/abs/"));
     if (!arxivId && arxivPage) {
       arxivId = normalizeArxivId(arxivPage)?.replace(/v\d+$/, "");
-      if (arxivId) urls.unshift({ ...source(`https://arxiv.org/pdf/${arxivId}`, "arXiv"), trusted: true });
+      if (arxivId) add(`https://arxiv.org/pdf/${arxivId}`, "arXiv", true);
     }
     add(work.best_oa_location?.pdf_url, undefined, true);
     add(work.primary_location?.pdf_url, undefined, true);
@@ -141,10 +144,10 @@ export async function downloadPdf(sources: PdfSource[], onStep: FetchStep = () =
   const hasExtension = await extensionAvailable();
   for (const candidate of sources) {
     onStep(`Downloading from ${candidate.label}…`);
-    // The extension fetch sends the user's cookies, so it is offered only for sources Biblio
-    // resolved itself. A URL carried on a paper record could have come from a crafted link.
+    // The extension fetch sends the user's cookies, so ordinary paper-record URLs are excluded;
+    // a translator URL may opt in with its short-lived capture token.
     const privileged = hasExtension && candidate.trusted;
-    const attempts = [() => direct(candidate.url), ...(privileged ? [() => extensionFetch(candidate.url)] : []), ...(candidate.trusted ? [() => viaFunction(candidate.url)] : [])];
+    const attempts = [() => direct(candidate.url), ...(privileged ? [() => extensionFetch(candidate.url, candidate.captureToken)] : []), ...(candidate.trusted ? [() => viaFunction(candidate.url)] : [])];
     for (const attempt of attempts) {
       const blob = await attempt();
       if (blob && blob.size <= MAX_BYTES && (await isPdf(blob))) return { blob, source: candidate };

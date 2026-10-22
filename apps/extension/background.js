@@ -5,6 +5,8 @@
 // extension (popup.js injects the translators into the active tab then, and only then).
 importScripts("app-url.js");
 const MAX_BYTES = 80 * 1024 * 1024;
+const CAPTURE_TOKEN_TTL = 15 * 60 * 1000;
+const CAPTURE_TOKEN_PREFIX = "biblio-capture:";
 
 function encodeCapture(data) {
   const bytes = new TextEncoder().encode(JSON.stringify(data));
@@ -31,11 +33,40 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
       await chrome.tabs.create({ url: `${await appUrl()}/search` });
       return;
     }
-    await chrome.tabs.create({ url: `${await appUrl()}/capture#${encodeCapture(paper)}` });
+    const captureToken = await registerCapturedPdf(paper.pdfUrl);
+    await chrome.tabs.create({ url: `${await appUrl()}/capture#${encodeCapture(captureToken ? { ...paper, captureToken } : paper)}` });
   } catch {
     await chrome.tabs.create({ url: `${await appUrl()}/search` });
   }
 });
+
+async function registerCapturedPdf(url) {
+  if (!url) return undefined;
+  let target;
+  try {
+    target = new URL(String(url));
+  } catch {
+    return undefined;
+  }
+  if (!/^https?:$/.test(target.protocol) || target.username || target.password || isPrivateAddress(target.hostname)) return undefined;
+  const token = crypto.randomUUID();
+  await chrome.storage.session.set({
+    [`${CAPTURE_TOKEN_PREFIX}${token}`]: { url: target.href, expiresAt: Date.now() + CAPTURE_TOKEN_TTL }
+  });
+  return token;
+}
+
+async function capturedUrlMatches(token, url) {
+  if (typeof token !== "string" || !token) return false;
+  const key = `${CAPTURE_TOKEN_PREFIX}${token}`;
+  const stored = (await chrome.storage.session.get(key))[key];
+  if (!stored || typeof stored.url !== "string" || typeof stored.expiresAt !== "number") return false;
+  if (stored.expiresAt < Date.now()) {
+    await chrome.storage.session.remove(key);
+    return false;
+  }
+  return stored.url === String(url);
+}
 
 function toBase64(buffer) {
   const bytes = new Uint8Array(buffer);
@@ -147,13 +178,26 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       .catch((error) => sendResponse({ ok: false, error: String(error?.message ?? error) }));
     return true;
   }
+  if (message?.type === "register-capture" && sender?.id === chrome.runtime.id) {
+    registerCapturedPdf(message.pdfUrl)
+      .then((captureToken) => sendResponse({ ok: true, captureToken }))
+      .catch((error) => sendResponse({ ok: false, error: String(error?.message ?? error) }));
+    return true;
+  }
   if (message?.type !== "fetch-pdf") return false;
   // A credentialed fetch is a powerful capability: refuse anything but our own app's pages.
   if (!trusted(sender)) {
     sendResponse({ ok: false, error: "Not allowed from this page." });
     return false;
   }
-  fetchPdf(message.url)
+  const authorized = message.captureToken
+    ? capturedUrlMatches(message.captureToken, message.url)
+    : Promise.resolve(true);
+  authorized
+    .then((allowed) => {
+      if (!allowed) throw new Error("That captured PDF link is no longer available.");
+      return fetchPdf(message.url);
+    })
     .then((result) => sendResponse({ ok: true, ...result }))
     .catch((error) => sendResponse({ ok: false, error: String(error?.message ?? error) }));
   return true; // async response

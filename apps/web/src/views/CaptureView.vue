@@ -59,13 +59,13 @@ async function save() {
     paperId.value = created.id;
     phase.value = "saved";
     collectionOpen.value = folders.value.length > 0;
-    await fetchPdf(created);
+    await fetchPdf(created, captured.value.captureToken);
   } catch (e) {
     error.value = e instanceof Error ? e.message : "Couldn't save the paper.";
   }
 }
 
-async function fetchPdf(target: Paper) {
+async function fetchPdf(target: Paper, captureToken?: string) {
   if (target.pdf) return;
   if (!session.profile.value?.driveRootFolderId) {
     pdf.value = { state: "skipped", message: "Connect Google Drive in Settings to save PDFs." };
@@ -73,7 +73,7 @@ async function fetchPdf(target: Paper) {
   }
   pdf.value = { state: "working", message: "Saving PDF to Drive…" };
   try {
-    await grabPdf(target, (message) => (pdf.value = { state: "working", message }));
+    await grabPdf(target, (message) => (pdf.value = { state: "working", message }), captureToken);
     pdf.value = { state: "done", message: "PDF saved to Drive" };
   } catch (e) {
     pdf.value = { state: "failed", message: e instanceof Error ? e.message : "Couldn't get the PDF." };
@@ -173,7 +173,7 @@ function assignCollection() {
 
       <div v-if="paper" class="row">
         <RouterLink class="btn primary" :to="`/paper/${paper.id}`">Open paper</RouterLink>
-        <button v-if="phase === 'duplicate' && !paper.pdf && pdf.state === 'idle'" class="btn" type="button" @click="fetchPdf(paper)">Save PDF to Drive</button>
+        <button v-if="phase === 'duplicate' && !paper.pdf && pdf.state === 'idle'" class="btn" type="button" @click="fetchPdf(paper, captured?.captureToken)">Save PDF to Drive</button>
         <RouterLink class="btn quiet" to="/library">Library</RouterLink>
       </div>
     </template>

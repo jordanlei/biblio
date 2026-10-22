@@ -20,6 +20,8 @@ export interface CapturedPaper {
   pdfUrl?: string;
   url?: string;
   collectionId?: string;
+  /** Short-lived capability held by the extension for fetching this capture's PDF with cookies. */
+  captureToken?: string;
 }
 
 const MAX_TEXT = 6000;
@@ -56,7 +58,8 @@ export function parseCapturedPaper(raw: unknown): CapturedPaper {
     abstract: text("abstract"),
     pdfUrl: link("pdfUrl"),
     url: link("url"),
-    collectionId: text("collectionId")
+    collectionId: text("collectionId"),
+    captureToken: text("captureToken")
   };
 }
 

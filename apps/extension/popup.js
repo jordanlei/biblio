@@ -66,7 +66,9 @@ async function main() {
   for (const label of [paper.translator, paper.doi && "DOI", paper.arxivId && "arXiv", paper.pmid && "PubMed", paper.pdfUrl && "PDF available"].filter(Boolean)) addChip(label);
   $("save").onclick = async () => {
     // The hash never reaches a server; the app reads it client-side.
-    await chrome.tabs.create({ url: `${await appUrl()}/capture#${encode(paper)}` });
+    const registration = await chrome.runtime.sendMessage({ type: "register-capture", pdfUrl: paper.pdfUrl }).catch(() => null);
+    const capture = registration?.captureToken ? { ...paper, captureToken: registration.captureToken } : paper;
+    await chrome.tabs.create({ url: `${await appUrl()}/capture#${encode(capture)}` });
     window.close();
   };
 }
