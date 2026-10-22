@@ -1,9 +1,10 @@
 import { normalizeArxivId, normalizeDoi, type Paper } from "@biblio/core";
 import { auth } from "../firebase";
-import { extensionFetch, extensionAvailable } from "./extensionBridge";
+import { extensionAvailable, extensionFetch, extensionPublisherPdf } from "./extensionBridge";
 
-// Finding and downloading open-access PDFs. A URL supplied by the source translator comes first;
-// discovered OA locations are fallbacks. Each URL is tried directly, then through the Biblio
+// Finding and downloading PDFs, in Zotero's order: the PDF the Zotero translator found on the
+// page, then the publisher's own PDF via the DOI (through the extension, with the browser's
+// institutional session), and only then open-access copies (PMC, arXiv, OpenAlex). Each URL is tried directly, then through the Biblio
 // extension when it is trusted, then through the optional `fetchPdf` Cloud Function.
 
 export interface PdfSource {
@@ -18,6 +19,8 @@ export interface PdfSource {
   trusted?: boolean;
   /** Short-lived capability from the extension for the captured translator URL. */
   captureToken?: string;
+  /** Publisher landing page for this DOI: fetched only through the extension's DOI resolver. */
+  publisherDoi?: string;
 }
 
 const MAX_BYTES = 80 * 1024 * 1024;
@@ -91,19 +94,22 @@ async function openAlexWork(paper: Paper): Promise<OpenAlexLocations | null> {
 export async function findPdfSources(paper: Paper, captureToken?: string): Promise<PdfSource[]> {
   const urls: PdfSource[] = [];
   const add = (url?: string | null, label?: string, trusted = false, token?: string) => {
-    if (!url || !/^https?:/i.test(url) || urls.some((s) => s.url === url)) return;
-    urls.push(source(url, label, trusted, token));
+    if (!url || !/^https?:/i.test(url) || urls.some((s) => s.url === url)) return undefined;
+    const added = source(url, label, trusted, token);
+    urls.push(added);
+    return added;
   };
   let arxivId = normalizeArxivId(paper.arxivId);
   // Keep the translator-provided URL first. The capture token lets the extension fetch that exact
   // URL with the browser's cookies when a publisher requires an institutional session.
   add(paper.openAccessPdfUrl, undefined, Boolean(captureToken), captureToken);
+  const doi = normalizeDoi(paper.doi);
+  const publisher = doi ? add(`https://doi.org/${doi}`, "Publisher") : undefined;
+  if (publisher) publisher.publisherDoi = doi;
   add(pdfFromLandingPage(paper.url));
   add(pmcPdfUrl(paper.pmcid), "PubMed Central", true);
   if (arxivId) add(`https://arxiv.org/pdf/${arxivId}`, "arXiv", true);
-  // These are useful fallbacks for older records without an OA PDF. They will not be
-  // downloaded as PDFs, but they remain available to open manually after a failed search.
-  if (paper.doi) add(`https://doi.org/${paper.doi}`, "Publisher");
+  // Not downloadable as a PDF, but available to open manually after a failed search.
   if (paper.pmid) add(`https://pubmed.ncbi.nlm.nih.gov/${paper.pmid}/`, "PubMed");
 
   const work = await openAlexWork(paper);
@@ -159,7 +165,8 @@ export async function downloadPdf(sources: PdfSource[], onStep: FetchStep = () =
     // The extension fetch sends the user's cookies, so ordinary paper-record URLs are excluded;
     // a translator URL may opt in with its short-lived capture token.
     const privileged = hasExtension && candidate.trusted;
-    const attempts = [() => direct(candidate.url), ...(privileged ? [() => extensionFetch(candidate.url, candidate.captureToken)] : []), ...(candidate.trusted ? [() => viaFunction(candidate.url)] : [])];
+    const publisherDoi = candidate.publisherDoi;
+    const attempts = publisherDoi ? (hasExtension ? [() => extensionPublisherPdf(publisherDoi)] : []) : [() => direct(candidate.url), ...(privileged ? [() => extensionFetch(candidate.url, candidate.captureToken)] : []), ...(candidate.trusted ? [() => viaFunction(candidate.url)] : [])];
     for (const attempt of attempts) {
       const blob = await attempt();
       if (blob && blob.size <= MAX_BYTES && (await isPdf(blob))) return { blob, source: candidate };

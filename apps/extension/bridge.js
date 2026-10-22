@@ -17,6 +17,12 @@
         reply({ type: "fetch-pdf-result", id: data.id, ...(response ?? { ok: false, error: error ?? "No response" }) });
       });
     }
+    if (data.type === "resolve-doi-pdf") {
+      chrome.runtime.sendMessage({ type: "resolve-doi-pdf", doi: data.doi }, (response) => {
+        const error = chrome.runtime.lastError?.message;
+        reply({ type: "resolve-doi-pdf-result", id: data.id, ...(response ?? { ok: false, error: error ?? "No response" }) });
+      });
+    }
   });
 
   reply({ type: "hello" });

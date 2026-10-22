@@ -15,7 +15,7 @@ test("the extension has one translator path and no retired Biblio parsers", () =
   for (const name of ["extract.js", "biblio-translate.js", "biblio-translators.js", "pubmed-xml.js"]) {
     assert.equal(existsSync(`${extensionRoot}${name}`), false, `${name} should not be shipped`);
   }
-  assert.match(readFileSync(`${extensionRoot}popup.js`, "utf8"), /zotero-capture\.js/);
+  assert.doesNotMatch(readFileSync(`${extensionRoot}popup.js`, "utf8"), /zotero-capture\.js/);
   assert.match(readFileSync(`${extensionRoot}background.js`, "utf8"), /zotero-capture\.js/);
 });
 
@@ -40,17 +40,24 @@ test("the generated capture keeps PubMed Central identifiers for PDF discovery",
   assert.match(bundle, /pmcid: clean\(item\.PMCID/);
 });
 
-test("the extension opens capture in a new Biblio tab", () => {
+test("the popup and the right-click menu share one capture path", () => {
   const popup = readFileSync(`${extensionRoot}popup.js`, "utf8");
   const background = readFileSync(`${extensionRoot}background.js`, "utf8");
-  assert.match(popup, /chrome\.tabs\.create\(\{ url: .*\/capture/);
   assert.match(background, /chrome\.tabs\.create\(\{ url: .*\/capture/);
+  assert.doesNotMatch(popup, /\/capture#/);
+  assert.match(popup, /type: "read-tab"/);
+  assert.match(popup, /type: "save-tab"/);
+  assert.match(background, /contextMenus\.onClicked[\s\S]*saveCapture\(tab, await readTab\(tab\)\)/);
+});
+
+test("captured publisher PDFs are fetched in the article tab first", () => {
+  const background = readFileSync(`${extensionRoot}background.js`, "utf8");
+  assert.match(background, /const fromTab = await fetchPdfInTab\(capture\)/);
 });
 
 test("captured PDF URLs can use a short-lived extension token", () => {
   const background = readFileSync(`${extensionRoot}background.js`, "utf8");
   const bridge = readFileSync(`${extensionRoot}bridge.js`, "utf8");
-  assert.match(background, /register-capture/);
-  assert.match(background, /capturedUrlMatches/);
+  assert.match(background, /capturedPdf\(message\.captureToken/);
   assert.match(bridge, /captureToken/);
 });

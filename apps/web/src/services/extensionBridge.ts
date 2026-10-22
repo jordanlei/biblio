@@ -13,6 +13,7 @@ interface ExtensionReply {
   base64?: string;
   contentType?: string;
   error?: string;
+  url?: string;
   version?: string;
 }
 
@@ -52,10 +53,22 @@ export async function extensionAvailable(): Promise<boolean> {
   return Boolean(await request({ type: "ping" }, 400));
 }
 
+function toBlob(reply: ExtensionReply) {
+  const bytes = Uint8Array.from(atob(reply.base64!), (c) => c.charCodeAt(0));
+  return new Blob([bytes], { type: reply.contentType || "application/pdf" });
+}
+
+/**
+ * Zotero's publisher-first lookup: the extension resolves the DOI with the browser's own session
+ * and downloads the PDF the landing page declares. Null when the extension is missing or no PDF.
+ */
+export async function extensionPublisherPdf(doi: string): Promise<Blob | null> {
+  const reply = await request({ type: "resolve-doi-pdf", doi }, 90_000);
+  return reply?.ok && reply.base64 ? toBlob(reply) : null;
+}
+
 /** Fetch a URL through the extension. Resolves null when the extension is missing or the fetch fails. */
 export async function extensionFetch(url: string, captureToken?: string): Promise<Blob | null> {
   const reply = await request({ type: "fetch-pdf", url, captureToken }, 90_000);
-  if (!reply?.ok || !reply.base64) return null;
-  const bytes = Uint8Array.from(atob(reply.base64), (c) => c.charCodeAt(0));
-  return new Blob([bytes], { type: reply.contentType || "application/pdf" });
+  return reply?.ok && reply.base64 ? toBlob(reply) : null;
 }

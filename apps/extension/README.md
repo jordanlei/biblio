@@ -39,9 +39,9 @@ its capture page in a new tab, where you can choose a collection before saving. 
 | File | Role |
 | --- | --- |
 | `zotero-capture.js` | Generated from the vendored Zotero Translate runtime and official translators. It detects and translates the active page without a Biblio-owned author or site parser. |
-| `popup.html/js` | Shows what was found and opens `/capture#<base64url JSON>` in a new tab. The capture hash never reaches a server. |
-| `background.js` | Service worker that detects capturable pages for the toolbar badge and fetches PDFs (`credentials: "include"`), verifies `%PDF-`, and returns base64. |
-| `bridge.js` | Content script on the app's own origins. Relays `window.postMessage` requests (`ping`, `fetch-pdf`) to the background worker. |
+| `popup.html/js` | Shows what the worker read from the tab. **Save to Biblio** asks the worker to save, so it is the same action as the right-click menu item. |
+| `background.js` | Service worker. `readTab()` runs the translators and `saveCapture()` opens `/capture#<base64url JSON>` (the hash never reaches a server); the popup and the context menu both call these two. It fetches PDFs: a captured publisher PDF is fetched **inside the article tab first**, using the browser session you're reading in (institutional access included, independent of your Biblio sign-in), then by the worker with `credentials: "include"`. For "Find PDF" it resolves a DOI to the publisher page and takes its `citation_pdf_url`, which is Zotero's publisher-first order. |
+| `bridge.js` | Content script on the app's own origins. Relays `window.postMessage` requests (`ping`, `fetch-pdf`, `resolve-doi-pdf`) to the background worker. |
 
 The extension never sees Firebase or Google credentials: saving happens in the signed-in web app. Host permission `<all_urls>` is required to fetch PDFs from any publisher.
 

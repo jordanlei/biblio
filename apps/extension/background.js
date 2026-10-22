@@ -2,7 +2,7 @@
 // bound by CORS, and `credentials: "include"` lets institutional/subscription access work too.
 //
 // This worker never looks at pages on its own: metadata is only ever read when you click the
-// extension (popup.js injects the translators into the active tab then, and only then).
+// extension: the popup or the right-click menu calls readTab(), which injects the translators then.
 importScripts("app-url.js");
 const MAX_BYTES = 80 * 1024 * 1024;
 const CAPTURE_TOKEN_TTL = 15 * 60 * 1000;
@@ -24,23 +24,37 @@ chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({ id: "save-to-biblio", title: "Save to Biblio", contexts: ["page", "selection", "link"] });
 });
 
+// The toolbar popup and the right-click menu are two buttons for one action. Both read the tab
+// with readTab() and save with saveCapture(); neither has a capture path of its own.
+const recentReads = new Map();
+
+async function readTab(tab) {
+  const cached = recentReads.get(tab.id);
+  if (cached && cached.url === tab.url && Date.now() - cached.at < 60_000) return cached.paper;
+  const [injection] = await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ["zotero-capture.js"] });
+  const paper = injection?.result ?? null;
+  recentReads.set(tab.id, { url: tab.url, at: Date.now(), paper });
+  return paper;
+}
+
+async function saveCapture(tab, paper) {
+  if (!paper?.isPaper || !paper.title) throw new Error("No paper detected on this page.");
+  const captureToken = await registerCapturedPdf(paper.pdfUrl, tab);
+  recentReads.delete(tab.id);
+  await chrome.tabs.create({ url: `${await appUrl()}/capture#${encodeCapture(captureToken ? { ...paper, captureToken } : paper)}`, index: tab.index + 1 });
+}
+
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   if (info.menuItemId !== "save-to-biblio" || !tab?.id) return;
   try {
-    const [injection] = await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ["zotero-capture.js"] });
-    const paper = injection?.result;
-    if (!paper?.isPaper || !paper.title) {
-      await chrome.tabs.create({ url: `${await appUrl()}/search` });
-      return;
-    }
-    const captureToken = await registerCapturedPdf(paper.pdfUrl);
-    await chrome.tabs.create({ url: `${await appUrl()}/capture#${encodeCapture(captureToken ? { ...paper, captureToken } : paper)}` });
+    await saveCapture(tab, await readTab(tab));
   } catch {
-    await chrome.tabs.create({ url: `${await appUrl()}/search` });
+    // Same "nothing here" screen the toolbar button shows, rather than a different fallback.
+    await chrome.action.openPopup().catch(() => undefined);
   }
 });
 
-async function registerCapturedPdf(url) {
+async function registerCapturedPdf(url, tab) {
   if (!url) return undefined;
   let target;
   try {
@@ -51,21 +65,22 @@ async function registerCapturedPdf(url) {
   if (!/^https?:$/.test(target.protocol) || target.username || target.password || isPrivateAddress(target.hostname)) return undefined;
   const token = crypto.randomUUID();
   await chrome.storage.session.set({
-    [`${CAPTURE_TOKEN_PREFIX}${token}`]: { url: target.href, expiresAt: Date.now() + CAPTURE_TOKEN_TTL }
+    [`${CAPTURE_TOKEN_PREFIX}${token}`]: { url: target.href, tabId: tab?.id, pageUrl: tab?.url, expiresAt: Date.now() + CAPTURE_TOKEN_TTL }
   });
   return token;
 }
 
-async function capturedUrlMatches(token, url) {
-  if (typeof token !== "string" || !token) return false;
+/** The stored capture for this token and URL, or null when it doesn't match or has expired. */
+async function capturedPdf(token, url) {
+  if (typeof token !== "string" || !token) return null;
   const key = `${CAPTURE_TOKEN_PREFIX}${token}`;
   const stored = (await chrome.storage.session.get(key))[key];
-  if (!stored || typeof stored.url !== "string" || typeof stored.expiresAt !== "number") return false;
+  if (!stored || typeof stored.url !== "string" || typeof stored.expiresAt !== "number") return null;
   if (stored.expiresAt < Date.now()) {
     await chrome.storage.session.remove(key);
-    return false;
+    return null;
   }
-  return stored.url === String(url);
+  return stored.url === String(url) ? stored : null;
 }
 
 function toBase64(buffer) {
@@ -178,30 +193,81 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       .catch((error) => sendResponse({ ok: false, error: String(error?.message ?? error) }));
     return true;
   }
-  if (message?.type === "register-capture" && sender?.id === chrome.runtime.id) {
-    registerCapturedPdf(message.pdfUrl)
-      .then((captureToken) => sendResponse({ ok: true, captureToken }))
+  // The popup asks the worker to read and save, so it runs exactly what the right-click menu runs.
+  if ((message?.type === "read-tab" || message?.type === "save-tab") && sender?.id === chrome.runtime.id && !sender.tab) {
+    chrome.tabs
+      .get(message.tabId)
+      .then(async (tab) => {
+        const paper = await readTab(tab);
+        if (message.type === "save-tab") await saveCapture(tab, paper);
+        return paper;
+      })
+      .then((paper) => sendResponse({ ok: true, paper }))
       .catch((error) => sendResponse({ ok: false, error: String(error?.message ?? error) }));
     return true;
   }
-  if (message?.type !== "fetch-pdf") return false;
+  if (message?.type !== "fetch-pdf" && message?.type !== "resolve-doi-pdf") return false;
   // A credentialed fetch is a powerful capability: refuse anything but our own app's pages.
   if (!trusted(sender)) {
     sendResponse({ ok: false, error: "Not allowed from this page." });
     return false;
   }
-  const authorized = message.captureToken
-    ? capturedUrlMatches(message.captureToken, message.url)
-    : Promise.resolve(true);
-  authorized
-    .then((allowed) => {
-      if (!allowed) throw new Error("That captured PDF link is no longer available.");
-      return fetchPdf(message.url);
-    })
+  const work = message.type === "resolve-doi-pdf" ? publisherPdfForDoi(message.doi) : fetchCapturedOrTrusted(message);
+  work
     .then((result) => sendResponse({ ok: true, ...result }))
     .catch((error) => sendResponse({ ok: false, error: String(error?.message ?? error) }));
   return true; // async response
 });
+
+async function fetchCapturedOrTrusted(message) {
+  if (!message.captureToken) return fetchPdf(message.url);
+  const capture = await capturedPdf(message.captureToken, message.url);
+  if (!capture) throw new Error("That captured PDF link is no longer available.");
+  // Ask the article's own tab first: it is the session the user is reading in, so its cookies
+  // are first-party and a subscription PDF the page can open is one we can save.
+  const fromTab = await fetchPdfInTab(capture).catch(() => null);
+  return fromTab ?? fetchPdf(message.url);
+}
+
+async function fetchPdfInTab(capture) {
+  if (typeof capture.tabId !== "number" || !capture.pageUrl) return null;
+  const tab = await chrome.tabs.get(capture.tabId);
+  if (!tab?.url || new URL(tab.url).origin !== new URL(capture.pageUrl).origin) return null;
+  const [injection] = await chrome.scripting.executeScript({
+    target: { tabId: capture.tabId },
+    args: [capture.url, MAX_BYTES],
+    func: async (url, maxBytes) => {
+      const response = await fetch(url, { credentials: "include", redirect: "follow" });
+      if (!response.ok) return null;
+      const buffer = await response.arrayBuffer();
+      if (buffer.byteLength > maxBytes) return null;
+      const bytes = new Uint8Array(buffer);
+      if (!new TextDecoder("latin1").decode(bytes.subarray(0, 1024)).includes("%PDF-")) return null;
+      let binary = "";
+      for (let i = 0; i < bytes.length; i += 0x8000) binary += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+      return btoa(binary);
+    }
+  });
+  return injection?.result ? { base64: injection.result, contentType: "application/pdf" } : null;
+}
+
+// Zotero's "Find Available PDF" order: resolve the DOI to the publisher's landing page with the
+// browser's own session, and take the PDF the page itself declares (citation_pdf_url).
+async function publisherPdfForDoi(doi) {
+  const clean = String(doi ?? "").trim();
+  if (!/^10\.\d{4,9}\/\S+$/.test(clean)) throw new Error("Not a DOI.");
+  const response = await fetch(`https://doi.org/${encodeURIComponent(clean).replace(/%2F/g, "/")}`, { credentials: "include", redirect: "follow" });
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  const buffer = await response.arrayBuffer();
+  if (buffer.byteLength > TRANSLATOR_HTTP_MAX_BYTES) throw new Error("Landing page is too large.");
+  const html = new TextDecoder().decode(buffer);
+  if (html.slice(0, 1024).includes("%PDF-")) return { base64: toBase64(buffer), contentType: "application/pdf" };
+  const meta = html.match(/<meta[^>]+name=["']citation_pdf_url["'][^>]*>/i)?.[0];
+  const href = meta?.match(/content=["']([^"']+)["']/i)?.[1];
+  if (!href) throw new Error("The publisher page doesn't link a PDF.");
+  const pdfUrl = new URL(href.replace(/&amp;/g, "&"), response.url).href;
+  return { ...(await fetchPdf(pdfUrl)), url: pdfUrl };
+}
 
 const TRANSLATOR_HTTP_MAX_BYTES = 12 * 1024 * 1024;
 
