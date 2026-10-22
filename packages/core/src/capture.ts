@@ -16,6 +16,7 @@ export interface CapturedPaper {
   doi?: string;
   arxivId?: string;
   pmid?: string;
+  pmcid?: string;
   abstract?: string;
   pdfUrl?: string;
   url?: string;
@@ -55,6 +56,7 @@ export function parseCapturedPaper(raw: unknown): CapturedPaper {
     doi: text("doi"),
     arxivId: text("arxivId"),
     pmid: text("pmid"),
+    pmcid: text("pmcid"),
     abstract: text("abstract"),
     pdfUrl: link("pdfUrl"),
     url: link("url"),

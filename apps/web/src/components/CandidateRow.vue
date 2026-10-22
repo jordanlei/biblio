@@ -38,7 +38,7 @@ async function add() {
     addedId.value = paper.id;
     emit("added", paper);
     // Grab the PDF straight away when there's somewhere to put it.
-    if (session.profile.value?.driveRootFolderId && (paper.openAccessPdfUrl || paper.arxivId || paper.doi)) void savePdf();
+    if (session.profile.value?.driveRootFolderId && (paper.openAccessPdfUrl || paper.arxivId || paper.doi || paper.pmcid)) void savePdf();
   } catch (error) {
     toastError(error);
   } finally {

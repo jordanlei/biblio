@@ -377,6 +377,7 @@ async function lookupPmid(pmid: string): Promise<PaperCandidate> {
     issue: pubmed.issue ?? candidate?.issue,
     pages: pubmed.pages ?? candidate?.pages,
     doi: pubmed.doi ?? candidate?.doi,
+    pmcid: pubmed.pmcid,
     url: `https://pubmed.ncbi.nlm.nih.gov/${pmid}/`,
     pmid,
     abstract: pubmed.abstract ?? candidate?.abstract,
@@ -394,6 +395,7 @@ interface PubmedRecord {
   issue?: string;
   pages?: string;
   doi?: string;
+  pmcid?: string;
   abstract?: string;
 }
 
@@ -414,6 +416,7 @@ async function lookupPubmedXml(pmid: string): Promise<PubmedRecord | null> {
     const monthName = xmlText(article, "Month");
     const months = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
     const doi = [...article.matchAll(/<ArticleId\b[^>]*IdType=["']doi["'][^>]*>([\s\S]*?)<\/ArticleId>/gi)][0]?.[1];
+    const pmcid = [...article.matchAll(/<ArticleId\b[^>]*IdType=["']pmc["'][^>]*>([\s\S]*?)<\/ArticleId>/gi)][0]?.[1];
     return {
       title: xmlText(article, "ArticleTitle"),
       authors,
@@ -424,6 +427,7 @@ async function lookupPubmedXml(pmid: string): Promise<PubmedRecord | null> {
       issue: xmlText(article, "Issue"),
       pages: xmlText(article, "MedlinePgn") ?? [xmlText(article, "StartPage"), xmlText(article, "EndPage")].filter(Boolean).join("-"),
       doi: normalizeDoi(doi),
+      pmcid: pmcid?.trim(),
       abstract: xmlText(article, "AbstractText")
     };
   } catch {

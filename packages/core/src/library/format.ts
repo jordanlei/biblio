@@ -48,6 +48,7 @@ export interface BiblioFields {
   note?: string;
   pdf?: string;
   arxivId?: string;
+  pmcid?: string;
   semanticScholarId?: string;
   openAccessPdfUrl?: string;
   source: Paper["source"];
@@ -171,6 +172,7 @@ export function paperToCsl(paper: Paper, paths: PaperPaths = {}): CslItem {
         note: paths.note,
         pdf: paths.pdf,
         arxivId: paper.arxivId,
+        pmcid: paper.pmcid,
         semanticScholarId: paper.semanticScholarId,
         openAccessPdfUrl: paper.openAccessPdfUrl,
         source: paper.source,
@@ -209,6 +211,7 @@ export function cslToPaper(item: CslItem, now: string): { paper: Paper; paths: P
     doi: item.DOI,
     arxivId: b?.arxivId,
     pmid: item.PMID,
+    pmcid: b?.pmcid,
     semanticScholarId: b?.semanticScholarId,
     isbn: item.ISBN ? item.ISBN.split(/,\s*/) : undefined,
     issn: item.ISSN ? item.ISSN.split(/,\s*/) : undefined,

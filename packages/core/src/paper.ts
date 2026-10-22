@@ -33,6 +33,7 @@ export function buildPaper(candidate: PaperCandidate, options: { id: string; exi
     doi: normalizeDoi(candidate.doi),
     arxivId: normalizeArxivId(candidate.arxivId),
     pmid: normalizeIdentifier(candidate.pmid),
+    pmcid: normalizeIdentifier(candidate.pmcid),
     semanticScholarId: normalizeIdentifier(candidate.semanticScholarId),
     url: candidate.url,
     openAccessPdfUrl: candidate.openAccessPdfUrl,

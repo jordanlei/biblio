@@ -166,6 +166,7 @@ ${translatorFactories}
       publisher: clean(item.publisher),
       doi,
       pmid: clean(item.PMID || ((item.extra || "").match(/(?:^|\\n)PMID:\\s*([^\\n]+)/i) || [])[1]),
+      pmcid: clean(item.PMCID || ((item.extra || "").match(/(?:^|\\n)PMCID:\\s*([^\\n]+)/i) || [])[1]),
       abstract: clean(item.abstractNote).slice(0, 6000),
       pdfUrl: absolute(pdf?.url),
       url: absolute(item.url) || location.href,

@@ -35,6 +35,11 @@ test("the official PubMed XML translator retains structured author fields", () =
   assert.match(source, /creator\.firstName = \[creator\.firstName, suffix\]/);
 });
 
+test("the generated capture keeps PubMed Central identifiers for PDF discovery", () => {
+  const bundle = readFileSync(`${extensionRoot}zotero-capture.js`, "utf8");
+  assert.match(bundle, /pmcid: clean\(item\.PMCID/);
+});
+
 test("the extension opens capture in a new Biblio tab", () => {
   const popup = readFileSync(`${extensionRoot}popup.js`, "utf8");
   const background = readFileSync(`${extensionRoot}background.js`, "utf8");

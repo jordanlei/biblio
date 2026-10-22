@@ -71,6 +71,10 @@ describe("capture payload validation", () => {
     expect(out.url).toBe("http://example.com/a");
   });
 
+  it("keeps a PubMed Central identifier for later PDF discovery", () => {
+    expect(parseCapturedPaper({ title: "X", pmid: "19217296", pmcid: "PMC2669412" }).pmcid).toBe("PMC2669412");
+  });
+
   it("caps absurdly long text and author lists", () => {
     const out = parseCapturedPaper({ title: "T".repeat(50_000), abstract: "A".repeat(50_000), authors: Array(5000).fill("X") });
     expect(out.title.length).toBe(6000);

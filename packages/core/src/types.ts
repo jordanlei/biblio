@@ -58,6 +58,8 @@ export interface Paper {
   doi?: string;
   arxivId?: string;
   pmid?: string;
+  /** PubMed Central identifier, when the source metadata includes one. */
+  pmcid?: string;
   semanticScholarId?: string;
   issn?: string[];
   isbn?: string[];
@@ -122,6 +124,7 @@ export interface PaperCandidate {
   doi?: string;
   arxivId?: string;
   pmid?: string;
+  pmcid?: string;
   semanticScholarId?: string;
   url?: string;
   openAccessPdfUrl?: string;

@@ -52,6 +52,17 @@ export function pdfFromLandingPage(url?: string): string | undefined {
 
 const squash = (value: string) => value.toLowerCase().replace(/[^a-z0-9]+/g, "");
 
+function normalizePmcId(value?: string) {
+  const match = String(value ?? "").trim().match(/^PMC(\d+)$/i);
+  return match ? `PMC${match[1]}` : undefined;
+}
+
+/** PMC redirects this stable article endpoint to the article's actual PDF when one exists. */
+function pmcPdfUrl(pmcid?: string) {
+  const id = normalizePmcId(pmcid);
+  return id ? `https://pmc.ncbi.nlm.nih.gov/articles/${id}/pdf/` : undefined;
+}
+
 /** The paper's OpenAlex record: by DOI, or failing that by exact title (and year) match. */
 async function openAlexWork(paper: Paper): Promise<OpenAlexLocations | null> {
   const select = "select=display_name,publication_year,best_oa_location,primary_location,locations";
@@ -88,6 +99,7 @@ export async function findPdfSources(paper: Paper, captureToken?: string): Promi
   // URL with the browser's cookies when a publisher requires an institutional session.
   add(paper.openAccessPdfUrl, undefined, Boolean(captureToken), captureToken);
   add(pdfFromLandingPage(paper.url));
+  add(pmcPdfUrl(paper.pmcid), "PubMed Central", true);
   if (arxivId) add(`https://arxiv.org/pdf/${arxivId}`, "arXiv", true);
   // These are useful fallbacks for older records without an OA PDF. They will not be
   // downloaded as PDFs, but they remain available to open manually after a failed search.
@@ -153,10 +165,5 @@ export async function downloadPdf(sources: PdfSource[], onStep: FetchStep = () =
       if (blob && blob.size <= MAX_BYTES && (await isPdf(blob))) return { blob, source: candidate };
     }
   }
-  if (!sources.length) throw new Error("No open-access copy is known for this paper.");
-  throw new Error(
-    hasExtension
-      ? "Found open-access links, but none returned a PDF. Open one, save the PDF, and drop it here."
-      : "This publisher blocks downloads from web pages. Install the Biblio extension to grab it, or open the link and drop the PDF here."
-  );
+  throw new Error(sources.length ? "No downloadable PDF was found in the available sources." : "No PDF was found for this paper.");
 }

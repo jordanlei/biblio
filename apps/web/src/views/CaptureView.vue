@@ -42,6 +42,7 @@ function toCandidate(c: CapturedPaper): PaperCandidate {
     doi: c.doi || undefined,
     arxivId,
     pmid: c.pmid || undefined,
+    pmcid: c.pmcid || undefined,
     abstract: c.abstract || undefined,
     url: c.url,
     openAccessPdfUrl: c.pdfUrl || undefined,
