@@ -57,7 +57,7 @@ function abstractFromInvertedIndex(index?: Record<string, number[]> | null): str
 }
 
 /** Best direct PDF link for a work: arXiv first (always fetchable by ID), then any OA PDF location. */
-export function bestPdfUrl(work: Pick<OpenAlexWork, "best_oa_location" | "primary_location" | "locations">, arxivId?: string): string | undefined {
+function bestPdfUrl(work: Pick<OpenAlexWork, "best_oa_location" | "primary_location" | "locations">, arxivId?: string): string | undefined {
   if (arxivId) return `https://arxiv.org/pdf/${arxivId}`;
   return work.best_oa_location?.pdf_url ?? work.primary_location?.pdf_url ?? work.locations?.find((l) => l.pdf_url)?.pdf_url ?? undefined;
 }

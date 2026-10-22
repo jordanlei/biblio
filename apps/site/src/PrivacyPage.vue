@@ -133,10 +133,6 @@ const leaves = [
         <FaqItem question="Your copy is only as secure as your Google account">
           Anyone who can sign in as you can read your library. Turn on two-factor authentication.
         </FaqItem>
-        <FaqItem question="The optional PDF helper keeps logs">
-          If you deploy the optional Cloud Function for PDFs that browsers can't fetch, your cloud provider logs which URLs it retrieved. On a one-person install that's your own
-          activity — but think twice before running a shared instance.
-        </FaqItem>
         <FaqItem question="Google may warn that the app isn't verified">
           Expected for self-hosted software: your copy is a brand-new sign-in client that Google hasn't reviewed. It's your own app asking your own permission.
         </FaqItem>

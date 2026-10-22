@@ -1,6 +1,6 @@
 # Architecture
 
-Biblio is a static Vue app talking directly to Firebase (Auth, Firestore) and Google Drive from the browser. There is no application server; two optional Cloud Functions exist for jobs browsers can't do (CORS-blocked fetches).
+Biblio is a static Vue app talking directly to Firebase (Auth, Firestore) and Google Drive from the browser. There is no application server: jobs a web page cannot do (CORS-blocked or subscription PDF fetches) go through the browser extension.
 
 **The canonical library is a folder of open files in the user's Drive; Firestore is a disposable, fast materialized view.** See [STORAGE.md](STORAGE.md) for the classification, sync model, and rebuild path, and [LIBRARY_FORMAT.md](LIBRARY_FORMAT.md) for the file format.
 
@@ -42,9 +42,9 @@ Biblio is a static Vue app talking directly to Firebase (Auth, Firestore) and Go
 | `services/librarySearch.ts` | Fielded, accent-folded, relevance-scored local search over metadata, notes, tags, citation keys, and saved-because text + highlight segments. |
 | `services/scope.ts` | `/library?folder|tag|view` scopes and combinable filters (`pdf`, `notes`, `untagged`, `status`) kept in the URL. |
 | `services/lookup.ts` | OpenAlex works/author search (reciprocal-rank fusion of relevance and citation rankings), identifier lookups (Crossref, DataCite, OpenAlex), `author:`/`year:` qualifier parsing. |
-| `services/pdfFetch.ts` | Finds OA PDF sources and downloads the first real PDF: direct → extension → `fetchPdf` function. |
+| `services/pdfFetch.ts` | Ranks PDF sources (publisher first, preprints last) and downloads the first real PDF: direct, then through the extension. |
 | `services/drive.ts` | App-level Drive actions: create/pick the library folder, attach/find/remove PDFs (into `papers/`), links. |
-| `services/extensionBridge.ts` | `postMessage` protocol to the extension's content script (ping, fetch-pdf). |
+| `services/extensionBridge.ts` | `postMessage` protocol to the extension's content script (ping, fetch-pdf, resolve-doi-pdf). |
 | `services/notes.ts` | Markdown rendering with an inline `@[key]` token, sanitized by DOMPurify. |
 | `services/ui.ts` | Toasts, the Add dialog state, list context for prev/next, undo trigger. |
 | `services/emulatorHooks.ts` | Local test mode only: programmatic sign-in for Playwright. |

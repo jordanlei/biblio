@@ -159,8 +159,7 @@ async function reconnectAndFetchPdf() {
 
 /**
  * A capture from the extension is an intentional save action, so normal captures add themselves
- * after duplicate checking. Saving also tries to download the PDF, which is constrained by the
- * PDF fetcher's safe-destination checks.
+ * after duplicate checking. Saving also tries to download the PDF.
  */
 function start() {
   if (!captured.value || !loaded.value || phase.value !== "waiting") return;

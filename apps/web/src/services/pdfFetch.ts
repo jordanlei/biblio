@@ -1,12 +1,11 @@
 import { normalizeArxivId, normalizeDoi, type Paper } from "@biblio/core";
-import { auth } from "../firebase";
 import { extensionAvailable, extensionFetch, extensionPublisherPdf } from "./extensionBridge";
 
 // Finding and downloading PDFs. The publisher's version always wins: the PDF the Zotero translator
 // found on the page, then the publisher's PDF via the DOI (through the extension, with the
 // browser's institutional session), then published open-access copies and PMC, accepted
 // manuscripts, and only last preprints (arXiv, OSF, bioRxiv…). Each URL is tried directly, then
-// through the Biblio extension when it is trusted, then through the optional `fetchPdf` Cloud Function.
+// through the Biblio extension when it is trusted.
 
 export interface PdfSource {
   url: string;
@@ -180,19 +179,6 @@ async function direct(url: string): Promise<Blob | null> {
   }
 }
 
-async function viaFunction(url: string): Promise<Blob | null> {
-  const user = auth.currentUser;
-  if (!user) return null;
-  try {
-    const token = await user.getIdToken();
-    const response = await fetch(`/api/fetch-pdf?url=${encodeURIComponent(url)}`, { headers: { Authorization: `Bearer ${token}` } });
-    if (!response.ok || !response.headers.get("content-type")?.includes("pdf")) return null;
-    return await response.blob();
-  } catch {
-    return null;
-  }
-}
-
 export type FetchStep = (message: string) => void;
 
 /** Download the first source that yields a real PDF. Throws with a helpful message when none do. */
@@ -204,7 +190,9 @@ export async function downloadPdf(sources: PdfSource[], onStep: FetchStep = () =
     // a translator URL may opt in with its short-lived capture token.
     const privileged = hasExtension && candidate.trusted;
     const publisherDoi = candidate.publisherDoi;
-    const attempts = publisherDoi ? (hasExtension ? [() => extensionPublisherPdf(publisherDoi)] : []) : [() => direct(candidate.url), ...(privileged ? [() => extensionFetch(candidate.url, candidate.captureToken)] : []), ...(candidate.trusted ? [() => viaFunction(candidate.url)] : [])];
+    const attempts = publisherDoi
+      ? hasExtension ? [() => extensionPublisherPdf(publisherDoi)] : []
+      : [() => direct(candidate.url), ...(privileged ? [() => extensionFetch(candidate.url, candidate.captureToken)] : [])];
     for (const attempt of attempts) {
       const blob = await attempt();
       if (blob && blob.size <= MAX_BYTES && (await isPdf(blob))) return { blob, source: candidate };

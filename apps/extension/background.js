@@ -1,8 +1,9 @@
-// Fetches PDFs for the Biblio web app (via bridge.js). Extensions with host permissions aren't
-// bound by CORS, and `credentials: "include"` lets institutional/subscription access work too.
+// Saves the paper on the current tab to Biblio, and fetches PDFs for the Biblio web app (via
+// bridge.js). Extensions with host permissions aren't bound by CORS, and `credentials: "include"`
+// lets institutional/subscription access work too.
 //
-// This worker never looks at pages on its own: metadata is only ever read when you click the
-// extension: the popup or the right-click menu calls readTab(), which injects the translators then.
+// This worker never looks at pages on its own: a page is read only when you click the toolbar
+// button or the "Save to Biblio" menu item, which both run saveTab().
 importScripts("app-url.js", "zotero-translator-index.js");
 const MAX_BYTES = 80 * 1024 * 1024;
 const CAPTURE_TOKEN_TTL = 15 * 60 * 1000;
@@ -15,29 +16,39 @@ function encodeCapture(data) {
   return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
-async function appUrl() {
-  const { appUrl } = await chrome.storage.sync.get("appUrl");
-  return appUrl || DEFAULT_APP_URL;
-}
-
 chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({ id: "save-to-biblio", title: "Save to Biblio", contexts: ["page", "selection", "link"] });
 });
+chrome.action.onClicked.addListener((tab) => saveTab(tab));
+chrome.contextMenus.onClicked.addListener((info, tab) => {
+  if (info.menuItemId === "save-to-biblio") saveTab(tab);
+});
 
-// The toolbar popup and the right-click menu are two buttons for one action. Both read the tab
-// with readTab() and save with saveCapture(); neither has a capture path of its own.
-const recentReads = new Map();
+/** Read the tab with Zotero's translators and open Biblio's capture page for it. */
+async function saveTab(tab) {
+  if (!tab?.id) return;
+  await chrome.action.setBadgeText({ tabId: tab.id, text: "" });
+  await chrome.action.setTitle({ tabId: tab.id, title: "Save to Biblio" });
+  try {
+    const paper = await readTab(tab);
+    if (!paper?.isPaper || !paper.title) throw new Error("No paper detected on this page.");
+    const captureToken = await registerCapturedPdf(paper.pdfUrl, tab);
+    const capture = captureToken ? { ...paper, captureToken } : paper;
+    await chrome.tabs.create({ url: `${DEFAULT_APP_URL}/capture#${encodeCapture(capture)}`, index: tab.index + 1 });
+  } catch (error) {
+    // chrome:// pages, the Web Store, or no paper: say so on the button itself.
+    await chrome.action.setBadgeBackgroundColor({ tabId: tab.id, color: "#b3261e" });
+    await chrome.action.setBadgeText({ tabId: tab.id, text: "!" });
+    await chrome.action.setTitle({ tabId: tab.id, title: `Biblio: ${error?.message ?? "couldn't read this page."}` });
+  }
+}
 
 async function readTab(tab) {
-  const cached = recentReads.get(tab.id);
-  if (cached && cached.url === tab.url && Date.now() - cached.at < 60_000) return cached.paper;
   const [injection] = await chrome.scripting.executeScript({
     target: { tabId: tab.id },
     files: ["zotero-runtime.js", ...translatorFilesFor(tab.url), "zotero-capture.js"]
   });
-  const paper = injection?.result ?? null;
-  recentReads.set(tab.id, { url: tab.url, at: Date.now(), paper });
-  return paper;
+  return injection?.result ?? null;
 }
 
 // The Zotero Connector's selection: web translators whose target matches the URL (an empty target
@@ -70,23 +81,6 @@ function translatorFilesFor(url) {
   }
   return [...chosen].map((id) => `zotero-translators/${id}.js`);
 }
-
-async function saveCapture(tab, paper) {
-  if (!paper?.isPaper || !paper.title) throw new Error("No paper detected on this page.");
-  const captureToken = await registerCapturedPdf(paper.pdfUrl, tab);
-  recentReads.delete(tab.id);
-  await chrome.tabs.create({ url: `${await appUrl()}/capture#${encodeCapture(captureToken ? { ...paper, captureToken } : paper)}`, index: tab.index + 1 });
-}
-
-chrome.contextMenus.onClicked.addListener(async (info, tab) => {
-  if (info.menuItemId !== "save-to-biblio" || !tab?.id) return;
-  try {
-    await saveCapture(tab, await readTab(tab));
-  } catch {
-    // Same "nothing here" screen the toolbar button shows, rather than a different fallback.
-    await chrome.action.openPopup().catch(() => undefined);
-  }
-});
 
 async function registerCapturedPdf(url, tab) {
   if (!url) return undefined;
@@ -129,7 +123,6 @@ function toBase64(buffer) {
 //
 // Always test `new URL(...).hostname`, never the raw string: the URL parser folds 2130706433,
 // 0x7f000001, 0177.0.0.1 and 127.1 to 127.0.0.1, and checking before that would miss them.
-// Mirrors functions/safe-destination.js; keep the two in step.
 const BLOCKED_NAMES = new Set(["localhost", "localhost.localdomain", "metadata", "metadata.google.internal"]);
 
 function isPrivateIpv4(address) {
@@ -224,19 +217,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message?.type === "zotero-http" && sender?.id === chrome.runtime.id) {
     fetchTranslatorRequest(message)
       .then((result) => sendResponse({ ok: true, ...result }))
-      .catch((error) => sendResponse({ ok: false, error: String(error?.message ?? error) }));
-    return true;
-  }
-  // The popup asks the worker to read and save, so it runs exactly what the right-click menu runs.
-  if ((message?.type === "read-tab" || message?.type === "save-tab") && sender?.id === chrome.runtime.id && !sender.tab) {
-    chrome.tabs
-      .get(message.tabId)
-      .then(async (tab) => {
-        const paper = await readTab(tab);
-        if (message.type === "save-tab") await saveCapture(tab, paper);
-        return paper;
-      })
-      .then((paper) => sendResponse({ ok: true, paper }))
       .catch((error) => sendResponse({ ok: false, error: String(error?.message ?? error) }));
     return true;
   }

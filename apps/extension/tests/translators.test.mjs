@@ -21,7 +21,6 @@ test("the extension has one translator path and no retired Biblio parsers", () =
   for (const name of ["extract.js", "biblio-translate.js", "biblio-translators.js", "pubmed-xml.js"]) {
     assert.equal(existsSync(`${extensionRoot}${name}`), false, `${name} should not be shipped`);
   }
-  assert.doesNotMatch(readFileSync(`${extensionRoot}popup.js`, "utf8"), /zotero-capture\.js/);
   assert.match(readFileSync(`${extensionRoot}background.js`, "utf8"), /files: \["zotero-runtime\.js", \.\.\.translatorFilesFor\(tab\.url\), "zotero-capture\.js"\]/);
 });
 
@@ -57,14 +56,12 @@ test("the capture driver keeps identifiers the app uses for PDF discovery", () =
   assert.match(runtime, /arxivId: clean\(/);
 });
 
-test("the popup and the right-click menu share one capture path", () => {
-  const popup = readFileSync(`${extensionRoot}popup.js`, "utf8");
+test("the toolbar button and the right-click menu run the same save", () => {
   const background = readFileSync(`${extensionRoot}background.js`, "utf8");
-  assert.match(background, /chrome\.tabs\.create\(\{ url: .*\/capture/);
-  assert.doesNotMatch(popup, /\/capture#/);
-  assert.match(popup, /type: "read-tab"/);
-  assert.match(popup, /type: "save-tab"/);
-  assert.match(background, /contextMenus\.onClicked[\s\S]*saveCapture\(tab, await readTab\(tab\)\)/);
+  assert.equal(existsSync(`${extensionRoot}popup.js`), false);
+  assert.match(background, /chrome\.action\.onClicked\.addListener\(\(tab\) => saveTab\(tab\)\)/);
+  assert.match(background, /if \(info\.menuItemId === "save-to-biblio"\) saveTab\(tab\)/);
+  assert.match(background, /chrome\.tabs\.create\(\{ url: .*\/capture#/);
 });
 
 test("captured publisher PDFs are fetched in the article tab first", () => {

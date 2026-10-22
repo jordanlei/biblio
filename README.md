@@ -12,16 +12,13 @@
 **Two kinds of site.** This repository's [project website](https://jordanlei.github.io/biblio/) (GitHub Pages, `apps/site`) explains Biblio, [how it works](https://jordanlei.github.io/biblio/how-it-works/), and how to set it up. Each person's own copy of the app (`apps/web`) runs on their own Firebase site and shows just a sign-in page. See [CONTRIBUTING.md](CONTRIBUTING.md) for the rules that keep it that way.
 
 - Set up your own copy: [tutorial](https://jordanlei.github.io/biblio/setup/) · full guide [docs/SELF_HOSTING.md](docs/SELF_HOSTING.md)
-- Current state, verification, and known gaps: [docs/STATUS.md](docs/STATUS.md)
 - Storage architecture (what's canonical, sync, rebuild): [docs/STORAGE.md](docs/STORAGE.md)
 - The on-Drive library format: [docs/LIBRARY_FORMAT.md](docs/LIBRARY_FORMAT.md)
 - How it's built: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
-- Where it could go: [docs/ROADMAP.md](docs/ROADMAP.md)
 - How the website's screenshots and videos are made: [docs/CAPTURES.md](docs/CAPTURES.md)
 - Adding your own features without fighting upstream: [docs/EXTENDING.md](docs/EXTENDING.md)
 - What Biblio protects, and what leaves your browser: [docs/SECURITY.md](docs/SECURITY.md)
 - Contributing and the rules that always hold: [CONTRIBUTING.md](CONTRIBUTING.md)
-- Original product brief: [brief.md](brief.md)
 
 ## What it does
 
@@ -49,7 +46,6 @@ apps/site/           The project website: static Vue page, reuses the app's styl
 apps/extension/      Manifest V3 extension (popup, page extractor, PDF fetcher, app bridge)
 packages/core/       Domain: types, citation keys, normalization, dedupe, BibTeX in/out,
                      library format + sync engine + storage ports (no SDKs)
-functions/           Cloud Functions: Semantic Scholar proxy, PDF fetch proxy (need Blaze plan)
 scripts/             setup (your own copy), deploy, dev-local launcher, mock Google Drive server
 e2e/                 Playwright walkthrough of the new-user journey
 samples/             Example Zotero/Better BibTeX export used by tests
@@ -64,7 +60,6 @@ npm run setup        # once: connect this copy to your own Firebase project (doc
 npm run dev          # app against that project (needs a real Google sign-in)
 npm run test:core    # fast development loop: provider-boundary check + core unit tests
 npm run test:final   # final gate: core tests + typecheck + build + e2e
-npm run bench:latency
 npm run typecheck
 npm run build
 npm run site:dev     # the project website, on :5180
@@ -89,7 +84,6 @@ npm run test:e2e     # Playwright: new-user journey + data-loss/rebuild, offline
 npm run deploy       # build + deploy hosting and Firestore rules to the project in biblio.config.json
 ```
 
-Cloud Functions (`semanticScholarSearch`, `fetchPdf`) require upgrading the project to the Blaze plan; then `npm run firebase -- deploy --only functions,hosting`. The app works without them: search uses OpenAlex directly and PDFs fall back to direct and extension fetching.
 
 ## Google Cloud configuration
 

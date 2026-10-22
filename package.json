@@ -6,18 +6,16 @@
   "type": "module",
   "workspaces": [
     "apps/*",
-    "packages/*",
-    "functions"
+    "packages/*"
   ],
   "scripts": {
     "dev": "npm --workspace apps/web run dev",
     "build": "npm --workspace packages/core run build && npm --workspace apps/web run build",
     "test": "npm run test:core && npm run test:extension",
-    "test:core": "node scripts/check-boundaries.mjs && node functions/safe-destination.test.mjs && npm --workspace packages/core run test",
+    "test:core": "node scripts/check-boundaries.mjs && npm --workspace packages/core run test",
     "test:extension": "npm run build:extension && node --test apps/extension/tests/*.test.mjs",
     "test:final": "npm test && npm run typecheck && npm run build && npm run test:e2e",
     "typecheck": "npm --workspace packages/core run build && npm --workspace apps/web run typecheck && npm --workspace apps/site run typecheck",
-    "bench:latency": "vitest run scripts/bench-latency.test.ts --pool=forks --reporter=dot",
     "preview": "npm --workspace apps/web run preview",
     "firebase:emulators": "firebase emulators:start --project demo-biblio",
     "setup": "node scripts/setup.mjs",
@@ -38,7 +36,6 @@
     "firebase-tools": "^15.32.1",
     "typescript": "5.9.3",
     "vite": "latest",
-    "vitest": "latest",
     "vue-tsc": "latest"
   }
 }

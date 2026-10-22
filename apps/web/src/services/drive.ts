@@ -2,7 +2,6 @@ import { defaultPdfPath, inspectLibrary, type Paper, type StoredFile } from "@bi
 import {
   GoogleDriveFileStore,
   createFolder,
-  deleteFile,
   fileExists,
   trashFile,
   untrashFile,
@@ -113,8 +112,6 @@ export async function removePdf(paper: Paper) {
   await trashFile(fileId);
   await updatePaper(paper.id, { pdf: undefined }, { label: "Remove PDF", restore: () => untrashFile(fileId) });
 }
-
-export const deleteDriveFile = deleteFile;
 
 /** Move the whole library folder to the Drive trash (account deletion, when the user asks). */
 export async function trashLibraryFolder() {

@@ -292,10 +292,6 @@ export async function updatePaper(paperId: string, patch: Partial<Paper>, undo?:
   await updateDoc(doc(papersCollection(uid), paperId), { ...clean, updatedAt: now() });
 }
 
-export async function deletePaper(paperId: string) {
-  await deletePapers([paperId]);
-}
-
 /** Delete paper records, undoably. (Drive files are handled by services/deletion.ts.) */
 export async function deletePapers(paperIds: string[], restore?: () => Promise<void>) {
   const uid = requireUid();
@@ -392,10 +388,6 @@ export async function createFolder(name: string, parentId: string | null = null)
   return folder;
 }
 
-export async function renameFolder(folderId: string, name: string) {
-  await updateDoc(doc(foldersCollection(requireUid()), folderId), { name: name.trim(), updatedAt: now() });
-}
-
 export function folderDescendants(folderId: string): string[] {
   const ids = [folderId];
   for (let i = 0; i < ids.length; i += 1) {
@@ -467,7 +459,7 @@ export async function deleteProfileDoc() {
 }
 
 // --- Export ----------------------------------------------------------------------------------
-export function downloadText(text: string, filename: string, type: string) {
+function downloadText(text: string, filename: string, type: string) {
   const url = URL.createObjectURL(new Blob([text], { type }));
   const link = document.createElement("a");
   link.href = url;

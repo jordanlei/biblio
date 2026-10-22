@@ -67,9 +67,6 @@ optional fonts in Settings.
 Worth being straight about:
 
 - **Catalog lookups reveal interests**, as above. Intrinsic to having no server.
-- **The optional PDF proxy keeps logs.** If you deploy the Cloud Function, your cloud provider
-  records which URLs it fetched. On a single-user install that's your own activity; think twice
-  before running a shared instance.
 - **Your copy is as secure as your Google account.** Anyone who can sign in as you can read your
   library. Use two-factor authentication.
 - **An unverified app warning may appear** the first time you sign in, because your copy is a new

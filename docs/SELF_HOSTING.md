@@ -107,7 +107,6 @@ The service account can deploy hosting and Firestore rules, and nothing else. To
   treats that as low-risk, so there's no "unverified app" warning and nothing to get verified.
 - **Your own domain.** Add it under *Hosting* in the Firebase console, then add it to
   *Authentication → Settings → Authorized domains*.
-- **Cloud Functions** (`functions/`) are optional and need the paid Blaze plan; the app works without them.
 - **The Chrome extension:** setup configures it for your address in `apps/extension`
   (`npm run build:extension` to refresh it). Load that folder unpacked (see its README).
 - **Moving between copies.** Your copy only sees the Drive files it created, so a library moves as
