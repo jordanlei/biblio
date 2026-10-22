@@ -4,8 +4,9 @@ import { decodeCaptureHash, normalizeArxivId } from "@biblio/core";
 import { computed, onMounted, ref, watch } from "vue";
 import { RouterLink, useRoute } from "vue-router";
 import AppIcon from "../components/AppIcon.vue";
-import { grabPdf } from "../services/drive";
-import { addPaper, checkDuplicate, parseCreators, setPaperFolders, shortAuthors, useLibrary } from "../services/library";
+import { attachPdf, grabPdf } from "../services/drive";
+import { downloadPdf, isPreprint } from "../services/pdfFetch";
+import { addPaper, checkDuplicate, parseCreators, setPaperFolders, shortAuthors, updatePaper, useLibrary } from "../services/library";
 import { getGoogleAccessToken, hasGoogleAccessToken, useSession } from "../services/session";
 
 // Landing page for the browser extension's "Save to Biblio". The extension passes the page's
@@ -92,6 +93,58 @@ async function fetchPdf(target: Paper, captureToken?: string) {
   }
 }
 
+/**
+ * Capturing a paper that is already in the library (often saved earlier as its arXiv preprint)
+ * upgrades that record: the publisher page's details fill in what it lacks, and the publisher's
+ * PDF replaces a PDF that came from somewhere else. Drive keeps the old file as a revision.
+ */
+async function upgradeExisting(existing: Paper) {
+  const c = captured.value!;
+  const preprint = existing.type === "preprint" && Boolean(c.venue);
+  const patch: Partial<Paper> = {};
+  const fill = <K extends keyof Paper>(key: K, value: Paper[K] | undefined) => {
+    if (value && (preprint || !existing[key])) patch[key] = value;
+  };
+  fill("doi", c.doi || undefined);
+  fill("containerTitle", c.venue || undefined);
+  fill("volume", c.volume || undefined);
+  fill("issue", c.issue || undefined);
+  fill("pages", c.pages || undefined);
+  fill("publisher", c.publisher || undefined);
+  fill("pmid", c.pmid || undefined);
+  fill("pmcid", c.pmcid || undefined);
+  fill("url", c.url || undefined);
+  if (preprint) patch.type = "article";
+  if (Object.keys(patch).length) await updatePaper(existing.id, patch, "Update from publisher page");
+
+  if (!existing.pdf) return fetchPdf({ ...existing, ...patch }, c.captureToken);
+  // Only ever upgrade toward the publisher's version: never replace a PDF with a preprint, and
+  // leave a PDF you attached by hand (no source URL) alone.
+  const saved = existing.pdf.sourceUrl;
+  if (!c.pdfUrl || !c.captureToken || !saved || saved === c.pdfUrl || isPreprint(c.pdfUrl)) return;
+  if (!hasGoogleAccessToken()) {
+    pdf.value = { state: "needs-drive", message: "Google Drive access expired." };
+    return;
+  }
+  const host = new URL(c.pdfUrl).hostname.replace(/^www\./, "");
+  pdf.value = { state: "working", message: `Replacing the saved PDF with ${host}'s…` };
+  try {
+    const { blob } = await downloadPdf([{ url: c.pdfUrl, host, label: host, trusted: true, captureToken: c.captureToken }]);
+    await attachPdf(existing, new File([blob], existing.pdf.filename, { type: "application/pdf" }), c.pdfUrl);
+    pdf.value = { state: "done", message: `Replaced the saved PDF with the publisher's (${host})` };
+  } catch {
+    pdf.value = { state: "failed", message: `Kept the saved PDF: ${host}'s PDF wasn't reachable from this browser` };
+  }
+}
+
+function useExisting() {
+  const existing = duplicate.value?.paper;
+  if (!existing) return;
+  paperId.value = existing.id;
+  phase.value = "duplicate";
+  void upgradeExisting(existing);
+}
+
 async function reconnectAndFetchPdf() {
   if (!paper.value) return;
   try {
@@ -100,7 +153,8 @@ async function reconnectAndFetchPdf() {
     pdf.value = { state: "needs-drive", message: e instanceof Error ? e.message : "Google Drive wasn't reconnected." };
     return;
   }
-  await fetchPdf(paper.value, captured.value?.captureToken);
+  if (phase.value === "duplicate") await upgradeExisting(paper.value);
+  else await fetchPdf(paper.value, captured.value?.captureToken);
 }
 
 /**
@@ -115,6 +169,7 @@ function start() {
   if (duplicate.value.kind === "exact") {
     paperId.value = duplicate.value.paper!.id;
     phase.value = "duplicate";
+    void upgradeExisting(duplicate.value.paper!);
   } else if (duplicate.value.kind === "probable") phase.value = "probable";
   else void save();
 }
@@ -180,7 +235,7 @@ function assignCollection() {
           <li>
             This may already be in your library as “{{ duplicate?.paper?.title }}”.
             <div class="row" style="margin-top: 10px">
-              <RouterLink class="btn" :to="`/paper/${duplicate?.paper?.id}`">Use existing</RouterLink>
+              <button class="btn" type="button" @click="useExisting">Update existing</button>
               <button class="btn primary" type="button" @click="save">Add anyway</button>
             </div>
           </li>

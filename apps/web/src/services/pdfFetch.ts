@@ -2,10 +2,11 @@ import { normalizeArxivId, normalizeDoi, type Paper } from "@biblio/core";
 import { auth } from "../firebase";
 import { extensionAvailable, extensionFetch, extensionPublisherPdf } from "./extensionBridge";
 
-// Finding and downloading PDFs, in Zotero's order: the PDF the Zotero translator found on the
-// page, then the publisher's own PDF via the DOI (through the extension, with the browser's
-// institutional session), and only then open-access copies (PMC, arXiv, OpenAlex). Each URL is tried directly, then through the Biblio
-// extension when it is trusted, then through the optional `fetchPdf` Cloud Function.
+// Finding and downloading PDFs. The publisher's version always wins: the PDF the Zotero translator
+// found on the page, then the publisher's PDF via the DOI (through the extension, with the
+// browser's institutional session), then published open-access copies and PMC, accepted
+// manuscripts, and only last preprints (arXiv, OSF, bioRxiv…). Each URL is tried directly, then
+// through the Biblio extension when it is trusted, then through the optional `fetchPdf` Cloud Function.
 
 export interface PdfSource {
   url: string;
@@ -30,10 +31,17 @@ function source(url: string, label?: string, trusted = false, captureToken?: str
   return { url, host, label: label ?? host, trusted, captureToken };
 }
 
+interface OpenAlexLocation {
+  pdf_url?: string | null;
+  landing_page_url?: string | null;
+  /** publishedVersion (version of record), acceptedVersion (author manuscript), submittedVersion (preprint). */
+  version?: string | null;
+}
+
 interface OpenAlexLocations {
-  best_oa_location?: { pdf_url?: string | null } | null;
-  primary_location?: { pdf_url?: string | null; landing_page_url?: string | null } | null;
-  locations?: Array<{ pdf_url?: string | null; landing_page_url?: string | null }>;
+  best_oa_location?: OpenAlexLocation | null;
+  primary_location?: OpenAlexLocation | null;
+  locations?: OpenAlexLocation[];
 }
 
 /** Landing pages whose PDF lives at a predictable address. */
@@ -90,40 +98,70 @@ async function openAlexWork(paper: Paper): Promise<OpenAlexLocations | null> {
   }
 }
 
-/** Every plausible open-access PDF URL for a paper, best first, de-duplicated. */
+// Preprint servers: a copy from one of these is never preferred over the publisher's version.
+const PREPRINT_HOSTS = /(^|\.)(arxiv\.org|biorxiv\.org|medrxiv\.org|osf\.io|psyarxiv\.com|ssrn\.com|researchsquare\.com|preprints\.org|chemrxiv\.org|zenodo\.org|europepmc\.org\/article\/PPR)$/i;
+
+/** Lower is better: the publisher's version of record, then PMC, accepted manuscripts, preprints. */
+const RANK = { publisher: 0, published: 1, pmc: 2, accepted: 3, unknown: 4, preprint: 5, link: 6 } as const;
+
+export function isPreprint(url: string) {
+  try {
+    return PREPRINT_HOSTS.test(new URL(url).hostname);
+  } catch {
+    return false;
+  }
+}
+
+function openAlexRank(location: OpenAlexLocation): number {
+  if (location.pdf_url && isPreprint(location.pdf_url)) return RANK.preprint;
+  if (location.version === "publishedVersion") return RANK.published;
+  if (location.version === "acceptedVersion") return RANK.accepted;
+  if (location.version === "submittedVersion") return RANK.preprint;
+  return RANK.unknown;
+}
+
+/** Every plausible PDF URL for a paper, publisher's version first and preprints last, de-duplicated. */
 export async function findPdfSources(paper: Paper, captureToken?: string): Promise<PdfSource[]> {
-  const urls: PdfSource[] = [];
-  const add = (url?: string | null, label?: string, trusted = false, token?: string) => {
-    if (!url || !/^https?:/i.test(url) || urls.some((s) => s.url === url)) return undefined;
+  const ranked: Array<{ rank: number; source: PdfSource }> = [];
+  const add = (rank: number, url?: string | null, label?: string, trusted = false, token?: string) => {
+    if (!url || !/^https?:/i.test(url)) return undefined;
+    const seen = ranked.find((r) => r.source.url === url);
+    if (seen) {
+      seen.rank = Math.min(seen.rank, rank);
+      return seen.source;
+    }
     const added = source(url, label, trusted, token);
-    urls.push(added);
+    ranked.push({ rank, source: added });
     return added;
   };
-  let arxivId = normalizeArxivId(paper.arxivId);
-  // Keep the translator-provided URL first. The capture token lets the extension fetch that exact
-  // URL with the browser's cookies when a publisher requires an institutional session.
-  add(paper.openAccessPdfUrl, undefined, Boolean(captureToken), captureToken);
+  // The PDF the Zotero translator found on the page. The capture token lets the extension fetch
+  // that exact URL with the browser's cookies when a publisher requires an institutional session.
+  const translatorUrl = paper.openAccessPdfUrl;
+  if (translatorUrl) add(isPreprint(translatorUrl) ? RANK.preprint : RANK.publisher, translatorUrl, undefined, Boolean(captureToken), captureToken);
   const doi = normalizeDoi(paper.doi);
-  const publisher = doi ? add(`https://doi.org/${doi}`, "Publisher") : undefined;
+  const publisher = doi ? add(RANK.publisher, `https://doi.org/${doi}`, "Publisher") : undefined;
   if (publisher) publisher.publisherDoi = doi;
-  add(pdfFromLandingPage(paper.url));
-  add(pmcPdfUrl(paper.pmcid), "PubMed Central", true);
-  if (arxivId) add(`https://arxiv.org/pdf/${arxivId}`, "arXiv", true);
+  const landing = pdfFromLandingPage(paper.url);
+  if (landing) add(isPreprint(landing) ? RANK.preprint : RANK.publisher, landing);
+  add(RANK.pmc, pmcPdfUrl(paper.pmcid), "PubMed Central", true);
+  let arxivId = normalizeArxivId(paper.arxivId);
+  if (arxivId) add(RANK.preprint, `https://arxiv.org/pdf/${arxivId}`, "arXiv", true);
   // Not downloadable as a PDF, but available to open manually after a failed search.
-  if (paper.pmid) add(`https://pubmed.ncbi.nlm.nih.gov/${paper.pmid}/`, "PubMed");
+  if (paper.pmid) add(RANK.link, `https://pubmed.ncbi.nlm.nih.gov/${paper.pmid}/`, "PubMed");
 
   const work = await openAlexWork(paper);
   if (work) {
     const arxivPage = work.locations?.map((l) => l.landing_page_url).find((u) => u?.includes("arxiv.org/abs/"));
     if (!arxivId && arxivPage) {
       arxivId = normalizeArxivId(arxivPage)?.replace(/v\d+$/, "");
-      if (arxivId) add(`https://arxiv.org/pdf/${arxivId}`, "arXiv", true);
+      if (arxivId) add(RANK.preprint, `https://arxiv.org/pdf/${arxivId}`, "arXiv", true);
     }
-    add(work.best_oa_location?.pdf_url, undefined, true);
-    add(work.primary_location?.pdf_url, undefined, true);
-    for (const location of work.locations ?? []) add(location.pdf_url, undefined, true);
+    for (const location of [work.best_oa_location, work.primary_location, ...(work.locations ?? [])]) {
+      if (location?.pdf_url) add(openAlexRank(location), location.pdf_url, undefined, true);
+    }
   }
-  return urls;
+  // Stable sort: within a rank, the order above (translator, DOI, PMC, OpenAlex's best) holds.
+  return ranked.sort((a, b) => a.rank - b.rank).map((r) => r.source);
 }
 
 async function isPdf(blob: Blob) {
