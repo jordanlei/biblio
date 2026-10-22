@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { extractCitationLinks, type Paper } from "@biblio/core";
-import { computed, nextTick, ref, watch } from "vue";
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { RouterLink, useRoute, useRouter } from "vue-router";
 import AppIcon from "../components/AppIcon.vue";
 import NotesEditor from "../components/NotesEditor.vue";
 import { deleteResearchNoteEverywhere } from "../services/deletion";
 import { createResearchNote, shortAuthors, updateResearchNote, useLibrary } from "../services/library";
 import { readingStatusLabel } from "../services/scope";
-import { askConfirm, toastError } from "../services/ui";
+import { askConfirm, isTypingTarget, toastError } from "../services/ui";
 
 // Research notes are freeform Markdown: a question, a project, a related-work draft. Papers are
 // connected by writing @[key] in the text; nothing else to set up. Each note is a .md file in
@@ -79,6 +79,7 @@ const linkCount = (markdown: string) => extractCitationLinks(markdown).filter((k
 async function removeNote() {
   const note = selected.value;
   if (!note) return;
+  const fallback = notes.value.find((candidate) => candidate.id !== note.id);
   const { confirmed } = await askConfirm({
     title: "Delete this note?",
     message: `“${note.title}” will be deleted, and its file moved to your Drive's trash. Papers it links stay in your library.`,
@@ -88,11 +89,36 @@ async function removeNote() {
   if (!confirmed) return;
   try {
     await deleteResearchNoteEverywhere(note);
-    await router.replace("/research-notes");
+    await router.replace(fallback ? `/research-notes/${fallback.id}` : "/research-notes");
   } catch (error) {
     toastError(error, "Couldn't delete the note.");
   }
 }
+
+function navigateNote(delta: number) {
+  if (!notes.value.length) return;
+  const index = notes.value.findIndex((note) => note.id === selected.value?.id);
+  const nextIndex = Math.max(0, Math.min(notes.value.length - 1, index === -1 ? (delta > 0 ? 0 : notes.value.length - 1) : index + delta));
+  void router.push(`/research-notes/${notes.value[nextIndex].id}`);
+}
+
+function onKey(event: KeyboardEvent) {
+  if (isTypingTarget(event.target) || event.metaKey || event.ctrlKey || event.altKey || document.querySelector(".overlay, .tour")) return;
+  if (route.path !== "/research-notes") return;
+  if (event.key === "ArrowDown" || event.key === "j") {
+    event.preventDefault();
+    navigateNote(1);
+  } else if (event.key === "ArrowUp" || event.key === "k") {
+    event.preventDefault();
+    navigateNote(-1);
+  } else if (event.key === "Delete" || event.key === "Backspace") {
+    event.preventDefault();
+    void removeNote();
+  }
+}
+
+onMounted(() => window.addEventListener("keydown", onKey));
+onBeforeUnmount(() => window.removeEventListener("keydown", onKey));
 </script>
 
 <template>

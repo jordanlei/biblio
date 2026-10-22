@@ -6,11 +6,11 @@ const emit = defineEmits<{ close: [] }>();
 const shortcuts: Array<[string[], string]> = [
   [["⌘", "K"], "Jump to anything"],
   [["/"], "Search"],
-  [["↑", "↓"], "Move through papers"],
+  [["↑", "↓"], "Move through papers, collections, or notes"],
   [["Enter"], "Open paper"],
   [["Space"], "Select for bulk actions"],
   [["1", "2", "3"], "To Read · Skim · Read"],
-  [["⌫"], "Delete"],
+  [["⌫"], "Delete the selected paper, collection, or note"],
   [["⌘", "Z"], "Undo"],
   [["A"], "Add papers"]
 ];

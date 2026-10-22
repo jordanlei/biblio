@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import { RouterLink, useRoute, useRouter } from "vue-router";
 import { usingEmulators } from "../firebase";
-import { createFolder, setPaperFolders, useLibrary } from "../services/library";
+import { createFolder, deleteFolder, folderDescendants, setPaperFolders, useLibrary } from "../services/library";
 import { customNavItems } from "../custom";
 import { scopeFromQuery, smartViews } from "../services/scope";
 import { signOut, useSession } from "../services/session";
-import { openAdd, ui } from "../services/ui";
+import { askConfirm, isTypingTarget, openAdd, toast, toastError, ui, undoAction } from "../services/ui";
 import AppIcon from "./AppIcon.vue";
 import BrandMark from "./BrandMark.vue";
 import SyncIndicator from "./SyncIndicator.vue";
@@ -28,6 +28,7 @@ const newFolderParent = ref<string | null>(null);
 const vSelectOnMount = { mounted: (el: HTMLInputElement) => el.select() };
 
 const activeScope = computed(() => (route.path === "/library" ? scopeFromQuery(route.query) : null));
+const activeFolderId = computed(() => (route.path === "/library" && typeof route.query.folder === "string" ? route.query.folder : null));
 
 const viewCounts = computed(() => {
   const counts: Record<string, number> = {};
@@ -96,6 +97,59 @@ async function dropOnFolder(folderId: string, event: DragEvent) {
   event.preventDefault();
   await setPaperFolders(JSON.parse(raw) as string[], folderId, true);
 }
+
+function navigateFolder(delta: number) {
+  const rows = folderRows.value;
+  if (!rows.length) return;
+  const index = rows.findIndex((folder) => folder.id === activeFolderId.value);
+  const nextIndex = Math.max(0, Math.min(rows.length - 1, index === -1 ? (delta > 0 ? 0 : rows.length - 1) : index + delta));
+  void router.push({ path: "/library", query: { folder: rows[nextIndex].id } });
+}
+
+async function removeActiveFolder() {
+  const folderId = activeFolderId.value;
+  const folder = folders.value.find((candidate) => candidate.id === folderId);
+  if (!folder) return;
+  const removed = new Set(folderDescendants(folder.id));
+  const remaining = folderRows.value.filter((row) => !removed.has(row.id));
+  const currentIndex = folderRows.value.findIndex((row) => row.id === folder.id);
+  const fallback = remaining.find((row) => folderRows.value.indexOf(row) > currentIndex) ?? [...remaining].reverse().find((row) => folderRows.value.indexOf(row) < currentIndex);
+  const { confirmed } = await askConfirm({
+    title: "Delete this collection?",
+    message: `“${folder.name}” and any nested collections will be removed. Papers will stay in your library.`,
+    confirmLabel: "Delete",
+    danger: true
+  });
+  if (!confirmed) return;
+  try {
+    await deleteFolder(folder.id);
+    await router.replace(fallback ? { path: "/library", query: { folder: fallback.id } } : "/library");
+    toast("Collection deleted.", { action: undoAction });
+  } catch (error) {
+    toastError(error, "Couldn't delete the collection.");
+  }
+}
+
+function onKey(event: KeyboardEvent) {
+  if (isTypingTarget(event.target) || event.metaKey || event.ctrlKey || event.altKey || document.querySelector(".overlay, .tour")) return;
+  if (route.path !== "/library" || !activeFolderId.value) return;
+  if (event.key === "ArrowDown" || event.key === "j") {
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    navigateFolder(1);
+  } else if (event.key === "ArrowUp" || event.key === "k") {
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    navigateFolder(-1);
+  } else if (event.key === "Delete" || event.key === "Backspace") {
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    void removeActiveFolder();
+  }
+}
+
+onMounted(() => window.addEventListener("keydown", onKey, true));
+onBeforeUnmount(() => window.removeEventListener("keydown", onKey, true));
 </script>
 
 <template>
