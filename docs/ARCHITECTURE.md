@@ -17,7 +17,7 @@ Biblio is a static Vue app talking directly to Firebase (Auth, Firestore) and Go
 
 ## Data model (`packages/core`)
 
-- `Paper` (`users/{uid}/papers/{uuid}`): bibliographic fields with structured `Creator`s, persistent `citationKey`, `tags`, `folderIds`, `notesMarkdown`, `readingStatus` (`inbox | readNext | skimming | reading | read | reference | parked`, plus legacy `tbr | skimmed`), optional `savedBecause`, optional `pdf` (Drive file ID + filename only), `openAccessPdfUrl`, `source`, timestamps.
+- `Paper` (`users/{uid}/papers/{uuid}`): bibliographic fields with structured `Creator`s, persistent `citationKey`, `tags`, `folderIds`, `notesMarkdown`, `readingStatus` (`toRead | skimming | read | reference`; older `inbox | readNext | tbr | reading | skimmed | parked` values are read as the nearest of these), optional `savedBecause`, optional `pdf` (Drive file ID + filename only), `openAccessPdfUrl`, `source`, timestamps.
 - `Folder` (`users/{uid}/folders/{uuid}`): `name`, `parentId`. Papers can be in many folders; deleting a folder never deletes papers.
 - `ResearchNote` (`users/{uid}/researchNotes/{uuid}`): a freeform Markdown note (title, body, timestamps). Papers are connected by `@[key]` links in the body. Notes stored in the old structured shape (question, saved search, papers with roles) are folded into Markdown on read by `migrateResearchNote` and saved in the new shape on their next edit.
 - Profile (`users/{uid}`): Drive folder ID/name, `onboardingCompleted`.

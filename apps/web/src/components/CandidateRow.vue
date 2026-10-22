@@ -34,7 +34,7 @@ const authors = computed(() => {
 async function add() {
   busy.value = true;
   try {
-    const paper = await addPaper({ ...props.candidate, folderIds: [], readingStatus: shelf.value as Paper["readingStatus"], savedBecause: savedBecause.value });
+    const paper = await addPaper({ ...props.candidate, folderIds: [], readingStatus: (shelf.value || undefined) as Paper["readingStatus"], savedBecause: savedBecause.value });
     addedId.value = paper.id;
     emit("added", paper);
     // Grab the PDF straight away when there's somewhere to put it.
@@ -86,6 +86,7 @@ function open(id: string) {
           Shelf
           <select v-model="shelf" class="select sm">
             <option v-for="s in readingStatuses" :key="s.id" :value="s.id">{{ s.label }}</option>
+            <option value="">No shelf</option>
           </select>
         </label>
         <label class="small reason">

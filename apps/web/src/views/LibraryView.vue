@@ -235,7 +235,7 @@ function onKey(event: KeyboardEvent) {
   } else if ((event.key === " " || event.key === "x") && selected.value) {
     event.preventDefault();
     toggleCheck(selected.value);
-  } else if (["0", "1", "2", "3", "4", "5", "6", "7"].includes(event.key) && targetIds.value.length) {
+  } else if ((event.key === "0" || readingStatuses.some((r) => r.key === event.key)) && targetIds.value.length) {
     void setStatus(targetIds.value, readingStatuses.find((r) => r.key === event.key)?.id);
   } else if (event.key === "o" && selected.value) {
     openPaper(selected.value);

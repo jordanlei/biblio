@@ -17,21 +17,21 @@ export interface ListFilters {
   status: "" | ReadingStatus;
 }
 
-/** The three shelves. Anything more specific is a tag. */
+/** The shelves: how much reading a paper needs. Reference is for papers kept to cite, not to read. */
 export const readingStatuses: Array<{ id: ReadingStatus; label: string; key: string }> = [
   { id: "toRead", label: "To Read", key: "1" },
   { id: "skimming", label: "Skim", key: "2" },
-  { id: "read", label: "Read", key: "3" }
+  { id: "read", label: "Read", key: "3" },
+  { id: "reference", label: "Reference", key: "4" }
 ];
 
-/** Older statuses map onto the three; a library written before the change still reads cleanly. */
+/** Older statuses map onto the shelves; a library written before the change still reads cleanly. */
 const legacyReadingStatus: Partial<Record<ReadingStatus, ReadingStatus | undefined>> = {
   inbox: "toRead",
   readNext: "toRead",
   tbr: "toRead",
   reading: "skimming",
   skimmed: "skimming",
-  reference: undefined,
   parked: undefined
 };
 

@@ -84,6 +84,17 @@ test("new researcher: sign in, set up, import, organize, annotate, export", asyn
     await expect(page.locator(".entry")).toHaveCount(1);
     await page.locator(".filter-menu").getByRole("button", { name: "Skim" }).click();
     await expect(page.locator(".entry")).toHaveCount(8);
+    // Reference: kept to cite, not to read. 4 shelves it there; 0 takes it off every shelf.
+    await page.locator(".entry", { hasText: "LFADS" }).click();
+    await page.keyboard.press("4");
+    await expect(page.locator(".entry", { hasText: "LFADS" }).locator(".status-mark")).toHaveText("Reference");
+    await page.locator(".filter-menu").getByRole("button", { name: "Reference" }).click();
+    await expect(page.locator(".entry")).toHaveCount(1);
+    await page.locator(".filter-menu").getByRole("button", { name: "Reference" }).click();
+    await page.locator(".entry", { hasText: "LFADS" }).click();
+    await page.keyboard.press("0");
+    await expect(page.locator(".entry", { hasText: "LFADS" }).locator(".status-mark")).toHaveCount(0);
+    await page.keyboard.press("2");
     await page.locator(".filters").getByRole("button", { name: "Filters" }).click();
   });
 

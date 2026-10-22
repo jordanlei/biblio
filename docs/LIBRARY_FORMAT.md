@@ -53,7 +53,7 @@ A JSON array of [CSL-JSON](https://citeproc-js.readthedocs.io/en/latest/csl-json
 | `type` | Biblio's paper type (`article`, `conferencePaper`, `preprint`, `book`, `bookChapter`, `thesis`, `report`, `other`). |
 | `tags` | Array of tags. |
 | `collections` | Array of collection ids from `biblio.json`. |
-| `readingStatus` | Exclusive attention shelf: `inbox`, `readNext`, `skimming`, `reading`, `read`, `reference`, or `parked`. Legacy `tbr` and `skimmed` values are still accepted. |
+| `readingStatus` | Exclusive attention shelf: `toRead`, `skimming`, `read`, or `reference` (kept to cite, not to read). Absent means no shelf. Older values (`inbox`, `readNext`, `tbr`, `reading`, `skimmed`, `parked`) are still accepted and read as the nearest shelf. |
 | `savedBecause` | Short user-entered reason for keeping the paper. |
 | `addedAt` | ISO 8601 timestamp the paper was added. |
 | `note` | Library-relative path of the paper's notes file, e.g. `notes/vaswaniAttentionNeed2017.md`. |

@@ -9,7 +9,8 @@ const shortcuts: Array<[string[], string]> = [
   [["↑", "↓"], "Move through papers, collections, or notes"],
   [["Enter"], "Open paper"],
   [["Space"], "Select for bulk actions"],
-  [["1", "2", "3"], "To Read · Skim · Read"],
+  [["1", "2", "3", "4"], "To Read · Skim · Read · Reference"],
+  [["0"], "Clear reading status"],
   [["⌫"], "Delete the selected paper, collection, or note"],
   [["⌘", "Z"], "Undo"],
   [["A"], "Add papers"]
