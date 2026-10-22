@@ -3,7 +3,7 @@
 //
 // This worker never looks at pages on its own: metadata is only ever read when you click the
 // extension: the popup or the right-click menu calls readTab(), which injects the translators then.
-importScripts("app-url.js");
+importScripts("app-url.js", "zotero-translator-index.js");
 const MAX_BYTES = 80 * 1024 * 1024;
 const CAPTURE_TOKEN_TTL = 15 * 60 * 1000;
 const CAPTURE_TOKEN_PREFIX = "biblio-capture:";
@@ -31,10 +31,44 @@ const recentReads = new Map();
 async function readTab(tab) {
   const cached = recentReads.get(tab.id);
   if (cached && cached.url === tab.url && Date.now() - cached.at < 60_000) return cached.paper;
-  const [injection] = await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ["zotero-capture.js"] });
+  const [injection] = await chrome.scripting.executeScript({
+    target: { tabId: tab.id },
+    files: ["zotero-runtime.js", ...translatorFilesFor(tab.url), "zotero-capture.js"]
+  });
   const paper = injection?.result ?? null;
   recentReads.set(tab.id, { url: tab.url, at: Date.now(), paper });
   return paper;
+}
+
+// The Zotero Connector's selection: web translators whose target matches the URL (an empty target
+// matches every page), every import and search translator (translators hand data to these), and
+// anything a chosen translator calls by ID. zotero-translator-index.js lists all of them.
+const translatorsById = new Map(ZOTERO_TRANSLATORS.map((t) => [t.id, t]));
+const targets = new Map();
+
+function translatorFilesFor(url) {
+  const chosen = new Set();
+  const visit = (id) => {
+    const translator = translatorsById.get(id);
+    if (!translator || chosen.has(id)) return;
+    chosen.add(id);
+    translator.deps.forEach(visit);
+  };
+  for (const translator of ZOTERO_TRANSLATORS) {
+    if (translator.type & 9) visit(translator.id);
+    else if (translator.type & 4) {
+      if (!targets.has(translator.id)) {
+        try {
+          targets.set(translator.id, translator.target ? new RegExp(translator.target, "i") : null);
+        } catch {
+          targets.set(translator.id, false);
+        }
+      }
+      const target = targets.get(translator.id);
+      if (target === null || (target && target.test(url))) visit(translator.id);
+    }
+  }
+  return [...chosen].map((id) => `zotero-translators/${id}.js`);
 }
 
 async function saveCapture(tab, paper) {
@@ -226,16 +260,45 @@ async function fetchCapturedOrTrusted(message) {
   // Ask the article's own tab first: it is the session the user is reading in, so its cookies
   // are first-party and a subscription PDF the page can open is one we can save.
   const fromTab = await fetchPdfInTab(capture).catch(() => null);
-  return fromTab ?? fetchPdf(message.url);
+  if (fromTab) return fromTab;
+  try {
+    return await fetchPdf(message.url);
+  } catch (error) {
+    // Hosts like PMC answer scripted requests with a bot check that a real tab clears by itself.
+    // Open the PDF in a background tab once, as Zotero does, then ask again.
+    if (!(await clearChallengeInTab(message.url))) throw error;
+    return (await fetchPdfInTab(capture).catch(() => null)) ?? fetchPdf(message.url);
+  }
+}
+
+async function clearChallengeInTab(url) {
+  let tab;
+  try {
+    tab = await chrome.tabs.create({ url, active: false });
+    const deadline = Date.now() + 20_000;
+    while (Date.now() < deadline) {
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const current = await chrome.tabs.get(tab.id);
+      // Chrome's PDF viewer has taken over, or the page settled somewhere other than a challenge.
+      if (current.status === "complete" && !/captcha|challenge|just a moment|checking your browser/i.test(current.title ?? "")) return true;
+    }
+    return false;
+  } catch {
+    return false;
+  } finally {
+    if (tab?.id) chrome.tabs.remove(tab.id).catch(() => undefined);
+  }
 }
 
 async function fetchPdfInTab(capture) {
   if (typeof capture.tabId !== "number" || !capture.pageUrl) return null;
   const tab = await chrome.tabs.get(capture.tabId);
+  // An https page can't fetch http:// (arXiv's translator still reports http links).
+  const url = tab.url?.startsWith("https:") ? capture.url.replace(/^http:/, "https:") : capture.url;
   if (!tab?.url || new URL(tab.url).origin !== new URL(capture.pageUrl).origin) return null;
   const [injection] = await chrome.scripting.executeScript({
     target: { tabId: capture.tabId },
-    args: [capture.url, MAX_BYTES],
+    args: [url, MAX_BYTES],
     func: async (url, maxBytes) => {
       const response = await fetch(url, { credentials: "include", redirect: "follow" });
       if (!response.ok) return null;
@@ -292,9 +355,21 @@ async function fetchTranslatorRequest(message) {
   });
   const buffer = await response.arrayBuffer();
   if (buffer.byteLength > TRANSLATOR_HTTP_MAX_BYTES) throw new Error("Translator response is too large.");
+  const charset = message.responseCharset || /charset=([^;]+)/i.exec(response.headers.get("content-type") || "")?.[1] || "utf-8";
+  let text;
+  try {
+    text = new TextDecoder(charset.trim()).decode(buffer);
+  } catch {
+    text = new TextDecoder().decode(buffer);
+  }
+  const headers = [];
+  response.headers.forEach((value, name) => headers.push(`${name}: ${value}`));
   return {
     status: response.status,
+    statusText: response.statusText,
     responseURL: response.url,
-    responseText: new TextDecoder().decode(buffer)
+    headers: headers.join("\r\n"),
+    responseText: message.binary ? "" : text,
+    ...(message.binary ? { base64: toBase64(buffer) } : {})
   };
 }

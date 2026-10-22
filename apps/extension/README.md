@@ -38,8 +38,9 @@ its capture page in a new tab, where you can choose a collection before saving. 
 
 | File | Role |
 | --- | --- |
-| `zotero-capture.js` | Generated from the vendored Zotero Translate runtime and official translators. It detects and translates the active page without a Biblio-owned author or site parser. |
+| `zotero-runtime.js`, `zotero-translators/`, `zotero-capture.js` | Generated from the vendored Zotero Translate runtime and **every** official Zotero translator (one file each). Like the Zotero Connector, the worker injects the translators whose target matches the page, plus the import/search translators and anything they call, and Zotero picks the best one. Biblio has no site or author parser of its own. |
 | `popup.html/js` | Shows what the worker read from the tab. **Save to Biblio** asks the worker to save, so it is the same action as the right-click menu item. |
+| `tests/live.mjs` | `npm run test:extension:live`: loads this extension into Chromium and captures every page in `tests/paper-cases.json` (plus the ignored `paper-cases.local.json`), PDFs included. Pages that show automated browsers a CAPTCHA are reported, not failed. |
 | `background.js` | Service worker. `readTab()` runs the translators and `saveCapture()` opens `/capture#<base64url JSON>` (the hash never reaches a server); the popup and the context menu both call these two. It fetches PDFs: a captured publisher PDF is fetched **inside the article tab first**, using the browser session you're reading in (institutional access included, independent of your Biblio sign-in), then by the worker with `credentials: "include"`. For "Find PDF" it resolves a DOI to the publisher page and takes its `citation_pdf_url`, which is Zotero's publisher-first order. |
 | `bridge.js` | Content script on the app's own origins. Relays `window.postMessage` requests (`ping`, `fetch-pdf`, `resolve-doi-pdf`) to the background worker. |
 
@@ -48,14 +49,17 @@ The extension never sees Firebase or Google credentials: saving happens in the s
 ### On Zotero and licensing
 
 Biblio **does not connect to a running Zotero installation** and has no live dependency on Zotero
-services. It vendors the official Zotero Translate runtime and the official PubMed, PubMed XML,
-Nature Publishing Group, Springer Link, Embedded Metadata, RDF, and RIS translators. The source
+services. It vendors the official Zotero Translate runtime and all of the official Zotero
+translators (`vendor/zotero/translators`, revision in `VERSION`). The source
 files are preserved under `vendor/zotero/`; the build wraps them in static factories so Manifest
 V3's CSP does not block Zotero's translator sandbox.
 
 Cross-origin requests made by those translators go through Biblio's extension worker, preserving
 the translator request behavior while avoiding publisher CORS failures. If no official bundled
 translator detects the page, Biblio fails closed rather than guessing an author name.
+
+To pick up Zotero's latest translator fixes, run `npm run update:translators` and reload the
+extension.
 
 The extension is distributed under AGPL-3.0-or-later because of these vendored translators and
 runtime. See
@@ -72,5 +76,4 @@ asked for, including from hosts that block ordinary web pages.
 ## Not yet
 
 - Chrome Web Store packaging and a fixed extension ID.
-- More bundled translators for pages without standard metadata.
 - Multi-paper pages (search results, tables of contents).

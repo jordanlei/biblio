@@ -28,7 +28,9 @@
     "site:dev": "npm --workspace apps/site run dev",
     "site:build": "npm --workspace apps/site run build",
     "test:e2e": "playwright test",
-    "test:boundaries": "node scripts/check-boundaries.mjs"
+    "test:boundaries": "node scripts/check-boundaries.mjs",
+    "test:extension:live": "npm run build:extension && node apps/extension/tests/live.mjs",
+    "update:translators": "node scripts/update-zotero-translators.mjs"
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0",

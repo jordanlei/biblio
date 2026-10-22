@@ -1,0 +1,16 @@
+[
+  { "url": "https://www.nature.com/articles/s41586-022-04743-9", "translator": "Nature Publishing Group", "title": "People construct simplified mental representations to plan", "firstAuthor": "Ho", "pdf": "https://www.nature.com/articles/s41586-022-04743-9.pdf" },
+  { "url": "https://www.nature.com/articles/s41467-025-67858-3", "translator": "Nature Publishing Group" },
+  { "url": "https://www.nature.com/articles/s41598-019-39507-5", "translator": "Nature Publishing Group", "title": "The visual geometry of a tool modulates generalization during adaptation", "firstAuthor": "Sadeghi", "pdf": "https://www.nature.com/articles/s41598-019-39507-5.pdf" },
+  { "url": "https://link.springer.com/article/10.3758/s13423-023-02319-w", "translator": "Springer Link" },
+  { "url": "https://pubmed.ncbi.nlm.nih.gov/6238127/", "translator": "PubMed" },
+  { "url": "https://pubmed.ncbi.nlm.nih.gov/19217296/", "translator": "PubMed", "title": "Motor task variation induces structural learning", "firstAuthor": "Braun" },
+  { "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC2669412/?utm_source=chatgpt.com", "translator": "PubMed Central", "title": "Motor task variation induces structural learning", "firstAuthor": "Braun", "pdf": true },
+  { "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6389992/", "translator": "PubMed Central", "title": "The visual geometry of a tool modulates generalization during adaptation", "firstAuthor": "Sadeghi", "pdf": true },
+  { "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4061982/", "translator": "PubMed Central", "firstAuthor": "Franchak", "pdf": true },
+  { "url": "https://www.sciencedirect.com/science/article/pii/S0960982209006083?via%3Dihub", "translator": "ScienceDirect", "title": "Motor Task Variation Induces Structural Learning", "firstAuthor": "Braun" },
+  { "url": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0207482", "title": "Adaptive coupling influences generalization of sensorimotor learning", "firstAuthor": "Sadeghi", "pdf": true },
+  { "url": "https://pubmed.ncbi.nlm.nih.gov/24954997/", "translator": "PubMed", "firstAuthor": "Franchak" },
+  { "url": "https://pubmed.ncbi.nlm.nih.gov/32538309/", "translator": "PubMed", "firstAuthor": "Franchak" },
+  { "url": "https://arxiv.org/abs/1706.03762", "translator": "arXiv.org", "title": "Attention Is All You Need", "firstAuthor": "Vaswani", "pdf": true }
+]

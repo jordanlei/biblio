@@ -8,12 +8,12 @@ Biblio vendors the Zotero Translate runtime and these official translator source
 
 <https://github.com/zotero/translators>
 
-Files used by the extension include `PubMed.js`, `PubMed XML.js`, `Nature Publishing Group.js`,
-`Springer Link.js`, `Embedded Metadata.js`, `RDF.js`, and `RIS.js`.
+The extension ships every translator in that repository (`vendor/zotero/translators/`).
 
 The vendored upstream snapshots are kept under `apps/extension/vendor/zotero/`.
-`zotero-capture.js` is generated from those files by `npm run build:extension`; it contains the
-upstream source verbatim plus a Biblio runtime adapter.
+`zotero-runtime.js` and `zotero-translators/<translatorID>.js` are generated from those files by
+`npm run build:extension`; they contain the upstream source verbatim (translators without their
+embedded test cases) plus a Biblio runtime adapter.
 
 Pinned upstream revisions: `zotero/translate` `dd524aea9a556cd23eb9dc8cc617219a98d0fb47`,
 `zotero/translators` `8fdb26b68c732b5810ffb037304c99e68aadd62b`, and Zotero utilities
