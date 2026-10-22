@@ -6,7 +6,7 @@ import { RouterLink, useRoute } from "vue-router";
 import AppIcon from "../components/AppIcon.vue";
 import { grabPdf } from "../services/drive";
 import { addPaper, checkDuplicate, parseCreators, setPaperFolders, shortAuthors, useLibrary } from "../services/library";
-import { useSession } from "../services/session";
+import { getGoogleAccessToken, hasGoogleAccessToken, useSession } from "../services/session";
 
 // Landing page for the browser extension's "Save to Biblio". The extension passes the page's
 // metadata in the URL hash (never sent to a server); this signed-in page saves it and fetches the PDF.
@@ -21,7 +21,7 @@ const error = ref("");
 const phase = ref<"waiting" | "duplicate" | "probable" | "saving" | "saved">("waiting");
 const duplicate = ref<DuplicateResult | null>(null);
 const paperId = ref<string | null>(null);
-const pdf = ref<{ state: "idle" | "working" | "done" | "failed" | "skipped"; message: string }>({ state: "idle", message: "" });
+const pdf = ref<{ state: "idle" | "working" | "done" | "failed" | "skipped" | "needs-drive"; message: string }>({ state: "idle", message: "" });
 const selectedCollectionId = ref("");
 const collectionOpen = ref(false);
 
@@ -72,13 +72,35 @@ async function fetchPdf(target: Paper, captureToken?: string) {
     pdf.value = { state: "skipped", message: "Connect Google Drive in Settings to save PDFs." };
     return;
   }
+  // Browsers only allow Google's popup after a click, so an expired Drive token waits for one
+  // rather than failing on a blocked popup.
+  if (!hasGoogleAccessToken()) {
+    pdf.value = { state: "needs-drive", message: "Google Drive access expired." };
+    return;
+  }
   pdf.value = { state: "working", message: "Saving PDF to Drive…" };
   try {
-    await grabPdf(target, (message) => (pdf.value = { state: "working", message }), captureToken);
-    pdf.value = { state: "done", message: "PDF saved to Drive" };
+    const from = await grabPdf(target, (message) => (pdf.value = { state: "working", message }), captureToken);
+    // Say plainly when the page's own PDF couldn't be fetched and a different copy was saved.
+    const fromPage = !target.openAccessPdfUrl || from.url === target.openAccessPdfUrl || from.publisherDoi;
+    pdf.value = {
+      state: "done",
+      message: fromPage ? `PDF saved to Drive (from ${from.host})` : `The publisher PDF wasn't reachable, so the ${from.label} copy was saved instead`
+    };
   } catch (e) {
     pdf.value = { state: "failed", message: e instanceof Error ? e.message : "Couldn't get the PDF." };
   }
+}
+
+async function reconnectAndFetchPdf() {
+  if (!paper.value) return;
+  try {
+    await getGoogleAccessToken();
+  } catch (e) {
+    pdf.value = { state: "needs-drive", message: e instanceof Error ? e.message : "Google Drive wasn't reconnected." };
+    return;
+  }
+  await fetchPdf(paper.value, captured.value?.captureToken);
 }
 
 /**
@@ -174,6 +196,7 @@ function assignCollection() {
 
       <div v-if="paper" class="row">
         <RouterLink class="btn primary" :to="`/paper/${paper.id}`">Open paper</RouterLink>
+        <button v-if="pdf.state === 'needs-drive'" class="btn" type="button" @click="reconnectAndFetchPdf">Reconnect Drive and save PDF</button>
         <button v-if="phase === 'duplicate' && !paper.pdf && pdf.state === 'idle'" class="btn" type="button" @click="fetchPdf(paper, captured?.captureToken)">Save PDF to Drive</button>
         <RouterLink class="btn quiet" to="/library">Library</RouterLink>
       </div>

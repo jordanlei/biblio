@@ -134,8 +134,9 @@ export async function clearLocalCache() {
 }
 
 // --- Google OAuth access token (for Drive) ---------------------------------------------------
-// Kept in memory and sessionStorage only, never in Firestore. Google access tokens last ~1 hour;
-// caching avoids a consent popup on every Drive action.
+// Kept in memory and localStorage, never in Firestore. Google access tokens last ~1 hour; caching
+// avoids a popup on every Drive action. localStorage (not sessionStorage) because the extension
+// opens each capture in a new tab, and a per-tab token meant reconnecting Drive on every save.
 const TOKEN_KEY = "biblio.googleAccessToken";
 const TOKEN_TTL_MS = 50 * 60 * 1000;
 let memoryToken: { token: string; expiresAt: number } | null = null;
@@ -148,16 +149,17 @@ function rememberToken(result: UserCredential) {
 export function rememberAccessToken(token: string) {
   memoryToken = { token, expiresAt: Date.now() + TOKEN_TTL_MS };
   try {
-    sessionStorage.setItem(TOKEN_KEY, JSON.stringify(memoryToken));
+    localStorage.setItem(TOKEN_KEY, JSON.stringify(memoryToken));
   } catch {
     // Storage can be unavailable (private mode); the in-memory copy still works for this tab.
   }
 }
 
 function cachedToken(): string | null {
-  if (!memoryToken) {
+  // Another tab may have renewed the token since this tab last looked.
+  if (!memoryToken || memoryToken.expiresAt <= Date.now()) {
     try {
-      memoryToken = JSON.parse(sessionStorage.getItem(TOKEN_KEY) ?? "null");
+      memoryToken = JSON.parse(localStorage.getItem(TOKEN_KEY) ?? "null");
     } catch {
       memoryToken = null;
     }
@@ -168,7 +170,7 @@ function cachedToken(): string | null {
 export function clearGoogleAccessToken() {
   memoryToken = null;
   try {
-    sessionStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(TOKEN_KEY);
   } catch {
     // ignore
   }
@@ -190,7 +192,9 @@ export async function getGoogleAccessToken(options: { interactive?: boolean } = 
   if (cached) return cached;
   if (options.interactive === false) return null;
   const current = auth.currentUser;
-  const result = current ? await reauthenticateWithPopup(current, makeGoogleProvider()) : await signInWithPopup(auth, makeGoogleProvider());
+  const result = current
+    ? await reauthenticateWithPopup(current, makeGoogleProvider(current.email ?? undefined))
+    : await signInWithPopup(auth, makeGoogleProvider());
   rememberToken(result);
   const token = cachedToken();
   if (!token) throw new Error("Google did not grant Drive access.");

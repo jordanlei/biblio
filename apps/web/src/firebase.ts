@@ -35,7 +35,11 @@ if (usingEmulators) {
 
 export const DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.file";
 
-export function makeGoogleProvider(): GoogleAuthProvider {
+/**
+ * `loginHint` is for renewing Drive access as the account that is already signed in: Google then
+ * skips the account chooser and closes the popup by itself when consent was already given.
+ */
+export function makeGoogleProvider(loginHint?: string): GoogleAuthProvider {
   const provider = new GoogleAuthProvider();
   provider.addScope("email");
   provider.addScope("profile");
@@ -43,6 +47,6 @@ export function makeGoogleProvider(): GoogleAuthProvider {
   // sign-in shows no "unverified app" warning. Libraries move between copies by import/export
   // (services/transfer.ts), never by reaching into files another copy made.
   provider.addScope(DRIVE_SCOPE);
-  provider.setCustomParameters({ prompt: "select_account" });
+  provider.setCustomParameters(loginHint ? { login_hint: loginHint } : { prompt: "select_account" });
   return provider;
 }
