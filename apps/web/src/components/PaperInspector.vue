@@ -2,8 +2,8 @@
 import { paperToBibtex, type Paper } from "@biblio/core";
 import { computed, ref, watch } from "vue";
 import { RouterLink, useRouter } from "vue-router";
-import { creatorsToText, paperTypeLabels, updatePaper, useLibrary } from "../services/library";
-import { renderNotes } from "../services/notes";
+import { creatorsToText, paperTypeLabels, updatePaper, useLibrary } from "../services/library/library";
+import { renderNotes } from "../services/library/notes";
 import { copyText, toastError } from "../services/ui";
 import AppIcon from "./AppIcon.vue";
 import BacklinkList from "./BacklinkList.vue";

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { Paper, ReadingStatus } from "@biblio/core";
-import { updatePaper } from "../services/library";
-import { normalizeReadingStatus, readingStatuses } from "../services/scope";
+import { updatePaper } from "../services/library/library";
+import { normalizeReadingStatus, readingStatuses } from "../services/library/scope";
 import { toastError } from "../services/ui";
 
 const props = defineProps<{ paper: Paper }>();

@@ -2,7 +2,7 @@
 import type { Paper } from "@biblio/core";
 import { ref, watch } from "vue";
 import { attachPdf, connectDriveFolder, createDriveFolder, driveFileExists, driveOpenUrl, grabPdf, removePdf } from "../services/drive";
-import { findPdfSources, type PdfSource } from "../services/pdfFetch";
+import { findPdfSources, type PdfSource } from "../services/pdf/fetch";
 import { useSession } from "../services/session";
 import { askConfirm, toast, toastError, undoAction } from "../services/ui";
 import AppIcon from "./AppIcon.vue";

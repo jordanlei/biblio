@@ -3,7 +3,7 @@ import { lazyViews } from "./lazy";
 import LibraryView from "./views/LibraryView.vue";
 import { sessionReady, useSession } from "./services/session";
 import { openAdd } from "./services/ui";
-import { customRoutes } from "./custom";
+import { customRoutes } from "./custom/index";
 
 export const router = createRouter({
   history: createWebHistory(),

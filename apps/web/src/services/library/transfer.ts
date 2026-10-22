@@ -1,8 +1,8 @@
 import { exportLibraryFiles, importLibraryFiles, inspectLibrary, libraryEntries, type LibraryEntry } from "@biblio/core";
 import { unzip, zip, type Unzipped } from "fflate";
-import { GoogleDriveFileStore } from "../adapters/googleDrive";
-import { connectLibraryFolder, syncNow } from "../sync/librarySync";
-import { createDriveFolder, DEFAULT_FOLDER_NAME, libraryFiles } from "./drive";
+import { GoogleDriveFileStore } from "../../adapters/googleDrive";
+import { connectLibraryFolder, syncNow } from "../../sync/librarySync";
+import { createDriveFolder, DEFAULT_FOLDER_NAME, libraryFiles } from "../drive";
 
 // Moving a library in and out of this copy. Each copy can only open Drive files it created
 // (drive.file), so a library comes in by copying its files into a new folder this copy creates.

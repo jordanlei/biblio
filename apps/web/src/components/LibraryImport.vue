@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import { importLibrary, readLibrarySource } from "../services/transfer";
+import { importLibrary, readLibrarySource } from "../services/library/transfer";
 import { askConfirm, toast, toastError } from "../services/ui";
-import { useLibrary } from "../services/library";
+import { useLibrary } from "../services/library/library";
 
 // "Import a library": a .zip (from Download library, or Google Drive's own folder download) or an
 // unzipped library folder. The files are copied into a new Drive folder this copy owns.

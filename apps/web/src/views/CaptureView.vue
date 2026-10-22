@@ -5,8 +5,8 @@ import { computed, onMounted, ref, watch } from "vue";
 import { RouterLink, useRoute } from "vue-router";
 import AppIcon from "../components/AppIcon.vue";
 import { attachPdf, grabPdf } from "../services/drive";
-import { downloadPdf, isPreprint } from "../services/pdfFetch";
-import { addPaper, checkDuplicate, parseCreators, setPaperFolders, shortAuthors, updatePaper, useLibrary } from "../services/library";
+import { downloadPdf, isPreprint } from "../services/pdf/fetch";
+import { addPaper, checkDuplicate, parseCreators, setPaperFolders, shortAuthors, updatePaper, useLibrary } from "../services/library/library";
 import { getGoogleAccessToken, hasGoogleAccessToken, useSession } from "../services/session";
 
 // Landing page for the browser extension's "Save to Biblio". The extension passes the page's

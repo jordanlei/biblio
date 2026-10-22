@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // Biblio's home page (GitHub Pages). Biblio isn't a hosted service: this page makes the case,
-// shows the features, and sends people to setup/. Captures come from scripts/capture-landing.mjs.
+// shows the features, and sends people to setup/. Captures come from apps/site/scripts/capture.mjs.
 import AppIcon from "../../web/src/components/AppIcon.vue";
 import FaqItem from "./components/FaqItem.vue";
 import LandingVideo from "./components/LandingVideo.vue";

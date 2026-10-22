@@ -2,7 +2,7 @@
 import type { Paper, PaperType } from "@biblio/core";
 import { normalizeArxivId, normalizeDoi } from "@biblio/core";
 import { computed, reactive, ref } from "vue";
-import { creatorsToText, paperTypeLabels, paperTypes, parseCreators, renameCitationKey, updatePaper, useLibrary } from "../services/library";
+import { creatorsToText, paperTypeLabels, paperTypes, parseCreators, renameCitationKey, updatePaper, useLibrary } from "../services/library/library";
 import { toast, toastError, undoAction } from "../services/ui";
 import ModalDialog from "./ModalDialog.vue";
 

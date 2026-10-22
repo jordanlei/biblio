@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
-import { downloadBibtex, shortAuthors, useLibrary } from "../services/library";
-import { isEmptyQuery, parseLocalQuery, scorePaper, fold } from "../services/librarySearch";
+import { downloadBibtex, shortAuthors, useLibrary } from "../services/library/library";
+import { isEmptyQuery, parseLocalQuery, scorePaper, fold } from "../services/library/search";
 import { openAdd, ui } from "../services/ui";
 import AppIcon from "./AppIcon.vue";
 

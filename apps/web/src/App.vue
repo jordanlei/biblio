@@ -10,7 +10,7 @@ import { lazyDialogs } from "./lazy";
 
 
 import ToastStack from "./components/ToastStack.vue";
-import { useLibrary } from "./services/library";
+import { useLibrary } from "./services/library/library";
 import { updateProfile, useSession } from "./services/session";
 import { isTypingTarget, openAdd, runUndo, toastError, ui } from "./services/ui";
 

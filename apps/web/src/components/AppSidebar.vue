@@ -2,9 +2,9 @@
 import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import { RouterLink, useRoute, useRouter } from "vue-router";
 import { usingEmulators } from "../firebase";
-import { createFolder, deleteFolder, folderDescendants, setPaperFolders, useLibrary } from "../services/library";
-import { customNavItems } from "../custom";
-import { scopeFromQuery, smartViews } from "../services/scope";
+import { createFolder, deleteFolder, folderDescendants, setPaperFolders, useLibrary } from "../services/library/library";
+import { customNavItems } from "../custom/index";
+import { scopeFromQuery, smartViews } from "../services/library/scope";
 import { signOut, useSession } from "../services/session";
 import { askConfirm, isTypingTarget, openAdd, toast, toastError, ui, undoAction } from "../services/ui";
 import AppIcon from "./AppIcon.vue";

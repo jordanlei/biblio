@@ -19,9 +19,9 @@ import {
 } from "@biblio/core";
 import { deleteDoc, deleteField, doc, onSnapshot, setDoc, updateDoc, writeBatch, type Unsubscribe } from "firebase/firestore";
 import { computed, ref, watch } from "vue";
-import { db } from "../firebase";
-import { foldersCollection, papersCollection, researchNotesCollection, userDoc } from "./paths";
-import { requireUid, useSession } from "./session";
+import { db } from "../../firebase";
+import { foldersCollection, papersCollection, researchNotesCollection, userDoc } from "../paths";
+import { requireUid, useSession } from "../session";
 
 // --- Live library state ----------------------------------------------------------------------
 // One Firestore subscription per signed-in user, shared by every view. Local writes show up

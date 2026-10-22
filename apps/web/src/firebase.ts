@@ -26,7 +26,7 @@ export const db = initializeFirestore(app, {
   localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
 });
 
-// Local test mode: Auth + Firestore emulators and the mock Drive server (see scripts/dev-drive-server.mjs).
+// Local test mode: Auth + Firestore emulators and the mock Drive server (see scripts/dev/drive-server.mjs).
 export const usingEmulators = import.meta.env.VITE_USE_EMULATORS === "true";
 if (usingEmulators) {
   connectAuthEmulator(auth, "http://127.0.0.1:9099", { disableWarnings: true });

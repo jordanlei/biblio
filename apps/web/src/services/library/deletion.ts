@@ -1,9 +1,9 @@
 import { defaultPdfPath, type Paper, type ResearchNote } from "@biblio/core";
-import { trashFile, untrashFile } from "../adapters/googleDrive";
-import { syncedNoteFileId, syncedResearchNoteFileId } from "../sync/librarySync";
-import { libraryFiles } from "./drive";
+import { trashFile, untrashFile } from "../../adapters/googleDrive";
+import { syncedNoteFileId, syncedResearchNoteFileId } from "../../sync/librarySync";
+import { libraryFiles } from "../drive";
 import { deletePapers, deleteResearchNote, useLibrary } from "./library";
-import { useSession } from "./session";
+import { useSession } from "../session";
 
 // Deleting from the library deletes from Drive too, so the two never drift apart. Files go to
 // Drive's trash (recoverable for 30 days) and Undo takes them back out.

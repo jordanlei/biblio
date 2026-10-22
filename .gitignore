@@ -1,13 +1,8 @@
 node_modules/
 dist/
 dist-*/
-# Generated for this checkout by `npm run build:extension`.
-apps/extension/app-url.js
-apps/extension/manifest.json
-apps/extension/zotero-capture.js
-apps/extension/zotero-runtime.js
-apps/extension/zotero-translator-index.js
-apps/extension/zotero-translators/
+# The extension Chrome loads, built for this checkout by `npm run build:extension`.
+apps/extension/build/
 # Local live translator cases; these URLs are intentionally not part of CI.
 apps/extension/tests/paper-cases.local.json
 # Development metadata copied with the Zotero utilities checkout; only runtime files are vendored.

@@ -3,8 +3,8 @@ import type { Paper } from "@biblio/core";
 import { computed } from "vue";
 import { RouterLink } from "vue-router";
 import AppIcon from "./AppIcon.vue";
-import { shortAuthors, useLibrary } from "../services/library";
-import { snippetText } from "../services/notes";
+import { shortAuthors, useLibrary } from "../services/library/library";
+import { snippetText } from "../services/library/notes";
 
 // "Mentioned in notes": every paper note and research note that links this paper, with the
 // sentence or bullet around the link.

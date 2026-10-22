@@ -4,9 +4,9 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue"
 import { RouterLink, useRoute, useRouter } from "vue-router";
 import AppIcon from "../components/AppIcon.vue";
 import NotesEditor from "../components/NotesEditor.vue";
-import { deleteResearchNoteEverywhere } from "../services/deletion";
-import { createResearchNote, shortAuthors, updateResearchNote, useLibrary } from "../services/library";
-import { readingStatusLabel } from "../services/scope";
+import { deleteResearchNoteEverywhere } from "../services/library/deletion";
+import { createResearchNote, shortAuthors, updateResearchNote, useLibrary } from "../services/library/library";
+import { readingStatusLabel } from "../services/library/scope";
 import { askConfirm, isTypingTarget, toastError } from "../services/ui";
 
 // Research notes are freeform Markdown: a question, a project, a related-work draft. Papers are

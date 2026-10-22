@@ -5,12 +5,12 @@ import { RouterLink, useRoute, useRouter } from "vue-router";
 import AppIcon from "../components/AppIcon.vue";
 import PaperInspector from "../components/PaperInspector.vue";
 import { attachPdf, driveOpenUrl, grabPdf } from "../services/drive";
-import { citeCommand, downloadBibtex, familyName, setPaperTag, updatePaper, useLibrary } from "../services/library";
-import { highlight, isEmptyQuery, parseLocalQuery, scorePaper } from "../services/librarySearch";
-import { filtersFromQuery, matchesFilters, normalizeReadingStatus, readingStatusLabel, readingStatuses, scopeFromQuery, type ListFilters } from "../services/scope";
+import { citeCommand, downloadBibtex, familyName, setPaperTag, updatePaper, useLibrary } from "../services/library/library";
+import { highlight, isEmptyQuery, parseLocalQuery, scorePaper } from "../services/library/search";
+import { filtersFromQuery, matchesFilters, normalizeReadingStatus, readingStatusLabel, readingStatuses, scopeFromQuery, type ListFilters } from "../services/library/scope";
 import { useSession } from "../services/session";
 import { askConfirm, copyText, isTypingTarget, openAdd, toast, toastError, ui, undoAction } from "../services/ui";
-import { deletePapersEverywhere } from "../services/deletion";
+import { deletePapersEverywhere } from "../services/library/deletion";
 
 type SortKey = "relevance" | "added" | "year-desc" | "year-asc" | "author" | "title";
 const sortOptions: Array<{ id: SortKey; label: string }> = [

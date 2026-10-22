@@ -6,7 +6,7 @@ import { readFileSync } from "node:fs";
 
 const DRIVE = "http://127.0.0.1:9199";
 const FIRESTORE = "http://127.0.0.1:8080/emulator/v1/projects/demo-biblio/databases/(default)/documents";
-const sampleBib = readFileSync(new URL("../samples/sample.bib", import.meta.url), "utf8");
+const sampleBib = readFileSync(new URL("./fixtures/zotero-export.bib", import.meta.url), "utf8");
 const pdf = Buffer.from(
   "%PDF-1.4\n1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj 2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj 3 0 obj<</Type/Page/MediaBox[0 0 300 144]/Parent 2 0 R>>endobj\ntrailer<</Root 1 0 R>>\n%%EOF\n"
 );

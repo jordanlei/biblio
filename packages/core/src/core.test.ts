@@ -157,8 +157,8 @@ describe("notes", () => {
   });
 });
 
-describe("samples/sample.bib (Zotero / Better BibTeX export)", () => {
-  const source = readFileSync(new URL("../../../samples/sample.bib", import.meta.url), "utf8");
+describe("e2e/fixtures/zotero-export.bib (Zotero / Better BibTeX export)", () => {
+  const source = readFileSync(new URL("../../../e2e/fixtures/zotero-export.bib", import.meta.url), "utf8");
   const [glaser, pandarinath, sussillo] = parseBibtex(source);
 
   it("parses all three entries with their citation keys and types", () => {

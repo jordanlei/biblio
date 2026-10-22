@@ -41,15 +41,15 @@
 ## Repository layout
 
 ```text
-apps/web/            The app: Vue 3 + Vite (views, components, services, adapters/, sync/)
-apps/site/           The project website: static Vue page, reuses the app's styles and icons
-apps/extension/      Manifest V3 extension (popup, page extractor, PDF fetcher, app bridge)
+apps/web/            The app: Vue 3 + Vite (views, components, services/{library,pdf}, adapters/, sync/)
+apps/site/           The project website: static Vue pages (scripts/capture.mjs makes its screenshots)
+apps/extension/      Chrome extension: src/ (worker, bridge), vendor/zotero (runtime + every translator),
+                     scripts/ (build, update translators), tests/; builds into build/ for Chrome
 packages/core/       Domain: types, citation keys, normalization, dedupe, BibTeX in/out,
                      library format + sync engine + storage ports (no SDKs)
-scripts/             setup (your own copy), deploy, dev-local launcher, mock Google Drive server
-e2e/                 Playwright walkthrough of the new-user journey
-samples/             Example Zotero/Better BibTeX export used by tests
-docs/                Status, architecture, roadmap
+scripts/             setup (your own copy), deploy, firebase, provider-boundary check; dev/ (local mode)
+e2e/                 Playwright walkthrough of the new-user journey, with BibTeX fixtures
+docs/                Architecture, storage, library format, security, self-hosting
 ```
 
 ## Develop
@@ -73,7 +73,7 @@ npm run test:e2e     # Playwright: new-user journey + data-loss/rebuild, offline
 ```
 
 - Sign in through the Auth emulator's fake Google chooser: **Add new account**, any email. Emulator UI: <http://127.0.0.1:4000>.
-- Drive calls go to `scripts/dev-drive-server.mjs`, a mock of the Drive v3 endpoints the app uses. Files land in `.dev-drive/` and are listed at <http://127.0.0.1:9199>; `/__control/offline?on=1` simulates an outage.
+- Drive calls go to `scripts/dev/drive-server.mjs`, a mock of the Drive v3 endpoints the app uses. Files land in `.dev-drive/` and are listed at <http://127.0.0.1:9199>; `/__control/offline?on=1` simulates an outage.
 - The project ID is `demo-biblio`, so nothing touches the real Firebase project.
 - The Firestore emulator needs Java 11+ on `PATH` (`brew install openjdk`).
 - There are no test credentials to keep: emulator accounts are invented on the spot. The e2e test signs in through an emulator-only hook (`apps/web/src/services/emulatorHooks.ts`) because the emulator's popup widget can't complete under the Playwright runner; the real popup works when driven by hand.

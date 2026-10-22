@@ -4,15 +4,15 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue"
 import { RouterLink, useRoute, useRouter } from "vue-router";
 import AppIcon from "../components/AppIcon.vue";
 import BacklinkList from "../components/BacklinkList.vue";
-import { customPaperPanels } from "../custom";
+import { customPaperPanels } from "../custom/index";
 import EditDetailsDialog from "../components/EditDetailsDialog.vue";
 import NotesEditor from "../components/NotesEditor.vue";
 import PdfPanel from "../components/PdfPanel.vue";
 import StatusControl from "../components/StatusControl.vue";
 import TagEditor from "../components/TagEditor.vue";
-import { creatorsToText, downloadBibtex, paperTypeLabels, updatePaper, useLibrary } from "../services/library";
+import { creatorsToText, downloadBibtex, paperTypeLabels, updatePaper, useLibrary } from "../services/library/library";
 import { askConfirm, copyText, isTypingTarget, toast, toastError, ui, undoAction } from "../services/ui";
-import { deletePapersEverywhere } from "../services/deletion";
+import { deletePapersEverywhere } from "../services/library/deletion";
 
 const route = useRoute();
 const router = useRouter();

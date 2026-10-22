@@ -35,17 +35,17 @@ Biblio is a static Vue app talking directly to Firebase (Auth, Firestore) and Go
 | --- | --- |
 | `firebase.ts` | Firebase init (`ignoreUndefinedProperties`), emulator wiring, the Drive scope. |
 | `services/session.ts` | Auth state; publishes the user only after the profile exists (fixes onboarding/reload races). Caches the Google access token for ~50 min in memory + `sessionStorage` (never Firestore) so Drive actions don't re-prompt. |
-| `services/library.ts` | The Firestore materialized view: live `onSnapshot` stores for papers, folders, and Research Notes shared by every view; all writes; contextual backlinks; `replaceLibrary()` for rebuilds; the **undo stack**. |
+| `services/library/library.ts` | The Firestore materialized view: live `onSnapshot` stores for papers, folders, and Research Notes shared by every view; all writes; contextual backlinks; `replaceLibrary()` for rebuilds; the **undo stack**. |
 | `adapters/googleDrive.ts` | All Drive REST: `driveRequest` (maps failures to `StorageUnavailableError` / `StorageAuthError`), folders, and `GoogleDriveFileStore` (the core `FileStore` port). |
 | `adapters/firestoreSyncState.ts` | Sync bookkeeping in `users/{uid}/sync/library`. |
 | `sync/librarySync.ts` | Composition root: wires `SyncEngine` to Drive + Firestore; reactive `syncStatus`; triggers (edits, online, focus); `connectLibraryFolder`, `rebuildFromDrive`, `reconnectDrive`. |
-| `services/librarySearch.ts` | Fielded, accent-folded, relevance-scored local search over metadata, notes, tags, citation keys, and saved-because text + highlight segments. |
-| `services/scope.ts` | `/library?folder|tag|view` scopes and combinable filters (`pdf`, `notes`, `untagged`, `status`) kept in the URL. |
+| `services/library/search.ts` | Fielded, accent-folded, relevance-scored local search over metadata, notes, tags, citation keys, and saved-because text + highlight segments. |
+| `services/library/scope.ts` | `/library?folder|tag|view` scopes and combinable filters (`pdf`, `notes`, `untagged`, `status`) kept in the URL. |
 | `services/lookup.ts` | OpenAlex works/author search (reciprocal-rank fusion of relevance and citation rankings), identifier lookups (Crossref, DataCite, OpenAlex), `author:`/`year:` qualifier parsing. |
-| `services/pdfFetch.ts` | Ranks PDF sources (publisher first, preprints last) and downloads the first real PDF: direct, then through the extension. |
+| `services/pdf/fetch.ts` | Ranks PDF sources (publisher first, preprints last) and downloads the first real PDF: direct, then through the extension. |
 | `services/drive.ts` | App-level Drive actions: create/pick the library folder, attach/find/remove PDFs (into `papers/`), links. |
-| `services/extensionBridge.ts` | `postMessage` protocol to the extension's content script (ping, fetch-pdf, resolve-doi-pdf). |
-| `services/notes.ts` | Markdown rendering with an inline `@[key]` token, sanitized by DOMPurify. |
+| `services/pdf/extensionBridge.ts` | `postMessage` protocol to the extension's content script (ping, fetch-pdf, resolve-doi-pdf). |
+| `services/library/notes.ts` | Markdown rendering with an inline `@[key]` token, sanitized by DOMPurify. |
 | `services/ui.ts` | Toasts, the Add dialog state, list context for prev/next, undo trigger. |
 | `services/emulatorHooks.ts` | Local test mode only: programmatic sign-in for Playwright. |
 
@@ -71,23 +71,23 @@ Three registries (`customRoutes`, `customNavItems`, `customPaperPanels`) are rea
 
 ## Project website (`apps/site`)
 
-Three static Vue pages published to GitHub Pages (`.github/workflows/site.yml`): the home page (`src/App.vue`: the model in brief, features, the comparison), How it works (`src/HowItWorksPage.vue`, at `how-it-works/`: Biblio is code, not a service, with the architecture diagram; keep it true to `scripts/setup.mjs` and [STORAGE.md](STORAGE.md)), and the setup tutorial (`src/SetupPage.vue`, served at `setup/`; keep it in step with `scripts/setup.mjs`). Captures of the app (`public/landing/`, made by `scripts/capture-landing.mjs`, see [CAPTURES.md](CAPTURES.md)),. It has no Firebase and no sign-in. Each person's copy of the app (`apps/web`) is deployed separately, to their own Firebase project; see [CONTRIBUTING.md](../CONTRIBUTING.md) for the rules that keep the two apart. It reuses the app's `styles.css`, `AppIcon`, and `BrandMark` by relative import, so the two look the same.
+Three static Vue pages published to GitHub Pages (`.github/workflows/site.yml`): the home page (`src/App.vue`: the model in brief, features, the comparison), How it works (`src/HowItWorksPage.vue`, at `how-it-works/`: Biblio is code, not a service, with the architecture diagram; keep it true to `scripts/setup.mjs` and [STORAGE.md](STORAGE.md)), and the setup tutorial (`src/SetupPage.vue`, served at `setup/`; keep it in step with `scripts/setup.mjs`). Captures of the app (`public/landing/`, made by `apps/site/scripts/capture.mjs`, see [CAPTURES.md](CAPTURES.md)),. It has no Firebase and no sign-in. Each person's copy of the app (`apps/web`) is deployed separately, to their own Firebase project; see [CONTRIBUTING.md](../CONTRIBUTING.md) for the rules that keep the two apart. It reuses the app's `styles.css`, `AppIcon`, and `BrandMark` by relative import, so the two look the same.
 
 ## Running a copy (`scripts/setup.mjs`, `biblio.config.json`)
 
 Each copy of the app is configured by a gitignored `biblio.config.json` read at build time (`apps/web/vite.config.ts`); nothing in the source names a Firebase project. `npm run setup` creates and fills it; `npm run deploy` targets it. See [SELF_HOSTING.md](SELF_HOSTING.md).
 
-## Moving a library (`services/transfer.ts`, core `library/transfer.ts`)
+## Moving a library (`services/library/transfer.ts`, core `library/transfer.ts`)
 
 A copy only sees Drive files it created (`drive.file`), so libraries move by copying files: *Download library* zips the library folder (fflate, in the browser); *Import a library* takes that .zip, Google Drive's own folder download (also a .zip, with extra wrapping folders), or an unzipped folder, finds `library.json`, checks it, writes the files into a new folder this copy creates (`library.json` last), and switches to it. *Reconnect* lists library folders this copy made earlier, for when its index was reset.
 
 ## Extension (`apps/extension`)
 
-`npm run build:extension` writes the ignored `manifest.json` and `app-url.js` configuration directly into `apps/extension/`; that single folder is loaded into Chrome. The extension never holds Firebase or Google credentials. The popup runs `extract.js` in the tab (Highwire `citation_*`, Dublin Core, JSON-LD, arXiv and DOI URL patterns, direct PDFs) and opens `/capture#<base64url JSON>` in the signed-in app. The app saves the paper, then asks the extension (via `bridge.js` → `background.js`) to fetch the PDF with `credentials: "include"`, which works for CORS-blocked and subscription hosts.
+`apps/extension/src` holds the extension's own code (`background.js`, `bridge.js`, the Zotero HTTP adapter, `manifest.json`); `apps/extension/vendor/zotero` holds the unmodified Zotero Translate runtime and every official translator. `npm run build:extension` (`apps/extension/scripts/build.mjs`) writes the folder Chrome loads, `apps/extension/build/` (ignored), with this copy's address. The toolbar button and the "Save to Biblio" menu item both run the worker's `saveTab()`: it injects the Zotero runtime and the translators whose target matches the page (plus import/search translators and their dependencies), Zotero picks the best, and the result opens `/capture#<base64url JSON>` in the signed-in app. The app saves the paper, then asks the extension (via `bridge.js` → `background.js`) to fetch the PDF: inside the article tab first (the user's own session), then from the worker with `credentials: "include"`. The extension never holds Firebase or Google credentials.
 
 ## Testing
 
-- `packages/core/src/core.test.ts` — citation keys, dedupe, BibTeX round-trips for every type, LaTeX/Zotero edge cases, and `samples/sample.bib`.
+- `packages/core/src/core.test.ts` — citation keys, dedupe, BibTeX round-trips for every type, LaTeX/Zotero edge cases, and `e2e/fixtures/zotero-export.bib`.
 - `packages/core/src/library.test.ts` — format round-trips, CSL interoperability, folders, shelves, saved-because fields, research notes (files, rename on retitle, hand-written and outside-edited files, migration from the old manifest field), sync: no-op when unchanged, offline queue, outside note edit, conflict copies, rebuild after index loss, adopting an existing library, shrink backup.
 - `e2e/ownership.spec.ts` — data-loss (wipe Firestore → reconnect folder → everything back), human-readable Drive contents, offline edits across a reload, outside note edits.
 - `scripts/check-boundaries.mjs` — provider-boundary rules (run by `npm test`).

@@ -348,8 +348,8 @@ async function browserExtension(appUrl) {
     note("Skipped. Run `npm run build:extension` whenever you want it.");
     return;
   }
-  run("scripts/configure-extension.mjs");
-  const extension = fileURLToPath(new URL("../apps/extension", import.meta.url));
+  run("apps/extension/scripts/build.mjs");
+  const extension = fileURLToPath(new URL("../apps/extension/build", import.meta.url));
   console.log("\n   To finish, in Chrome:");
   console.log("     1. Open chrome://extensions and turn on Developer mode (top right).");
   console.log("     2. Click “Load unpacked”.");

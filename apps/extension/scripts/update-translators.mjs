@@ -8,7 +8,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const target = fileURLToPath(new URL("../apps/extension/vendor/zotero/translators/", import.meta.url));
+const target = fileURLToPath(new URL("../vendor/zotero/translators/", import.meta.url));
 const scratch = mkdtempSync(join(tmpdir(), "zotero-translators-"));
 const run = (cmd, args, options = {}) => {
   const result = spawnSync(cmd, args, { encoding: "utf8", ...options });
@@ -26,4 +26,4 @@ try {
 } finally {
   rmSync(scratch, { recursive: true, force: true });
 }
-run("node", [fileURLToPath(new URL("./configure-extension.mjs", import.meta.url))], { stdio: "inherit" });
+run("node", [fileURLToPath(new URL("./build.mjs", import.meta.url))], { stdio: "inherit" });

@@ -11,7 +11,7 @@ Biblio vendors the Zotero Translate runtime and these official translator source
 The extension ships every translator in that repository (`vendor/zotero/translators/`).
 
 The vendored upstream snapshots are kept under `apps/extension/vendor/zotero/`.
-`zotero-runtime.js` and `zotero-translators/<translatorID>.js` are generated from those files by
+`build/zotero-runtime.js` and `build/zotero-translators/<translatorID>.js` are generated from those files by
 `npm run build:extension`; they contain the upstream source verbatim (translators without their
 embedded test cases) plus a Biblio runtime adapter.
 

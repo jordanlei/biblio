@@ -2,7 +2,7 @@
 import type { Paper } from "@biblio/core";
 import { computed, ref } from "vue";
 import { RouterLink } from "vue-router";
-import { setPaperTag, useLibrary } from "../services/library";
+import { setPaperTag, useLibrary } from "../services/library/library";
 import { toastError } from "../services/ui";
 
 const props = defineProps<{ paper: Paper }>();

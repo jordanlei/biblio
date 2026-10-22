@@ -2,7 +2,7 @@
 // How to run it, what it produces, and how to add a capture: docs/CAPTURES.md.
 //
 //   npm run dev:local                                   # emulators + mock Drive + Vite (needs Java)
-//   node scripts/capture-landing.mjs [http://localhost:5173]
+//   node apps/site/scripts/capture.mjs [http://localhost:5173]
 //
 // Signs in to the local emulators as a fresh user and builds a small library through the UI
 // (import, tags, shelves, saved reasons, notes with @[links], PDFs from arXiv, a research note),
@@ -17,10 +17,10 @@ const require = createRequire(import.meta.url);
 const { chromium } = require("playwright");
 
 const APP = process.argv[2] ?? "http://localhost:5173";
-const OUT = new URL("../apps/site/public/landing/", import.meta.url).pathname;
+const OUT = new URL("../public/landing/", import.meta.url).pathname;
 const FPS = 20;
 mkdirSync(OUT, { recursive: true });
-const bib = readFileSync(new URL("../e2e/fixtures/sample.bib", import.meta.url), "utf8") + "\n" + readFileSync(new URL("../samples/sample.bib", import.meta.url), "utf8");
+const bib = readFileSync(new URL("../../../e2e/fixtures/sample.bib", import.meta.url), "utf8") + "\n" + readFileSync(new URL("../../../e2e/fixtures/zotero-export.bib", import.meta.url), "utf8");
 
 const browser = await chromium.launch();
 const context = await browser.newContext({ viewport: { width: 1280, height: 800 }, deviceScaleFactor: 2, colorScheme: "light" });

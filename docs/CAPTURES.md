@@ -1,7 +1,7 @@
 # Website captures
 
 Every image and video on the project website (`apps/site/src/App.vue`) is a capture
-of the real app running locally, made by one script: [`scripts/capture-landing.mjs`](../scripts/capture-landing.mjs).
+of the real app running locally, made by one script: [`apps/site/scripts/capture.mjs`](../apps/site/scripts/capture.mjs).
 Nothing is mocked up by hand. When the UI changes, rerun the script so the page stays honest.
 
 ## Prerequisites
@@ -26,7 +26,7 @@ WEB_PORT=5391 DEV_DRIVE_DIR=.dev-drive-landing npm run dev:local   # emulators +
 In a second terminal, once Vite is serving:
 
 ```sh
-node scripts/capture-landing.mjs http://localhost:5391
+node apps/site/scripts/capture.mjs http://localhost:5391
 ```
 
 A full run takes about two minutes and prints one line per output:
@@ -57,7 +57,7 @@ Stop the stack before running `npx playwright test`, which starts its own stack 
    `demo.<timestamp>@example.com` account, so no state carries over between runs. No real Google
    account is involved.
 2. **Builds a demo library through the UI**, the way a person would. It creates the Drive library,
-   imports 8 papers (`e2e/fixtures/sample.bib` + `samples/sample.bib`), adds two tags, sets "Saved
+   imports 8 papers (`e2e/fixtures/sample.bib` + `e2e/fixtures/zotero-export.bib`), adds two tags, sets "Saved
    because" reasons, writes a paper note with `@[…]` links, and fetches two arXiv PDFs.
 3. **Records and shoots**, in this order:
 

@@ -52,16 +52,18 @@ test("new researcher: sign in, set up, import, organize, annotate, export", asyn
     await page.getByRole("button", { name: "Import 5 papers" }).click();
     await expect(page.locator(".entry")).toHaveCount(5);
     await expect(page.locator(".entry").first()).toContainText("Attention Is All You Need");
-    await expect(page.locator(".entry").first()).toContainText("vaswaniAttentionNeed2017");
+    // The citation key survives import: the preview pane shows it for the selected paper.
+    await page.locator(".entry").first().click();
+    await expect(page.getByText("vaswaniAttentionNeed2017").first()).toBeVisible();
   });
 
-  await test.step("imports the Zotero sample in samples/sample.bib", async () => {
+  await test.step("imports the Zotero sample in fixtures/zotero-export.bib", async () => {
     await expect(page.getByRole("dialog")).toHaveCount(0);
     await page.keyboard.press("a");
     await expect(page.getByRole("dialog")).toBeVisible();
     await page.getByRole("tab", { name: "Import .bib" }).click();
     await page.getByText("…or paste BibTeX").click();
-    await page.locator("details.paste textarea").fill(readFileSync(new URL("../samples/sample.bib", import.meta.url), "utf8"));
+    await page.locator("details.paste textarea").fill(readFileSync(new URL("./fixtures/zotero-export.bib", import.meta.url), "utf8"));
     await expect(page.getByText("3 entries found")).toBeVisible();
     await page.getByRole("button", { name: "Import 3 papers" }).click();
     await expect(page.locator(".entry")).toHaveCount(8);
@@ -77,14 +79,17 @@ test("new researcher: sign in, set up, import, organize, annotate, export", asyn
     await expect(page.locator(".entry")).toHaveCount(8);
     await page.locator(".entry", { hasText: "LFADS" }).click();
     await page.keyboard.press("2");
-    await page.locator(".filters").getByRole("button", { name: "Skimming" }).click();
+    await page.locator(".filters").getByRole("button", { name: "Filters" }).click();
+    await page.locator(".filter-menu").getByRole("button", { name: "Skim" }).click();
     await expect(page.locator(".entry")).toHaveCount(1);
-    await page.locator(".filters").getByRole("button", { name: "Skimming" }).click();
+    await page.locator(".filter-menu").getByRole("button", { name: "Skim" }).click();
     await expect(page.locator(".entry")).toHaveCount(8);
+    await page.locator(".filters").getByRole("button", { name: "Filters" }).click();
   });
 
   await test.step("write a research note that links papers, saved as Markdown in Drive", async () => {
-    await page.getByRole("button", { name: "New note" }).click();
+    await page.locator('aside.sidebar a[href="/research-notes"]').click();
+    await page.getByRole("button", { name: "New note" }).first().click();
     await expect(page).toHaveURL(/\/research-notes\/[\w-]+/);
     await page.keyboard.type("Credit assignment"); // the new note's title is selected
     await page.keyboard.press("Enter"); // on to the text
@@ -95,7 +100,7 @@ test("new researcher: sign in, set up, import, organize, annotate, export", asyn
     await text.pressSequentially(".", { delay: 5 });
     await text.blur();
     await expect(page.locator(".linked")).toContainText("LFADS");
-    await expect(page.locator("aside.sidebar")).toContainText("Credit assignment");
+    await expect(page.locator(".notes-list")).toContainText("Credit assignment");
     await expect.poll(async () => (await fetch(MOCK_DRIVE)).text(), { timeout: 20_000 }).toContain("Credit assignment.md");
 
     // A second note straight after: its title and text both stick (saves don't overwrite each other).
@@ -190,7 +195,7 @@ test("new researcher: sign in, set up, import, organize, annotate, export", asyn
 
   await test.step("export references.bib with stable keys", async () => {
     await page.goto("/library");
-    const [download] = await Promise.all([page.waitForEvent("download"), page.getByRole("button", { name: "Export .bib" }).click()]);
+    const [download] = await Promise.all([page.waitForEvent("download"), page.getByRole("button", { name: "Export visible papers" }).click()]);
     expect(download.suggestedFilename()).toBe("references.bib");
     const text = readFileSync((await download.path())!, "utf8");
     expect(text).toContain("@inproceedings{vaswaniAttentionNeed2017,");

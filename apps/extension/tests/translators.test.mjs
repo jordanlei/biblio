@@ -4,24 +4,25 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 
-const extensionRoot = fileURLToPath(new URL("../", import.meta.url));
+const build = fileURLToPath(new URL("../build/", import.meta.url));
+const src = fileURLToPath(new URL("../src/", import.meta.url));
 const vendorRoot = fileURLToPath(new URL("../vendor/zotero/", import.meta.url));
 
 const translatorIndex = () => {
-  const source = readFileSync(`${extensionRoot}zotero-translator-index.js`, "utf8");
+  const source = readFileSync(`${build}zotero-translator-index.js`, "utf8");
   return JSON.parse(source.slice(source.indexOf("["), source.lastIndexOf("]") + 1));
 };
 
 test("the generated Zotero runtime and capture driver parse", () => {
-  execFileSync(process.execPath, ["--check", `${extensionRoot}zotero-runtime.js`], { stdio: "pipe" });
-  execFileSync(process.execPath, ["--check", `${extensionRoot}zotero-capture.js`], { stdio: "pipe" });
+  execFileSync(process.execPath, ["--check", `${build}zotero-runtime.js`], { stdio: "pipe" });
+  execFileSync(process.execPath, ["--check", `${build}zotero-capture.js`], { stdio: "pipe" });
 });
 
 test("the extension has one translator path and no retired Biblio parsers", () => {
   for (const name of ["extract.js", "biblio-translate.js", "biblio-translators.js", "pubmed-xml.js"]) {
-    assert.equal(existsSync(`${extensionRoot}${name}`), false, `${name} should not be shipped`);
+    assert.equal(existsSync(`${src}${name}`), false, `${name} should not be shipped`);
   }
-  assert.match(readFileSync(`${extensionRoot}background.js`, "utf8"), /files: \["zotero-runtime\.js", \.\.\.translatorFilesFor\(tab\.url\), "zotero-capture\.js"\]/);
+  assert.match(readFileSync(`${src}background.js`, "utf8"), /files: \["zotero-runtime\.js", \.\.\.translatorFilesFor\(tab\.url\), "zotero-capture\.js"\]/);
 });
 
 test("every official Zotero translator ships, with its source verbatim", () => {
@@ -34,7 +35,7 @@ test("every official Zotero translator ships, with its source verbatim", () => {
     const header = source.match(/^\s*(\{[\s\S]*?\n\})/);
     const { translatorID } = JSON.parse(header[1]);
     const body = source.slice(header[0].length).split("/** BEGIN TEST CASES **/")[0];
-    const built = readFileSync(`${extensionRoot}zotero-translators/${translatorID}.js`, "utf8");
+    const built = readFileSync(`${build}zotero-translators/${translatorID}.js`, "utf8");
     assert.ok(built.includes(body), `${name} body is not present verbatim in its generated file`);
   }
 });
@@ -51,27 +52,27 @@ test("translators are chosen by their own target, as in the Zotero Connector", (
 });
 
 test("the capture driver keeps identifiers the app uses for PDF discovery", () => {
-  const runtime = readFileSync(`${extensionRoot}zotero-runtime.js`, "utf8");
+  const runtime = readFileSync(`${build}zotero-runtime.js`, "utf8");
   assert.match(runtime, /pmcid: clean\(item\.PMCID/);
   assert.match(runtime, /arxivId: clean\(/);
 });
 
 test("the toolbar button and the right-click menu run the same save", () => {
-  const background = readFileSync(`${extensionRoot}background.js`, "utf8");
-  assert.equal(existsSync(`${extensionRoot}popup.js`), false);
+  const background = readFileSync(`${src}background.js`, "utf8");
+  assert.equal(existsSync(`${src}popup.js`) || existsSync(`${build}popup.js`), false);
   assert.match(background, /chrome\.action\.onClicked\.addListener\(\(tab\) => saveTab\(tab\)\)/);
   assert.match(background, /if \(info\.menuItemId === "save-to-biblio"\) saveTab\(tab\)/);
   assert.match(background, /chrome\.tabs\.create\(\{ url: .*\/capture#/);
 });
 
 test("captured publisher PDFs are fetched in the article tab first", () => {
-  const background = readFileSync(`${extensionRoot}background.js`, "utf8");
+  const background = readFileSync(`${src}background.js`, "utf8");
   assert.match(background, /const fromTab = await fetchPdfInTab\(capture\)/);
 });
 
 test("captured PDF URLs can use a short-lived extension token", () => {
-  const background = readFileSync(`${extensionRoot}background.js`, "utf8");
-  const bridge = readFileSync(`${extensionRoot}bridge.js`, "utf8");
+  const background = readFileSync(`${src}background.js`, "utf8");
+  const bridge = readFileSync(`${src}bridge.js`, "utf8");
   assert.match(background, /capturedPdf\(message\.captureToken/);
   assert.match(bridge, /captureToken/);
 });

@@ -21,14 +21,14 @@
     "setup": "node scripts/setup.mjs",
     "deploy": "node scripts/deploy.mjs",
     "firebase": "node scripts/firebase.mjs",
-    "build:extension": "node scripts/configure-extension.mjs",
-    "dev:local": "node scripts/dev-local.mjs",
+    "build:extension": "node apps/extension/scripts/build.mjs",
+    "dev:local": "node scripts/dev/local.mjs",
     "site:dev": "npm --workspace apps/site run dev",
     "site:build": "npm --workspace apps/site run build",
     "test:e2e": "playwright test",
     "test:boundaries": "node scripts/check-boundaries.mjs",
     "test:extension:live": "npm run build:extension && node apps/extension/tests/live.mjs",
-    "update:translators": "node scripts/update-zotero-translators.mjs"
+    "update:translators": "node apps/extension/scripts/update-translators.mjs"
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0",

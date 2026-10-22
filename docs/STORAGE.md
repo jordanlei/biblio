@@ -54,7 +54,7 @@ The test: delete Biblio's entire database, reconnect the Drive folder, and the l
 | --- | --- | --- |
 | Domain + format + sync engine | `packages/core` (`library/format.ts`, `library/sync.ts`, `library/ports.ts`) | nothing provider-specific |
 | Ports | `FileStore` (canonical files), `LibraryView` (materialized view), `SyncStateStore` (bookkeeping) | — |
-| Adapters | `apps/web/src/adapters/googleDrive.ts` (FileStore over Drive REST), `adapters/firestoreSyncState.ts`, `services/library.ts` (Firestore view + Vue store) | SDKs/REST |
+| Adapters | `apps/web/src/adapters/googleDrive.ts` (FileStore over Drive REST), `adapters/firestoreSyncState.ts`, `services/library/library.ts` (Firestore view + Vue store) | SDKs/REST |
 | Composition | `apps/web/src/sync/librarySync.ts` | core + adapters |
 | UI | `components/`, `views/` | services only |
 
@@ -99,7 +99,7 @@ The library and Drive are kept in step for deliberate deletions, and every destr
 | Delete folder | collection removed from `biblio.json`; papers stay | ⌘Z |
 | Delete account | nothing, unless “also move my library folder to the trash” is ticked | — (Drive trash keeps it 30 days) |
 
-Deletions are all-or-nothing: if a Drive file can't be trashed, nothing is deleted and any files already trashed are restored (`services/deletion.ts`). The sync engine itself never deletes files.
+Deletions are all-or-nothing: if a Drive file can't be trashed, nothing is deleted and any files already trashed are restored (`services/library/deletion.ts`). The sync engine itself never deletes files.
 
 ## Rebuild
 
@@ -118,7 +118,7 @@ User-facing behavior is otherwise unchanged.
 
 ## Known limits
 
-- Drive `drive.file` scope: a copy sees only the files it created (no "unverified app" warning). Edits to those files made elsewhere are picked up; files added by hand are not seen. A library made elsewhere comes in by import, which copies it into a new folder this copy owns (`services/transfer.ts`).
+- Drive `drive.file` scope: a copy sees only the files it created (no "unverified app" warning). Edits to those files made elsewhere are picked up; files added by hand are not seen. A library made elsewhere comes in by import, which copies it into a new folder this copy owns (`services/library/transfer.ts`).
 - Conflicts on `library.json` are resolved at file level (outside copy kept), not merged field by field.
 - Firestore's local cache isn't persisted across reloads; offline *Drive* outages are fully supported, full offline use of the app is not.
 - Firestore documents still store a full copy of notes (needed for instant search). Very large libraries may want notes moved to a separate collection later.

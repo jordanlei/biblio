@@ -1,5 +1,5 @@
 // Live check of the real extension against real paper pages: npm run test:extension:live
-// Loads apps/extension into Chromium, opens each page in tests/paper-cases.json (and the
+// Loads apps/extension/build into Chromium, opens each page in tests/paper-cases.json (and the
 // gitignored paper-cases.local.json, if present), and runs exactly what "Save to Biblio" runs:
 // the worker's readTab() and, when a case expects a PDF, the in-tab publisher fetch.
 import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
@@ -8,8 +8,9 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { chromium } from "playwright";
 
-const root = fileURLToPath(new URL("../", import.meta.url));
-const read = (name) => (existsSync(`${root}tests/${name}`) ? JSON.parse(readFileSync(`${root}tests/${name}`, "utf8")) : []);
+const build = fileURLToPath(new URL("../build/", import.meta.url));
+const tests = fileURLToPath(new URL("./", import.meta.url));
+const read = (name) => (existsSync(`${tests}${name}`) ? JSON.parse(readFileSync(`${tests}${name}`, "utf8")) : []);
 const only = process.argv[2];
 const cases = [...read("paper-cases.json"), ...read("paper-cases.local.json")].filter((c) => !only || c.url.includes(only));
 const seen = new Set();
@@ -20,7 +21,7 @@ const context = await chromium.launchPersistentContext(profile, {
   headless: !process.env.HEADED,
   // Headless Chromium names itself in its user agent, which some publishers refuse outright.
   userAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
-  args: [`--disable-extensions-except=${root}`, `--load-extension=${root}`, "--disable-blink-features=AutomationControlled"]
+  args: [`--disable-extensions-except=${build}`, `--load-extension=${build}`, "--disable-blink-features=AutomationControlled"]
 });
 const worker = context.serviceWorkers()[0] ?? (await context.waitForEvent("serviceworker"));
 let failures = 0;

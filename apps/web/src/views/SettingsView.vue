@@ -5,8 +5,8 @@ import AppIcon from "../components/AppIcon.vue";
 import AppearanceSettings from "../components/AppearanceSettings.vue";
 import LibraryImport from "../components/LibraryImport.vue";
 import { connectDriveFolder, createDriveFolder, DEFAULT_FOLDER_NAME, disconnectDriveFolder, driveFolderUrl, findOwnLibraries, trashLibraryFolder, type DriveFolderSelection, type OwnLibrary } from "../services/drive";
-import { downloadLibraryZip } from "../services/transfer";
-import { deleteAllUserMetadata, deleteProfileDoc } from "../services/library";
+import { downloadLibraryZip } from "../services/library/transfer";
+import { deleteAllUserMetadata, deleteProfileDoc } from "../services/library/library";
 import { clearLocalCache, deleteCurrentAuthUser, updateProfile, useSession } from "../services/session";
 import { askConfirm, openAdd, toast, toastError } from "../services/ui";
 import { connectLibraryFolder, rebuildFromDrive, stopSync, syncNow, syncStatus } from "../sync/librarySync";
@@ -114,7 +114,7 @@ async function deleteAccount() {
           <dd>Format version, your folder tree, and a plain-language explanation.</dd>
         </dl>
         <p class="muted small">
-          <code>references.bib</code> in that folder is always up to date. To export just a folder or search, use <em>Export .bib</em> above the list; to import, use
+          <code>references.bib</code> in that folder is always up to date. To export just a folder or search, use the export button above the list; to import, use
           <button class="link-btn" type="button" @click="openAdd('import')">Add papers → Import .bib</button>.
         </p>
         <div class="row wrap">

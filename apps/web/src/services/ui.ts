@@ -85,7 +85,7 @@ export async function copyText(text: string, label = "Copied") {
 
 /** Undo the last recorded library action (⌘Z / Ctrl+Z, or a toast's Undo button). */
 export async function runUndo() {
-  const { undoLast } = await import("./library");
+  const { undoLast } = await import("./library/library");
   try {
     const label = await undoLast();
     toast(label ? `Undone: ${label.toLowerCase()}.` : "Nothing to undo.");

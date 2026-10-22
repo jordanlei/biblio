@@ -3,7 +3,7 @@ import { ref, watch } from "vue";
 import { GoogleDriveFileStore } from "../adapters/googleDrive";
 import { FirestoreSyncStateStore } from "../adapters/firestoreSyncState";
 import { connectDriveFolder, type DriveFolderSelection } from "../services/drive";
-import { putResearchNote, replaceLibrary, updatePaper, useLibrary } from "../services/library";
+import { putResearchNote, replaceLibrary, updatePaper, useLibrary } from "../services/library/library";
 import { getGoogleAccessToken, useSession } from "../services/session";
 
 // Composition root for the canonical library. Wires the provider-agnostic SyncEngine (core) to

@@ -2,8 +2,8 @@
 import type { Paper, ResearchNote } from "@biblio/core";
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
-import { creatorsToText, shortAuthors, updatePaper, updateResearchNote, useLibrary } from "../services/library";
-import { renderNotes } from "../services/notes";
+import { creatorsToText, shortAuthors, updatePaper, updateResearchNote, useLibrary } from "../services/library/library";
+import { renderNotes } from "../services/library/notes";
 import { toastError } from "../services/ui";
 
 // Markdown notes with @[ paper links: a paper's own notes, or the text of a research note.

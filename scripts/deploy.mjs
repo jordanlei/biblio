@@ -8,7 +8,7 @@ const run = (cmd, args) => {
   if (result.status !== 0) process.exit(result.status ?? 1);
 };
 run("npm", ["run", "build"]);
-// Refresh the ignored manifest and app URL in the folder people load into Chrome.
-run("node", ["scripts/configure-extension.mjs"]);
+// Rebuild the extension (apps/extension/build) for this address.
+run("node", ["apps/extension/scripts/build.mjs"]);
 run("npx", ["firebase", "deploy", "--only", "hosting,firestore:rules", "--project", projectId, "--non-interactive"]);
 console.log(`\nDeployed: ${appUrl}`);

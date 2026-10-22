@@ -2,7 +2,7 @@
 import { parseBibtex, type PaperCandidate, type PaperType } from "@biblio/core";
 import { computed, nextTick, onMounted, reactive, ref } from "vue";
 import { useRouter } from "vue-router";
-import { addPaper, checkDuplicate, importPapers, paperTypeLabels, paperTypes, parseCreators } from "../services/library";
+import { addPaper, checkDuplicate, importPapers, paperTypeLabels, paperTypes, parseCreators } from "../services/library/library";
 import { lookupIdentifier, parseIdentifier } from "../services/lookup";
 import { toast, toastError, ui, type AddTab } from "../services/ui";
 import AppIcon from "./AppIcon.vue";

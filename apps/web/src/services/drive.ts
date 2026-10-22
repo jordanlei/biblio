@@ -9,8 +9,8 @@ import {
   listVisibleFolders,
   openUrl
 } from "../adapters/googleDrive";
-import { updatePaper } from "./library";
-import { downloadPdf, findPdfSources } from "./pdfFetch";
+import { updatePaper } from "./library/library";
+import { downloadPdf, findPdfSources } from "./pdf/fetch";
 import { hasGoogleAccessToken, updateProfile, useSession } from "./session";
 
 // App-level Drive actions (connect a library folder, attach/find/remove PDFs). Provider details

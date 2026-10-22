@@ -2,7 +2,7 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { DEFAULT_FOLDER_NAME, connectDriveFolder, createDriveFolder, findOwnLibraries, type DriveFolderSelection, type OwnLibrary } from "../services/drive";
 import { connectLibraryFolder } from "../sync/librarySync";
-import { useLibrary } from "../services/library";
+import { useLibrary } from "../services/library/library";
 import { useSession } from "../services/session";
 import { openAdd, toast as toastInfo, toastError } from "../services/ui";
 import AppIcon from "./AppIcon.vue";
