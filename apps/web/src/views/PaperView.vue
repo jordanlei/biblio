@@ -328,6 +328,7 @@ async function removePaper() {
 }
 
 .abstract {
+  max-width: 40rem;
   font-family: var(--font-serif);
   font-size: calc(16px * var(--text-scale));
   line-height: 1.75;

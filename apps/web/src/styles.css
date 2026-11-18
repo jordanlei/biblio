@@ -11,17 +11,18 @@
   /* Set by Settings → Appearance (services/appearance.ts). */
   --text-scale: 1;
 
-  /* Warm paper, quieter contrast, one consistent library-green accent. */
-  --bg: #f6f4ee;
-  --surface: #fffdf8;
+  /* Warm paper, one consistent library-green accent. Every text tier meets WCAG AA on the paper
+     and the sidebar (text-3 is about 5:1). */
+  --bg: #f8f6f1;
+  --surface: #fffefa;
   --surface-2: #eeece5;
   --surface-3: #e4e1d8;
-  --sidebar: #eeece5;
+  --sidebar: #f1efe8;
   --border: #dedbd2;
   --border-strong: #c7c2b7;
-  --text: #20221f;
-  --text-2: #5a5f58;
-  --text-3: #858a82;
+  --text: #1c1d1a;
+  --text-2: #474b45;
+  --text-3: #63675f;
   --accent: #28624f;
   --accent-hover: #1f5040;
   --accent-text: #f8fffb;
@@ -61,8 +62,8 @@
     --border: #312c25;
     --border-strong: #4a4237;
     --text: #ece5d6;
-    --text-2: #b4ab99;
-    --text-3: #857c6d;
+    --text-2: #c2b9a7;
+    --text-3: #a39a8a;
     --accent: #82bda5;
     --accent-hover: #9bcdb8;
     --accent-text: #102019;
@@ -89,8 +90,8 @@
   --border: #312c25;
   --border-strong: #4a4237;
   --text: #ece5d6;
-  --text-2: #b4ab99;
-  --text-3: #857c6d;
+  --text-2: #c2b9a7;
+  --text-3: #a39a8a;
   --accent: #82bda5;
   --accent-hover: #9bcdb8;
   --accent-text: #102019;
@@ -176,9 +177,9 @@ a {
 .section-label,
 .smallcaps {
   font-family: var(--font-ui);
-  font-size: calc(10.5px * var(--text-scale));
+  font-size: calc(11.5px * var(--text-scale));
   font-weight: 650;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   line-height: 1.3;
   color: var(--text-2);
   text-transform: uppercase;
@@ -538,9 +539,11 @@ a.tag:hover {
 }
 
 /* ---------- Markdown ---------- */
+/* Capped at a comfortable measure (about 70 characters) wherever it appears. */
 .prose {
+  max-width: 40rem;
   font-family: var(--font-ui);
-  font-size: calc(14.5px * var(--text-scale));
+  font-size: calc(15px * var(--text-scale));
   line-height: 1.65;
   color: var(--text);
   overflow-wrap: anywhere;
@@ -548,6 +551,12 @@ a.tag:hover {
 
 .prose > * + * {
   margin-top: 0.75em;
+}
+
+.prose .katex-display {
+  margin: 1em 0;
+  overflow-x: auto;
+  overflow-y: hidden;
 }
 
 .prose h1,

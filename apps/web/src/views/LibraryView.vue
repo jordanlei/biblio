@@ -521,7 +521,11 @@ const scopeEyebrow = computed(() => (scope.value.kind === "folder" ? "Folder" : 
   grid-template-columns: minmax(0, 1fr) minmax(390px, 470px);
 }
 
+/* The list keeps a readable width on wide screens instead of stretching titles edge to edge. */
 .list-pane {
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
   min-width: 0;
   padding: 30px clamp(24px, 4vw, 56px) 56px;
 }
