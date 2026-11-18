@@ -176,15 +176,16 @@ function followCite(event: MouseEvent) {
 
 .authors {
   margin-top: 8px;
-  color: var(--text);
+  color: var(--text-2);
   font-size: calc(13.5px * var(--text-scale));
 }
 
 .venue {
   margin-top: 2px;
-  font-family: var(--font-ui);
-  font-size: calc(13.5px * var(--text-scale));
-  color: var(--text-2);
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: calc(14.5px * var(--text-scale));
+  color: var(--text-3);
 }
 
 .ids {
@@ -198,10 +199,13 @@ function followCite(event: MouseEvent) {
   text-decoration: none;
 }
 
+/* Sections are set apart by space and their serif heading; no rules between them. */
 .block {
-  margin-top: 26px;
-  padding-top: 22px;
-  border-top: 1px solid var(--border);
+  margin-top: 30px;
+}
+
+.block > .section-label:first-child {
+  margin-bottom: 8px;
 }
 
 .key-eyebrow {
@@ -230,7 +234,7 @@ function followCite(event: MouseEvent) {
   font-family: var(--font-ui);
   font-size: calc(14.5px * var(--text-scale));
   line-height: 1.65;
-  color: var(--text);
+  color: var(--text-2);
 }
 
 .clamp {

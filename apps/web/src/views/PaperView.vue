@@ -313,8 +313,10 @@ async function removePaper() {
 
 .venue {
   margin-top: 4px;
-  font-family: var(--font-ui);
-  color: var(--text-2);
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.05em;
+  color: var(--text-3);
 }
 
 .ids {

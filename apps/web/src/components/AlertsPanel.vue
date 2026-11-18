@@ -120,7 +120,7 @@ async function act(suggestion: Suggestion, accept: boolean) {
         <div class="body">
           <a class="title" :href="s.candidate.url ?? `https://openalex.org/${s.id}`" target="_blank" rel="noopener">{{ s.candidate.title }}</a>
           <p class="small muted">
-            {{ shortAuthors(s.candidate.authors ?? []) }}<template v-if="s.candidate.issued?.year"> · {{ s.candidate.issued.year }}</template><template v-if="s.candidate.containerTitle"> · {{ s.candidate.containerTitle }}</template>
+            {{ shortAuthors(s.candidate.authors ?? []) }}<template v-if="s.candidate.issued?.year"> · {{ s.candidate.issued.year }}</template><template v-if="s.candidate.containerTitle"> · <cite class="venue">{{ s.candidate.containerTitle }}</cite></template>
           </p>
           <p class="small faint">via {{ followLabel(s.followId) ?? "an earlier follow" }}</p>
         </div>
@@ -242,6 +242,11 @@ async function act(suggestion: Suggestion, accept: boolean) {
 
 .title:hover {
   text-decoration: underline;
+}
+
+.venue {
+  font-family: var(--font-serif);
+  font-style: italic;
 }
 
 .acts {

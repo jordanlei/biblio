@@ -118,7 +118,7 @@ function onDrop(event: DragEvent) {
 
     <template v-else-if="paper.pdf">
       <div class="row wrap">
-        <a class="btn primary" :href="driveOpenUrl(paper.pdf.driveFileId)" target="_blank" rel="noopener"><AppIcon name="pdf" /> Open PDF</a>
+        <a class="btn" :href="driveOpenUrl(paper.pdf.driveFileId)" target="_blank" rel="noopener"><AppIcon name="pdf" /> Open PDF</a>
         <button class="btn sm quiet" type="button" @click="fileInput?.click()">Replace</button>
         <button class="btn sm quiet" type="button" @click="remove()">Remove…</button>
       </div>
@@ -127,7 +127,7 @@ function onDrop(event: DragEvent) {
 
     <template v-else-if="session.profile.value?.driveRootFolderId">
       <div class="row wrap">
-        <button class="btn primary" type="button" @click="find"><AppIcon name="download" :size="15" /> Find PDF</button>
+        <button class="btn" type="button" @click="find"><AppIcon name="download" :size="15" /> Find PDF</button>
         <button class="btn quiet" type="button" @click="fileInput?.click()">Choose file…</button>
       </div>
       <div v-if="failure" class="failure">

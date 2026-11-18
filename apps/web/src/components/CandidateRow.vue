@@ -70,7 +70,7 @@ function open(id: string) {
       <p class="meta">{{ authors }}</p>
       <p class="meta faint">
         <span v-if="candidate.type">{{ paperTypeLabels[candidate.type] }}</span>
-        <span v-if="candidate.containerTitle"> · {{ candidate.containerTitle }}</span>
+        <span v-if="candidate.containerTitle"> · <cite class="venue">{{ candidate.containerTitle }}</cite></span>
         <span v-if="candidate.issued?.year"> · {{ candidate.issued.year }}</span>
         <span v-if="citedBy"> · {{ citedBy.toLocaleString() }} citations</span>
         <span v-if="candidate.doi"> · DOI {{ candidate.doi }}</span>
@@ -209,5 +209,10 @@ function open(id: string) {
     flex-wrap: wrap;
     align-items: center;
   }
+}
+
+.venue {
+  font-family: var(--font-serif);
+  font-style: italic;
 }
 </style>

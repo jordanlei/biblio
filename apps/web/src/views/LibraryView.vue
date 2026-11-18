@@ -840,7 +840,7 @@ const scopeEyebrow = computed(() => (scope.value.kind === "folder" ? "Folder" : 
 
 .year {
   font-family: var(--font-ui);
-  font-size: calc(14px * var(--text-scale));
+  font-size: calc(13px * var(--text-scale));
   color: var(--text-3);
   text-align: right;
 }
@@ -857,14 +857,18 @@ const scopeEyebrow = computed(() => (scope.value.kind === "folder" ? "Folder" : 
 .meta {
   display: flex;
   flex-wrap: wrap;
+  align-items: baseline;
   gap: 0 10px;
-  margin-top: 3px;
-  font-size: calc(13px * var(--text-scale));
+  margin-top: 4px;
+  font-size: calc(13.5px * var(--text-scale));
   color: var(--text-2);
 }
 
+/* Journals in italic serif, as in a reference list. */
 .venue {
-  font-family: var(--font-ui);
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.05em;
   color: var(--text-3);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -873,11 +877,17 @@ const scopeEyebrow = computed(() => (scope.value.kind === "folder" ? "Folder" : 
 }
 
 .row-tags {
-  margin-top: 4px;
+  margin-top: 6px;
+}
+
+.row-tags .tag {
+  color: var(--text-3);
+  font-size: calc(12px * var(--text-scale));
 }
 
 .saved-because {
   margin-top: 6px;
+  font-style: italic;
   font-size: calc(12.5px * var(--text-scale));
   color: var(--text-3);
 }
@@ -898,7 +908,7 @@ const scopeEyebrow = computed(() => (scope.value.kind === "folder" ? "Folder" : 
 }
 
 .has-pdf {
-  color: var(--accent-ink);
+  color: var(--text-2);
 }
 
 .key-eyebrow {
