@@ -8,7 +8,7 @@ const props = defineProps<{ paper: Paper }>();
 
 function set(status: ReadingStatus) {
   const next = normalizeReadingStatus(props.paper.readingStatus) === status ? undefined : status;
-  updatePaper(props.paper.id, { readingStatus: next }, "Change reading status").catch(toastError);
+  updatePaper(props.paper.id, { readingStatus: next, ...(props.paper.inbox ? { inbox: undefined } : {}) }, "Change reading status").catch(toastError);
 }
 </script>
 

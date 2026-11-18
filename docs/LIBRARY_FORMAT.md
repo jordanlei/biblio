@@ -53,7 +53,8 @@ A JSON array of [CSL-JSON](https://citeproc-js.readthedocs.io/en/latest/csl-json
 | `type` | Biblio's paper type (`article`, `conferencePaper`, `preprint`, `book`, `bookChapter`, `thesis`, `report`, `other`). |
 | `tags` | Array of tags. |
 | `collections` | Array of collection ids from `biblio.json`. |
-| `readingStatus` | Exclusive attention shelf: `toRead`, `skimming`, `read`, or `reference` (kept to cite, not to read). Absent means no shelf. Older values (`inbox`, `readNext`, `tbr`, `reading`, `skimmed`, `parked`) are still accepted and read as the nearest shelf. |
+| `readingStatus` | Exclusive attention shelf: `toRead`, `skimming`, `read`, or `reference` (kept to cite, not to read). Absent means no shelf, which is the usual case: `toRead` marks what is being read now. Older values (`inbox`, `readNext`, `tbr`, `reading`, `skimmed`, `parked`) are still accepted and read as the nearest shelf. |
+| `inbox` | `true` while the paper is newly added and not yet looked at; absent once it is marked done or shelved. Single adds and captures set it; bulk BibTeX imports do not. |
 | `savedBecause` | Short user-entered reason for keeping the paper. |
 | `addedAt` | ISO 8601 timestamp the paper was added. |
 | `note` | Library-relative path of the paper's notes file, e.g. `notes/vaswaniAttentionNeed2017.md`. |
@@ -67,7 +68,7 @@ Legacy migration expectation:
 - `readingStatus: "tbr"` is shown as **Read next**.
 - `readingStatus: "skimmed"` is shown as **Skimming**.
 - `readingStatus: "read"` remains **Read**.
-- New captures and imports should use `readingStatus: "inbox"`.
+- New captures carry no shelf and `inbox: true`; bulk imports carry neither.
 
 ## `notes/<citationKey>.md`
 

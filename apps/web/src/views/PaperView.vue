@@ -307,8 +307,7 @@ async function removePaper() {
 
 .venue {
   margin-top: 4px;
-  font-family: var(--font-serif);
-  font-style: italic;
+  font-family: var(--font-ui);
   color: var(--text-2);
 }
 
@@ -329,9 +328,9 @@ async function removePaper() {
 
 .abstract {
   max-width: 40rem;
-  font-family: var(--font-serif);
-  font-size: calc(16px * var(--text-scale));
-  line-height: 1.75;
+  font-family: var(--font-ui);
+  font-size: calc(15.5px * var(--text-scale));
+  line-height: 1.7;
 }
 
 

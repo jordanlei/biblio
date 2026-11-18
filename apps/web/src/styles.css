@@ -11,32 +11,32 @@
   /* Set by Settings → Appearance (services/appearance.ts). */
   --text-scale: 1;
 
-  /* Warm paper, one consistent library-green accent. Every text tier meets WCAG AA on the paper
+  /* White paper and cool greys, after Fieldnotes. Every text tier meets WCAG AA on the paper
      and the sidebar (text-3 is about 5:1). */
-  --bg: #f8f6f1;
-  --surface: #fffefa;
-  --surface-2: #eeece5;
-  --surface-3: #e4e1d8;
-  --sidebar: #f1efe8;
-  --border: #dedbd2;
-  --border-strong: #c7c2b7;
-  --text: #1c1d1a;
-  --text-2: #474b45;
-  --text-3: #63675f;
-  --accent: #28624f;
-  --accent-hover: #1f5040;
-  --accent-text: #f8fffb;
-  --accent-soft: #dfece6;
-  --accent-ink: #245846;
-  --select: #e5eee9;
-  --mark: #f3dc93;
-  --danger: #a02c22;
-  --danger-soft: #f6e1dc;
-  --warn-soft: #f6ead0;
-  --warn-ink: #77520f;
-  --shadow: 0 1px 2px rgba(48, 36, 18, 0.06), 0 10px 28px rgba(48, 36, 18, 0.08);
-  --shadow-subtle: 0 8px 24px rgba(32, 34, 31, 0.045);
-  --shadow-lg: 0 28px 70px rgba(48, 36, 18, 0.24);
+  --bg: #ffffff;
+  --surface: #ffffff;
+  --surface-2: #f4f4f5;
+  --surface-3: #e9e9ec;
+  --sidebar: #f7f7f8;
+  --border: #e7e7ea;
+  --border-strong: #d2d2d8;
+  --text: #18181b;
+  --text-2: #3f3f46;
+  --text-3: #686872;
+  --accent: #23407a;
+  --accent-hover: #1b3263;
+  --accent-text: #ffffff;
+  --accent-soft: #e6ebf6;
+  --accent-ink: #23407a;
+  --select: #eef1f8;
+  --mark: #fbe7a1;
+  --danger: #b42318;
+  --danger-soft: #fdecea;
+  --warn-soft: #fbf1dc;
+  --warn-ink: #7a4f10;
+  --shadow: 0 1px 2px rgba(24, 24, 27, 0.05), 0 8px 24px rgba(24, 24, 27, 0.07);
+  --shadow-subtle: 0 6px 20px rgba(24, 24, 27, 0.04);
+  --shadow-lg: 0 24px 64px rgba(24, 24, 27, 0.18);
   --radius: 6px;
   --radius-sm: 5px;
 
@@ -54,26 +54,26 @@
 /* Dark theme: follows the system unless Settings forces light or dark. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #161411;
-    --surface: #1d1a16;
-    --surface-2: #23201b;
-    --surface-3: #2d2822;
-    --sidebar: #1b1a17;
-    --border: #312c25;
-    --border-strong: #4a4237;
-    --text: #ece5d6;
-    --text-2: #c2b9a7;
-    --text-3: #a39a8a;
-    --accent: #82bda5;
-    --accent-hover: #9bcdb8;
-    --accent-text: #102019;
-    --accent-soft: #203a31;
-    --accent-ink: #9bcdb8;
-    --select: #24352e;
+    --bg: #141416;
+    --surface: #1a1a1d;
+    --surface-2: #212125;
+    --surface-3: #2a2a2f;
+    --sidebar: #18181b;
+    --border: #2c2c31;
+    --border-strong: #45454c;
+    --text: #ececef;
+    --text-2: #c4c4cc;
+    --text-3: #9a9aa3;
+    --accent: #8fb0e8;
+    --accent-hover: #a8c2ee;
+    --accent-text: #0f1626;
+    --accent-soft: #1f2a3d;
+    --accent-ink: #a8c2ee;
+    --select: #222833;
     --mark: #5b4a17;
     --danger: #e27c70;
     --danger-soft: #3b211e;
-    --warn-soft: #3a3020;
+    --warn-soft: #33291a;
     --warn-ink: #e3c27e;
     --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 10px 28px rgba(0, 0, 0, 0.3);
     --shadow-lg: 0 28px 70px rgba(0, 0, 0, 0.55);
@@ -82,26 +82,26 @@
 }
 
 :root[data-theme="dark"] {
-  --bg: #161411;
-  --surface: #1d1a16;
-  --surface-2: #23201b;
-  --surface-3: #2d2822;
-  --sidebar: #1b1a17;
-  --border: #312c25;
-  --border-strong: #4a4237;
-  --text: #ece5d6;
-  --text-2: #c2b9a7;
-  --text-3: #a39a8a;
-  --accent: #82bda5;
-  --accent-hover: #9bcdb8;
-  --accent-text: #102019;
-  --accent-soft: #203a31;
-  --accent-ink: #9bcdb8;
-  --select: #24352e;
+  --bg: #141416;
+  --surface: #1a1a1d;
+  --surface-2: #212125;
+  --surface-3: #2a2a2f;
+  --sidebar: #18181b;
+  --border: #2c2c31;
+  --border-strong: #45454c;
+  --text: #ececef;
+  --text-2: #c4c4cc;
+  --text-3: #9a9aa3;
+  --accent: #8fb0e8;
+  --accent-hover: #a8c2ee;
+  --accent-text: #0f1626;
+  --accent-soft: #1f2a3d;
+  --accent-ink: #a8c2ee;
+  --select: #222833;
   --mark: #5b4a17;
   --danger: #e27c70;
   --danger-soft: #3b211e;
-  --warn-soft: #3a3020;
+  --warn-soft: #33291a;
   --warn-ink: #e3c27e;
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 10px 28px rgba(0, 0, 0, 0.3);
   --shadow-lg: 0 28px 70px rgba(0, 0, 0, 0.55);

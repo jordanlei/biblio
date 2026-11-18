@@ -427,7 +427,7 @@ const fmt = (n: number) => (n >= 1e6 ? `${(n / 1e6).toFixed(1)}M` : n >= 1e4 ? `
 }
 
 .people .name {
-  font-family: var(--font-serif);
+  font-family: var(--font-ui);
   font-size: calc(15.5px * var(--text-scale));
   font-weight: 600;
 }

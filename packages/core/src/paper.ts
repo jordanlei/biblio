@@ -42,6 +42,7 @@ export function buildPaper(candidate: PaperCandidate, options: { id: string; exi
     folderIds: candidate.folderIds ?? [],
     notesMarkdown: candidate.notesMarkdown ?? "",
     readingStatus: candidate.readingStatus,
+    inbox: candidate.inbox || undefined,
     savedBecause: candidate.savedBecause?.trim() || undefined,
     source: candidate.source ?? "manual",
     createdAt: options.now,

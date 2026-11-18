@@ -2,9 +2,10 @@ import type { Paper, ReadingStatus } from "@biblio/core";
 import type { LocationQuery } from "vue-router";
 import { folderDescendants, useLibrary } from "./library";
 
-export type SmartView = "all" | "recent";
+export type SmartView = "inbox" | "all" | "recent";
 
 export const smartViews: Array<{ id: SmartView; label: string; icon: string }> = [
+  { id: "inbox", label: "Inbox", icon: "inbox" },
   { id: "all", label: "All papers", icon: "library" },
   { id: "recent", label: "Recently added", icon: "clock" }
 ];
@@ -17,7 +18,10 @@ export interface ListFilters {
   status: "" | ReadingStatus;
 }
 
-/** The shelves: how much reading a paper needs. Reference is for papers kept to cite, not to read. */
+/**
+ * The shelves, all optional: most papers carry none. To Read marks what you are reading now;
+ * Reference is for papers kept to cite, not to read.
+ */
 export const readingStatuses: Array<{ id: ReadingStatus; label: string; key: string }> = [
   { id: "toRead", label: "To Read", key: "1" },
   { id: "skimming", label: "Skim", key: "2" },
@@ -86,6 +90,7 @@ export function scopeFromQuery(query: LocationQuery): Scope {
   const label = smartViews.find((v) => v.id === view)!.label;
   const since = Date.now() - RECENT_MS;
   const predicates: Record<SmartView, (p: Paper) => boolean> = {
+    inbox: (p) => Boolean(p.inbox),
     all: () => true,
     recent: (p) => Date.parse(p.createdAt) >= since
   };

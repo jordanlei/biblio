@@ -237,6 +237,8 @@ function onKey(event: KeyboardEvent) {
     toggleCheck(selected.value);
   } else if ((event.key === "0" || readingStatuses.some((r) => r.key === event.key)) && targetIds.value.length) {
     void setStatus(targetIds.value, readingStatuses.find((r) => r.key === event.key)?.id);
+  } else if (event.key === "e" && targetIds.value.length) {
+    void markDone(targetIds.value);
   } else if (event.key === "o" && selected.value) {
     openPaper(selected.value);
   } else if (event.key === "p" && selected.value?.pdf) {
@@ -264,9 +266,23 @@ onBeforeUnmount(() => observer?.disconnect());
 
 async function setStatus(ids: string[], status: Paper["readingStatus"]) {
   try {
-    for (const id of ids) await updatePaper(id, { readingStatus: status }, "Change reading status");
+    // Choosing a shelf is a decision about the paper, so it also leaves the inbox.
+    for (const id of ids) await updatePaper(id, { readingStatus: status, ...(paperById.value.get(id)?.inbox ? { inbox: undefined } : {}) }, "Change reading status");
     const label = readingStatuses.find((r) => r.id === status)?.label;
     toast(`${ids.length === 1 ? "Marked" : `Marked ${ids.length} papers`} ${label ? `“${label}”` : "unread"}.`, { action: undoAction });
+  } catch (error) {
+    toastError(error);
+  }
+}
+
+/** Take papers out of the inbox; they stay in the library, unlabeled unless you shelved them. */
+async function markDone(ids: string[]) {
+  const inInbox = ids.filter((id) => paperById.value.get(id)?.inbox);
+  if (!inInbox.length) return;
+  try {
+    for (const id of inInbox) await updatePaper(id, { inbox: undefined }, "Mark done");
+    toast(inInbox.length === 1 ? "Moved out of the inbox." : `Moved ${inInbox.length} papers out of the inbox.`, { action: undoAction });
+    checked.value = new Set();
   } catch (error) {
     toastError(error);
   }
@@ -368,6 +384,9 @@ const scopeEyebrow = computed(() => (scope.value.kind === "folder" ? "Folder" : 
             </p>
           </div>
           <span class="spacer" />
+          <button v-if="scope.id === 'inbox' && visible.length" class="btn sm" type="button" title="Move every paper shown out of the inbox" @click="markDone(visible.map((p) => p.id))">
+            <AppIcon name="check" :size="14" /> All done
+          </button>
           <button class="btn quiet icon" type="button" :disabled="!visible.length" aria-label="Export visible papers" title="Export visible papers as references.bib" @click="exportVisible">
             <AppIcon name="download" :size="15" />
           </button>
@@ -380,6 +399,7 @@ const scopeEyebrow = computed(() => (scope.value.kind === "folder" ? "Folder" : 
           </form>
           <button class="btn sm" type="button" @click="copyText(citeCommand(checkedPapers))"><AppIcon name="quote" :size="13" /> \cite</button>
           <button class="btn sm" type="button" :disabled="!!findingPdfs" @click="bulkFindPdfs"><AppIcon name="pdf" :size="13" /> {{ findingPdfs || "Find PDFs" }}</button>
+          <button v-if="checkedPapers.some((p) => p.inbox)" class="btn sm" type="button" title="Move out of the inbox (E)" @click="markDone([...checked])"><AppIcon name="check" :size="13" /> Done</button>
           <button class="btn sm" type="button" @click="downloadBibtex(checkedPapers)"><AppIcon name="download" :size="13" /> .bib</button>
           <button class="btn sm danger" type="button" @click="removePapers([...checked])"><AppIcon name="trash" :size="13" /> Delete</button>
           <span class="spacer" />
@@ -449,6 +469,10 @@ const scopeEyebrow = computed(() => (scope.value.kind === "folder" ? "Folder" : 
             <button class="btn primary" type="button" @click="openAdd('search')"><AppIcon name="plus" /> Add papers</button>
           </div>
         </template>
+        <template v-else-if="scope.id === 'inbox'">
+          <h2>Inbox clear</h2>
+          <p>New papers land here until you look at them. Press <kbd>E</kbd> to mark one done, or a number key to shelve it.</p>
+        </template>
         <template v-else>
           <h2>Nothing here</h2>
           <p>No papers in “{{ scope.label }}” right now.</p>
@@ -495,6 +519,7 @@ const scopeEyebrow = computed(() => (scope.value.kind === "folder" ? "Folder" : 
             </div>
             <div class="side">
               <span class="marks">
+                <span v-if="paper.inbox && scope.id !== 'inbox'" class="new-dot" title="In the inbox" />
                 <span v-if="normalizeReadingStatus(paper.readingStatus)" class="status-mark" :class="normalizeReadingStatus(paper.readingStatus)">{{ statusLabel(paper) }}</span>
                 <AppIcon v-if="paper.notesMarkdown?.trim()" name="note" :size="14" />
                 <AppIcon v-if="paper.pdf" name="pdf" :size="14" class="has-pdf" />
@@ -608,6 +633,13 @@ const scopeEyebrow = computed(() => (scope.value.kind === "folder" ? "Folder" : 
   width: 1px;
   margin: 4px 4px;
   background: var(--border);
+}
+
+.new-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
 }
 
 .status-mark {
@@ -752,7 +784,7 @@ const scopeEyebrow = computed(() => (scope.value.kind === "folder" ? "Folder" : 
   width: 130px;
 }
 
-/* Bibliography-style entries: year in the margin, title in the serif, a hairline between. */
+/* Bibliography-style entries: year in the margin, a hairline between. */
 .papers {
   margin: 12px -12px 0;
   padding: 0;
@@ -803,17 +835,17 @@ const scopeEyebrow = computed(() => (scope.value.kind === "folder" ? "Folder" : 
 }
 
 .year {
-  font-family: var(--font-serif);
+  font-family: var(--font-ui);
   font-size: calc(14px * var(--text-scale));
   color: var(--text-3);
   text-align: right;
 }
 
 .title {
-  font-family: var(--font-serif);
-  font-size: calc(17px * var(--text-scale));
-  font-weight: 550;
-  line-height: 1.35;
+  font-family: var(--font-ui);
+  font-size: calc(15.5px * var(--text-scale));
+  font-weight: 600;
+  line-height: 1.4;
   letter-spacing: -0.005em;
   color: var(--text);
 }
@@ -828,8 +860,7 @@ const scopeEyebrow = computed(() => (scope.value.kind === "folder" ? "Folder" : 
 }
 
 .venue {
-  font-family: var(--font-serif);
-  font-style: italic;
+  font-family: var(--font-ui);
   color: var(--text-3);
   overflow: hidden;
   text-overflow: ellipsis;

@@ -65,7 +65,7 @@ export const textSizes = [
   { id: "larger", label: "Larger", scale: 1.18 }
 ];
 
-export const DEFAULT_APPEARANCE: Appearance = { theme: "system", accent: "oxblood", readingFont: "literata", uiFont: "inter", textSize: "default" };
+export const DEFAULT_APPEARANCE: Appearance = { theme: "system", accent: "ink", readingFont: "literata", uiFont: "inter", textSize: "default" };
 
 const STORAGE_KEY = "biblio.appearance";
 

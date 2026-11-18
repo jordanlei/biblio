@@ -47,7 +47,7 @@ function toCandidate(c: CapturedPaper): PaperCandidate {
     abstract: c.abstract || undefined,
     url: c.url,
     openAccessPdfUrl: c.pdfUrl || undefined,
-    readingStatus: "toRead",
+    inbox: true,
     source: "extension",
     folderIds: []
   };

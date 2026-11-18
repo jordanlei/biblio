@@ -41,7 +41,7 @@ const entries = computed(() => (backlinkContexts.value.get(props.paper.citationK
 
 .title {
   color: var(--text);
-  font-family: var(--font-serif);
+  font-family: var(--font-ui);
 }
 
 .kind {

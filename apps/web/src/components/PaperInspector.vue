@@ -59,6 +59,7 @@ function followCite(event: MouseEvent) {
     <header class="ins-head">
       <p class="eyebrow">{{ paperTypeLabels[paper.type] }}<template v-if="paper.issued?.year"> · {{ paper.issued.year }}</template></p>
       <span class="spacer" />
+      <button v-if="paper.inbox" class="btn sm" type="button" title="Move out of the inbox (E)" @click="updatePaper(paper.id, { inbox: undefined }, 'Mark done').catch(toastError)"><AppIcon name="check" :size="13" /> Done</button>
       <RouterLink class="btn sm" :to="`/paper/${paper.id}`">Open <AppIcon name="chevron-right" :size="13" /></RouterLink>
       <button class="btn quiet icon" type="button" aria-label="Copy BibTeX" title="Copy BibTeX" @click="copyText(paperToBibtex(paper), 'Copied BibTeX')"><AppIcon name="copy" :size="14" /></button>
       <button class="btn quiet icon" type="button" aria-label="Close preview" @click="emit('close')"><AppIcon name="x" /></button>
@@ -168,8 +169,7 @@ function followCite(event: MouseEvent) {
 
 .venue {
   margin-top: 2px;
-  font-family: var(--font-serif);
-  font-style: italic;
+  font-family: var(--font-ui);
   font-size: calc(13.5px * var(--text-scale));
   color: var(--text-2);
 }
@@ -214,7 +214,7 @@ function followCite(event: MouseEvent) {
 }
 
 .abstract {
-  font-family: var(--font-serif);
+  font-family: var(--font-ui);
   font-size: calc(14.5px * var(--text-scale));
   line-height: 1.65;
   color: var(--text);

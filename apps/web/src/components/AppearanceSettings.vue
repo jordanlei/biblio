@@ -66,8 +66,8 @@ onMounted(() => {
       </div>
 
       <div class="setting">
-        <p class="label">Display &amp; reading font <span class="faint">— headings, paper titles, and abstracts</span></p>
-        <div class="fonts" role="radiogroup" aria-label="Reading font">
+        <p class="label">Title font <span class="faint">— page headings and paper titles</span></p>
+        <div class="fonts" role="radiogroup" aria-label="Title font">
           <button
             v-for="f in readingFonts"
             :key="f.id"
@@ -85,7 +85,7 @@ onMounted(() => {
       </div>
 
       <div class="setting">
-        <p class="label">Interface font</p>
+        <p class="label">Text font <span class="faint">— everything you read: abstracts, notes, lists</span></p>
         <div class="fonts" role="radiogroup" aria-label="Interface font">
           <button
             v-for="f in uiFonts"

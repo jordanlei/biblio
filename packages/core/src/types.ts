@@ -72,6 +72,8 @@ export interface Paper {
   folderIds: string[];
   notesMarkdown: string;
   readingStatus?: ReadingStatus;
+  /** Newly added and not yet looked at. Cleared when the paper is triaged. */
+  inbox?: boolean;
   savedBecause?: string;
   pdf?: PaperPdf;
   source: "extension" | "semantic-scholar" | "openalex" | "bibtex" | "zotero" | "manual";
@@ -133,6 +135,7 @@ export interface PaperCandidate {
   folderIds?: string[];
   notesMarkdown?: string;
   readingStatus?: ReadingStatus;
+  inbox?: boolean;
   savedBecause?: string;
   source?: Paper["source"];
 }

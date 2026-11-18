@@ -11,6 +11,7 @@ const shortcuts: Array<[string[], string]> = [
   [["Space"], "Select for bulk actions"],
   [["1", "2", "3", "4"], "To Read · Skim · Read · Reference"],
   [["0"], "Clear reading status"],
+  [["E"], "Mark done: move out of the inbox"],
   [["⌫"], "Delete the selected paper, collection, or note"],
   [["⌘", "Z"], "Undo"],
   [["A"], "Add papers"]

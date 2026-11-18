@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { buildPaper, exportBibtex, extractCitationLinkContexts, findExistingPaper, generateCitationKey, normalizeDoi, parseBibtex, replaceCitationKey } from "./index";
+import { buildPaper, cslToPaper, exportBibtex, extractCitationLinkContexts, findExistingPaper, generateCitationKey, normalizeDoi, paperToCsl, parseBibtex, replaceCitationKey } from "./index";
 import type { Paper } from "./types";
 
 const basePaper: Paper = {
@@ -56,6 +56,14 @@ describe("core", () => {
     );
     expect(paper.readingStatus).toBe("inbox");
     expect(paper.savedBecause).toBe("Compare against baseline.");
+  });
+
+  it("keeps the inbox flag through the library file", () => {
+    const paper = buildPaper({ title: "Just Captured", inbox: true }, { id: "p3", existingKeys: [], now: "2026-01-01T00:00:00.000Z" });
+    expect(paper.inbox).toBe(true);
+    expect(cslToPaper(paperToCsl(paper), "2026-01-02T00:00:00.000Z").paper.inbox).toBe(true);
+    const triaged = { ...paper, inbox: undefined };
+    expect(cslToPaper(paperToCsl(triaged), "2026-01-02T00:00:00.000Z").paper.inbox).toBeUndefined();
   });
 });
 

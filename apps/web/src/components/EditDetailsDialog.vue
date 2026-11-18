@@ -121,7 +121,7 @@ async function save() {
         <label class="field">PMID <input v-model="form.pmid" class="input mono" /></label>
       </div>
       <label class="field">URL <input v-model="form.url" class="input" /></label>
-      <label class="field">Abstract <textarea v-model="form.abstract" class="textarea serif" rows="5" /></label>
+      <label class="field">Abstract <textarea v-model="form.abstract" class="textarea" rows="5" /></label>
       <label class="field">Citation key
         <input v-model="form.citationKey" class="input mono" :aria-invalid="Boolean(keyError)" />
         <span v-if="keyError" class="err">{{ keyError }}</span>

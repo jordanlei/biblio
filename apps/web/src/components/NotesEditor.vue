@@ -336,7 +336,7 @@ function onKeydown(event: KeyboardEvent) {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-family: var(--font-serif);
+  font-family: var(--font-ui);
   font-size: calc(13.5px * var(--text-scale));
   font-weight: 550;
 }

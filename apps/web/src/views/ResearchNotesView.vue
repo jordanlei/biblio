@@ -277,7 +277,7 @@ onBeforeUnmount(() => window.removeEventListener("keydown", onKey));
 
 .paper-title {
   color: var(--text);
-  font-family: var(--font-serif);
+  font-family: var(--font-ui);
   font-weight: 600;
 }
 

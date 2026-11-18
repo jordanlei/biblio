@@ -42,6 +42,8 @@ export interface BiblioFields {
   tags: string[];
   collections: string[];
   readingStatus?: ReadingStatus;
+  /** True while the paper is in the inbox (added, not yet triaged). */
+  inbox?: boolean;
   savedBecause?: string;
   addedAt: string;
   /** Library-relative paths. */
@@ -167,6 +169,7 @@ export function paperToCsl(paper: Paper, paths: PaperPaths = {}): CslItem {
         tags: paper.tags,
         collections: paper.folderIds,
         readingStatus: paper.readingStatus,
+        inbox: paper.inbox || undefined,
         savedBecause: paper.savedBecause,
         addedAt: paper.createdAt,
         note: paths.note,
@@ -223,6 +226,7 @@ export function cslToPaper(item: CslItem, now: string): { paper: Paper; paths: P
     folderIds: b?.collections ?? [],
     notesMarkdown: "",
     readingStatus: b?.readingStatus,
+    inbox: b?.inbox || undefined,
     savedBecause: b?.savedBecause,
     source: b?.source ?? "manual",
     sourceIdentifiers: b?.sourceIdentifiers,

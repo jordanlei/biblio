@@ -20,7 +20,7 @@ const busy = ref(false);
 const pdfState = ref<"idle" | "saving" | "saved" | "failed">("idle");
 const pdfStep = ref("");
 const expanded = ref(false);
-const shelf = ref("toRead");
+const shelf = ref("");
 const savedBecause = ref("");
 
 const added = computed(() => (addedId.value ? paperById.value.get(addedId.value) ?? null : null));
@@ -34,7 +34,7 @@ const authors = computed(() => {
 async function add() {
   busy.value = true;
   try {
-    const paper = await addPaper({ ...props.candidate, folderIds: [], readingStatus: (shelf.value || undefined) as Paper["readingStatus"], savedBecause: savedBecause.value });
+    const paper = await addPaper({ ...props.candidate, folderIds: [], readingStatus: (shelf.value || undefined) as Paper["readingStatus"], inbox: !shelf.value || undefined, savedBecause: savedBecause.value });
     addedId.value = paper.id;
     emit("added", paper);
     // Grab the PDF straight away when there's somewhere to put it.
@@ -85,8 +85,8 @@ function open(id: string) {
         <label class="small">
           Shelf
           <select v-model="shelf" class="select sm">
-            <option v-for="s in readingStatuses" :key="s.id" :value="s.id">{{ s.label }}</option>
             <option value="">No shelf</option>
+            <option v-for="s in readingStatuses" :key="s.id" :value="s.id">{{ s.label }}</option>
           </select>
         </label>
         <label class="small reason">
@@ -133,7 +133,7 @@ function open(id: string) {
 }
 
 .title {
-  font-family: var(--font-serif);
+  font-family: var(--font-ui);
   font-size: calc(15.5px * var(--text-scale));
   font-weight: 600;
   line-height: 1.35;
@@ -147,7 +147,7 @@ function open(id: string) {
 
 .abstract {
   margin-top: 6px;
-  font-family: var(--font-serif);
+  font-family: var(--font-ui);
   font-size: calc(13.5px * var(--text-scale));
   line-height: 1.55;
   color: var(--text-2);
