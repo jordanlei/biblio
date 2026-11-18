@@ -19,30 +19,46 @@ export interface ListFilters {
 }
 
 /**
- * The shelves, all optional: most papers carry none. To Read marks what you are reading now;
- * Reference is for papers kept to cite, not to read.
+ * Reading states beyond the inbox. Unmarked is the default: a paper you keep for reference.
+ * Inbox (a flag, not a status) is the to-read pile; Skim and Read record how far you got.
  */
 export const readingStatuses: Array<{ id: ReadingStatus; label: string; key: string }> = [
-  { id: "toRead", label: "To Read", key: "1" },
   { id: "skimming", label: "Skim", key: "2" },
-  { id: "read", label: "Read", key: "3" },
-  { id: "reference", label: "Reference", key: "4" }
+  { id: "read", label: "Read", key: "3" }
 ];
 
-/** Older statuses map onto the shelves; a library written before the change still reads cleanly. */
+/** Older statuses meaning "still to read" now place the paper in the inbox. */
+const toReadStatuses = new Set<ReadingStatus>(["toRead", "inbox", "readNext", "tbr"]);
+
+/** Older statuses map onto Skim/Read; "to read" ones go to the inbox, Reference is the unmarked default. */
 const legacyReadingStatus: Partial<Record<ReadingStatus, ReadingStatus | undefined>> = {
-  inbox: "toRead",
-  readNext: "toRead",
-  tbr: "toRead",
   reading: "skimming",
-  skimmed: "skimming",
-  parked: undefined
+  skimmed: "skimming"
 };
 
-/** The shelf a stored value belongs to now (undefined = no shelf). */
+/** The reading state a stored value belongs to now (undefined = unmarked). */
 export function normalizeReadingStatus(status?: ReadingStatus): ReadingStatus | undefined {
   if (!status) return undefined;
   return readingStatuses.some((r) => r.id === status) ? status : legacyReadingStatus[status];
+}
+
+/** In the inbox: flagged on arrival, or marked "to read" by an older version. */
+export function inInbox(paper: Pick<Paper, "inbox" | "readingStatus">): boolean {
+  return Boolean(paper.inbox) || (paper.readingStatus ? toReadStatuses.has(paper.readingStatus) : false);
+}
+
+export type Shelf = "inbox" | "skimming" | "read";
+
+/** The three things a paper can be marked as, with their keys; anything else is unmarked. */
+export const shelves: Array<{ id: Shelf; label: string; key: string }> = [{ id: "inbox", label: "Inbox", key: "1" }, ...(readingStatuses as Array<{ id: Shelf; label: string; key: string }>)];
+
+export function shelfOf(paper: Paper): Shelf | undefined {
+  return inInbox(paper) ? "inbox" : (normalizeReadingStatus(paper.readingStatus) as Shelf | undefined);
+}
+
+/** The write that puts a paper on a shelf (or unmarks it), clearing older values on the way. */
+export function shelfPatch(shelf: Shelf | undefined): Partial<Paper> {
+  return shelf === "inbox" ? { inbox: true, readingStatus: undefined } : { inbox: undefined, readingStatus: shelf };
 }
 
 export function readingStatusLabel(status?: ReadingStatus) {
@@ -90,7 +106,7 @@ export function scopeFromQuery(query: LocationQuery): Scope {
   const label = smartViews.find((v) => v.id === view)!.label;
   const since = Date.now() - RECENT_MS;
   const predicates: Record<SmartView, (p: Paper) => boolean> = {
-    inbox: (p) => Boolean(p.inbox),
+    inbox: (p) => inInbox(p),
     all: () => true,
     recent: (p) => Date.parse(p.createdAt) >= since
   };

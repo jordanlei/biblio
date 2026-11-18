@@ -23,6 +23,8 @@ export interface UserProfile {
   onboardingCompleted: boolean;
   /** Display preferences (see services/appearance.ts). */
   appearance?: Partial<import("./appearance").Appearance>;
+  /** Followed authors and topics, and what they turned up (see services/alerts.ts). */
+  alerts?: import("./alerts").AlertsState;
   createdAt: string;
   updatedAt: string;
 }
@@ -63,6 +65,7 @@ async function ensureUserProfile(next: User): Promise<UserProfile> {
     driveRootFolderName: current.driveRootFolderName ?? null,
     onboardingCompleted: current.onboardingCompleted ?? false,
     ...(current.appearance ? { appearance: current.appearance } : {}),
+    ...(current.alerts ? { alerts: current.alerts } : {}),
     createdAt: current.createdAt ?? now(),
     updatedAt: now()
   };

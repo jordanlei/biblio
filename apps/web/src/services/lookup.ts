@@ -216,6 +216,16 @@ export async function searchWorks(query: WorkQuery, signal?: AbortSignal): Promi
   };
 }
 
+/** The newest works by an author (OpenAlex author ID) or about a topic, published on or after `since` (YYYY-MM-DD). */
+export async function newWorks(follow: { kind: "author" | "topic"; query: string }, since: string, signal?: AbortSignal): Promise<SearchHit[]> {
+  const match = follow.kind === "author" ? `authorships.author.id:${follow.query}` : `title_and_abstract.search:${follow.query.replace(/[,|]/g, " ")}`;
+  const data = await getJson<{ results: OpenAlexWork[] }>(
+    worksUrl({ filter: `${match},from_publication_date:${since}`, sort: "publication_date:desc", "per-page": "25" }),
+    signal
+  );
+  return data.results.map((work) => ({ id: work.id.replace("https://openalex.org/", ""), candidate: fromOpenAlex(work), citedBy: work.cited_by_count ?? 0 }));
+}
+
 /** People matching a name, most-cited first. */
 export async function searchAuthors(name: string, signal?: AbortSignal): Promise<AuthorHit[]> {
   const url = new URL(`${OPENALEX}/authors`);

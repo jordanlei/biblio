@@ -10,6 +10,7 @@ import { lazyDialogs } from "./lazy";
 
 
 import ToastStack from "./components/ToastStack.vue";
+import { checkAlerts } from "./services/alerts";
 import { useLibrary } from "./services/library/library";
 import { updateProfile, useSession } from "./services/session";
 import { isTypingTarget, openAdd, runUndo, toastError, ui } from "./services/ui";
@@ -18,6 +19,7 @@ const AddPapersDialog = defineAsyncComponent(lazyDialogs.add);
 const HelpDialog = defineAsyncComponent(lazyDialogs.help);
 const GuidedTour = defineAsyncComponent(lazyDialogs.tour);
 const CommandPalette = defineAsyncComponent(lazyDialogs.palette);
+const DuplicatesDialog = defineAsyncComponent(lazyDialogs.duplicates);
 
 const route = useRoute();
 const drawerOpen = ref(false);
@@ -31,6 +33,8 @@ function endTour() {
   updateProfile({ onboardingCompleted: true }).catch(toastError);
 }
 watch(() => route.fullPath, () => (drawerOpen.value = false));
+// Followed authors and topics: look for new work once the library is loaded (throttled inside).
+watch(loaded, (ready) => ready && void checkAlerts().catch(() => {}), { immediate: true });
 
 function onKey(event: KeyboardEvent) {
   if (route.meta.public) return;
@@ -47,7 +51,7 @@ function onKey(event: KeyboardEvent) {
     return;
   }
   if (event.metaKey || event.ctrlKey || event.altKey) return;
-  if (ui.addOpen || ui.helpOpen || document.querySelector(".overlay, .tour")) return;
+  if (ui.addOpen || ui.helpOpen || ui.duplicatesOpen || document.querySelector(".overlay, .tour")) return;
   if (event.key === "a") {
     event.preventDefault();
     openAdd("search");
@@ -81,6 +85,7 @@ onBeforeUnmount(() => window.removeEventListener("keydown", onKey));
     <GuidedTour v-if="showTour" @done="endTour" />
     <ConfirmDialog />
     <CommandPalette v-if="ui.paletteOpen" @close="ui.paletteOpen = false" />
+    <DuplicatesDialog v-if="ui.duplicatesOpen" @close="ui.duplicatesOpen = false" />
   </div>
   <ToastStack />
 </template>

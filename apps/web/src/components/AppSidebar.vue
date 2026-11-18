@@ -4,6 +4,7 @@ import { RouterLink, useRoute, useRouter } from "vue-router";
 import { usingEmulators } from "../firebase";
 import { createFolder, deleteFolder, folderDescendants, setPaperFolders, useLibrary } from "../services/library/library";
 import { customNavItems } from "../custom/index";
+import { alerts } from "../services/alerts";
 import { scopeFromQuery, smartViews } from "../services/library/scope";
 import { signOut, useSession } from "../services/session";
 import { askConfirm, isTypingTarget, openAdd, toast, toastError, ui, undoAction } from "../services/ui";
@@ -19,6 +20,9 @@ const { papers, folders, tagCounts, researchNotes } = useLibrary();
 
 const showAllTags = ref(false);
 const accountOpen = ref(false);
+// The Google account picture; falls back to an initial if it can't load.
+const photo = computed(() => session.user.value?.photoURL ?? session.profile.value?.photoURL ?? null);
+const photoFailed = ref(false);
 const collapsedFolders = ref(new Set<string>());
 const dropFolderId = ref<string | null>(null);
 const newFolderName = ref("");
@@ -33,6 +37,7 @@ const activeFolderId = computed(() => (route.path === "/library" && typeof route
 const viewCounts = computed(() => {
   const counts: Record<string, number> = {};
   for (const view of smartViews) counts[view.id] = papers.value.filter(scopeFromQuery({ view: view.id }).matches).length;
+  counts.inbox += alerts.value.suggestions.length;
   return counts;
 });
 
@@ -157,11 +162,11 @@ onBeforeUnmount(() => window.removeEventListener("keydown", onKey, true));
     <div class="brand-row">
       <RouterLink to="/library" class="brand"><BrandMark :size="26" /> Biblio</RouterLink>
       <span v-if="usingEmulators" class="chip accent" title="Firebase emulators + mock Drive">Local</span>
+      <span class="spacer" />
+      <button class="btn quiet icon add-btn" data-tour="add" type="button" aria-label="Add papers" title="Add papers (A)" @click="openAdd('search')">
+        <AppIcon name="plus" :size="16" />
+      </button>
     </div>
-
-    <button class="btn primary block add-btn" data-tour="add" type="button" @click="openAdd('search')">
-      <AppIcon name="plus" /> Add papers <span class="spacer" /><kbd class="kbd-on-accent">A</kbd>
-    </button>
 
     <button class="jump" type="button" @click="ui.paletteOpen = true">
       <AppIcon name="search" :size="14" /> <span>Jump to…</span> <span class="spacer" /> <kbd>⌘K</kbd>
@@ -246,11 +251,16 @@ onBeforeUnmount(() => window.removeEventListener("keydown", onKey, true));
     <div class="sidebar-foot">
       <SyncIndicator />
       <div class="account">
-        <button class="nav-item" :class="{ active: route.path === '/settings' }" type="button" aria-haspopup="menu" :aria-expanded="accountOpen" @click="accountOpen = !accountOpen">
-          <span class="avatar">{{ (session.user.value?.displayName ?? session.user.value?.email ?? "?").slice(0, 1).toUpperCase() }}</span>
-          <span class="label">{{ session.user.value?.displayName ?? session.user.value?.email }}</span>
-          <AppIcon name="more" />
-        </button>
+        <div class="account-row">
+          <RouterLink class="nav-item account-link" :class="{ active: route.path === '/settings' }" to="/settings" title="Settings">
+            <img v-if="photo && !photoFailed" class="avatar" :src="photo" alt="" referrerpolicy="no-referrer" @error="photoFailed = true" />
+            <span v-else class="avatar">{{ (session.user.value?.displayName ?? session.user.value?.email ?? "?").slice(0, 1).toUpperCase() }}</span>
+            <span class="label">{{ session.user.value?.displayName ?? session.user.value?.email }}</span>
+          </RouterLink>
+          <button class="btn quiet icon" type="button" aria-label="Account menu" aria-haspopup="menu" :aria-expanded="accountOpen" @click="accountOpen = !accountOpen">
+            <AppIcon name="more" />
+          </button>
+        </div>
         <div v-if="accountOpen" class="account-menu card" role="menu">
           <p class="small faint">{{ session.user.value?.email }}</p>
           <RouterLink class="nav-item" role="menuitem" to="/settings" @click="accountOpen = false"><AppIcon name="settings" /> Settings</RouterLink>
@@ -315,8 +325,21 @@ onBeforeUnmount(() => window.removeEventListener("keydown", onKey, true));
 }
 
 .add-btn {
-  justify-content: flex-start;
-  height: 36px;
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--border-strong);
+  color: var(--text);
+}
+
+.account-row {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.account-link {
+  flex: 1;
+  min-width: 0;
 }
 
 .kbd-on-accent {
@@ -545,6 +568,8 @@ onBeforeUnmount(() => window.removeEventListener("keydown", onKey, true));
 }
 
 .avatar {
+  flex: none;
+  object-fit: cover;
   display: grid;
   place-items: center;
   width: 22px;

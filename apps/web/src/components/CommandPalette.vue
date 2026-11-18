@@ -33,8 +33,8 @@ const actions: Item[] = [
   { id: "a:all", group: "Actions", icon: "library", label: "All papers", run: go("/library") },
   { id: "a:recent", group: "Actions", icon: "clock", label: "Recently added", run: go({ path: "/library", query: { view: "recent" } }) },
   { id: "a:inbox", group: "Actions", icon: "inbox", label: "Inbox", run: go({ path: "/library", query: { view: "inbox" } }) },
-  { id: "a:to-read", group: "Actions", icon: "library", label: "To Read", run: go({ path: "/library", query: { status: "toRead" } }) },
   { id: "a:research-notes", group: "Actions", icon: "note", label: "Research notes", run: go("/research-notes") },
+  { id: "a:duplicates", group: "Actions", icon: "copy", label: "Find duplicates", run: () => (ui.duplicatesOpen = true) },
   { id: "a:export", group: "Actions", icon: "download", label: "Export references.bib", run: () => downloadBibtex(papers.value) },
   { id: "a:settings", group: "Actions", icon: "settings", label: "Settings", run: go("/settings") },
   { id: "a:help", group: "Actions", icon: "help", label: "Keyboard shortcuts", detail: "?", run: () => (ui.helpOpen = true) }

@@ -3,10 +3,13 @@ import { paperToBibtex, type Paper } from "@biblio/core";
 import { computed, ref, watch } from "vue";
 import { RouterLink, useRouter } from "vue-router";
 import { creatorsToText, paperTypeLabels, updatePaper, useLibrary } from "../services/library/library";
+import { duplicateGroupOf } from "../services/library/merge";
 import { renderNotes } from "../services/library/notes";
-import { copyText, toastError } from "../services/ui";
+import { inInbox, shelfPatch } from "../services/library/scope";
+import { copyText, toastError, ui } from "../services/ui";
 import AppIcon from "./AppIcon.vue";
 import BacklinkList from "./BacklinkList.vue";
+import CitationLinks from "./CitationLinks.vue";
 import NotesEditor from "./NotesEditor.vue";
 import PdfPanel from "./PdfPanel.vue";
 import StatusControl from "./StatusControl.vue";
@@ -38,6 +41,7 @@ const venue = computed(() => {
   const parts = [p.containerTitle, p.volume && `${p.volume}${p.issue ? `(${p.issue})` : ""}`, p.pages && `pp. ${p.pages}`].filter(Boolean);
   return parts.join(", ");
 });
+const duplicate = computed(() => duplicateGroupOf(props.paper.id)?.papers.find((p) => p.id !== props.paper.id));
 const notesHtml = computed(() => renderNotes(props.paper.notesMarkdown, paperByKey.value));
 const mentionedIn = computed(() => (backlinkContexts.value.get(props.paper.citationKey) ?? []).filter((entry) => entry.sourceId !== props.paper.id));
 
@@ -59,7 +63,7 @@ function followCite(event: MouseEvent) {
     <header class="ins-head">
       <p class="eyebrow">{{ paperTypeLabels[paper.type] }}<template v-if="paper.issued?.year"> · {{ paper.issued.year }}</template></p>
       <span class="spacer" />
-      <button v-if="paper.inbox" class="btn sm" type="button" title="Move out of the inbox (E)" @click="updatePaper(paper.id, { inbox: undefined }, 'Mark done').catch(toastError)"><AppIcon name="check" :size="13" /> Done</button>
+      <button v-if="inInbox(paper)" class="btn sm" type="button" title="Move out of the inbox (E)" @click="updatePaper(paper.id, shelfPatch(undefined), 'Mark done').catch(toastError)"><AppIcon name="check" :size="13" /> Done</button>
       <RouterLink class="btn sm" :to="`/paper/${paper.id}`">Open <AppIcon name="chevron-right" :size="13" /></RouterLink>
       <button class="btn quiet icon" type="button" aria-label="Copy BibTeX" title="Copy BibTeX" @click="copyText(paperToBibtex(paper), 'Copied BibTeX')"><AppIcon name="copy" :size="14" /></button>
       <button class="btn quiet icon" type="button" aria-label="Close preview" @click="emit('close')"><AppIcon name="x" /></button>
@@ -70,6 +74,10 @@ function followCite(event: MouseEvent) {
       <h2 class="title">{{ paper.title }}</h2>
       <p class="authors">{{ authors || "Unknown author" }}</p>
       <p v-if="venue" class="venue">{{ venue }}</p>
+      <p v-if="duplicate" class="notice small">
+        Also in your library as “{{ duplicate.title }}” ({{ duplicate.issued?.year ?? "n.d." }}).
+        <button class="link-btn" type="button" @click="ui.duplicatesOpen = true">Review and merge</button>
+      </p>
 
       <div class="ids">
         <a v-if="paper.doi" :href="`https://doi.org/${paper.doi}`" target="_blank" rel="noopener" class="chip">DOI <AppIcon name="external" :size="11" /></a>
@@ -117,6 +125,11 @@ function followCite(event: MouseEvent) {
       <section v-if="mentionedIn.length" class="block">
         <p class="section-label">Mentioned in notes</p>
         <BacklinkList :paper="paper" compact />
+      </section>
+
+      <section class="block">
+        <p class="section-label">Citations</p>
+        <CitationLinks :paper="paper" />
       </section>
     </div>
   </aside>

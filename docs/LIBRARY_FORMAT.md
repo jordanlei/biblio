@@ -8,6 +8,8 @@ A Biblio library is an ordinary folder (today: in the user's Google Drive). Ever
 ├── biblio.json   manifest: format id, version, collections (folders)
 ├── library.json       all papers, as a CSL-JSON array
 ├── references.bib     the same papers as BibTeX (derived convenience copy)
+├── bib/
+│   └── <folder>.bib   each folder's papers, subfolders included, as BibTeX (derived)
 ├── notes/
 │   ├── <citationKey>.md   one Markdown file per paper that has notes
 │   └── <title>.md         freeform notes that link papers with @[key]
@@ -53,7 +55,7 @@ A JSON array of [CSL-JSON](https://citeproc-js.readthedocs.io/en/latest/csl-json
 | `type` | Biblio's paper type (`article`, `conferencePaper`, `preprint`, `book`, `bookChapter`, `thesis`, `report`, `other`). |
 | `tags` | Array of tags. |
 | `collections` | Array of collection ids from `biblio.json`. |
-| `readingStatus` | Exclusive attention shelf: `toRead`, `skimming`, `read`, or `reference` (kept to cite, not to read). Absent means no shelf, which is the usual case: `toRead` marks what is being read now. Older values (`inbox`, `readNext`, `tbr`, `reading`, `skimmed`, `parked`) are still accepted and read as the nearest shelf. |
+| `readingStatus` | How far the paper has been read: `skimming` or `read`. Absent is the usual case: a paper kept for reference. Older `toRead`, `inbox`, `readNext` and `tbr` are read as being in the inbox, `reference` and `parked` as absent. Older values (`inbox`, `readNext`, `tbr`, `reading`, `skimmed`, `parked`) are still accepted and read as the nearest shelf. |
 | `inbox` | `true` while the paper is newly added and not yet looked at; absent once it is marked done or shelved. Single adds and captures set it; bulk BibTeX imports do not. |
 | `savedBecause` | Short user-entered reason for keeping the paper. |
 | `addedAt` | ISO 8601 timestamp the paper was added. |
@@ -116,6 +118,11 @@ Plain PDFs. `custom.biblio.pdf` links a paper to its file. Files are named once 
 ## `references.bib`
 
 The library as BibTeX with the same citation keys, regenerated whenever the library changes. It is a convenience copy; `library.json` is authoritative.
+
+
+## `bib/<folder>.bib`
+
+One BibTeX file per folder that holds papers, including papers in its subfolders, named after the folder (`safeFileName`; a clash gets `_2`). Regenerated when the folder's papers change, renamed with the folder, and removed when it empties. Derived: never read back.
 
 ## Rules for writers
 

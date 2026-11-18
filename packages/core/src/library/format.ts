@@ -21,6 +21,8 @@ export const LIBRARY_PATHS = {
   manifest: "biblio.json",
   library: "library.json",
   bibtex: "references.bib",
+  /** One BibTeX file per folder (subfolders included), regenerated like references.bib. */
+  bibDir: "bib",
   notesDir: "notes",
   papersDir: "papers"
 } as const;
@@ -384,6 +386,35 @@ export function serializeLibrary(papers: Paper[], folders: Folder[], pathsFor: (
   };
 }
 
+/**
+ * One BibTeX file per folder that holds papers, subfolders included, so a writing project can cite
+ * just its own references. Named after the folder; a clash gets a number. Deterministic.
+ */
+export function folderBibliographies(papers: Paper[], folders: Folder[]): Array<{ folderId: string; path: string; bibtex: string }> {
+  const children = new Map<string, Folder[]>();
+  for (const folder of folders) if (folder.parentId) children.set(folder.parentId, [...(children.get(folder.parentId) ?? []), folder]);
+  const subtree = (id: string, seen = new Set<string>()): Set<string> => {
+    if (seen.has(id)) return seen;
+    seen.add(id);
+    for (const child of children.get(id) ?? []) subtree(child.id, seen);
+    return seen;
+  };
+  const sorted = [...papers].sort((a, b) => a.citationKey.localeCompare(b.citationKey) || a.id.localeCompare(b.id));
+  const used = new Set<string>();
+  const out: Array<{ folderId: string; path: string; bibtex: string }> = [];
+  for (const folder of [...folders].sort((a, b) => a.name.localeCompare(b.name) || a.id.localeCompare(b.id))) {
+    const ids = subtree(folder.id);
+    const inFolder = sorted.filter((p) => p.folderIds.some((id) => ids.has(id)));
+    if (!inFolder.length) continue;
+    const base = safeFileName(folder.name);
+    let name = base;
+    for (let n = 2; used.has(name.toLowerCase()); n += 1) name = `${base}_${n}`;
+    used.add(name.toLowerCase());
+    out.push({ folderId: folder.id, path: `${LIBRARY_PATHS.bibDir}/${name}.bib`, bibtex: exportBibtex(inFolder) });
+  }
+  return out;
+}
+
 export interface ParsedLibrary {
   papers: Paper[];
   folders: Folder[];
@@ -426,6 +457,7 @@ everything here is plain files you can open, copy, back up, or use with other to
 | \`research-notes/\` | Freeform notes (questions, projects, drafts), one Markdown file each. Add your own .md files here and they appear in Biblio. |
 | \`library.json\` | Every paper's citation metadata as **CSL-JSON** (works with pandoc, Zotero, citeproc). Biblio's own fields — tags, folders, shelf/status, saved reason, which note and PDF belong to the paper — are under \`custom.biblio\`. |
 | \`references.bib\` | The same library as BibTeX, regenerated automatically. |
+| \`bib/\` | One BibTeX file per folder (subfolders included), for a paper or project that cites only its own references. |
 | \`biblio.json\` | Format name and version, and folders (collections). |
 
 Links to papers are written in any note as \`@[citationKey]\`.

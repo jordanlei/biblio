@@ -15,6 +15,7 @@ export const ui = reactive({
   addTab: "search" as AddTab,
   helpOpen: false,
   paletteOpen: false,
+  duplicatesOpen: false,
   toasts: [] as Toast[],
   /** Ordered paper IDs of the library list the user last looked at; drives prev/next on paper pages. */
   listIds: [] as string[],

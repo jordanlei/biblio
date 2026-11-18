@@ -2,12 +2,13 @@
 import type { Paper } from "@biblio/core";
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { RouterLink, useRoute, useRouter } from "vue-router";
+import AlertsPanel from "../components/AlertsPanel.vue";
 import AppIcon from "../components/AppIcon.vue";
 import PaperInspector from "../components/PaperInspector.vue";
 import { attachPdf, driveOpenUrl, grabPdf } from "../services/drive";
 import { citeCommand, downloadBibtex, familyName, setPaperTag, updatePaper, useLibrary } from "../services/library/library";
 import { highlight, isEmptyQuery, parseLocalQuery, scorePaper } from "../services/library/search";
-import { filtersFromQuery, matchesFilters, normalizeReadingStatus, readingStatusLabel, readingStatuses, scopeFromQuery, type ListFilters } from "../services/library/scope";
+import { filtersFromQuery, inInbox, matchesFilters, normalizeReadingStatus, readingStatusLabel, readingStatuses, scopeFromQuery, shelfPatch, shelves, type ListFilters, type Shelf } from "../services/library/scope";
 import { useSession } from "../services/session";
 import { askConfirm, copyText, isTypingTarget, openAdd, toast, toastError, ui, undoAction } from "../services/ui";
 import { deletePapersEverywhere } from "../services/library/deletion";
@@ -235,8 +236,8 @@ function onKey(event: KeyboardEvent) {
   } else if ((event.key === " " || event.key === "x") && selected.value) {
     event.preventDefault();
     toggleCheck(selected.value);
-  } else if ((event.key === "0" || readingStatuses.some((r) => r.key === event.key)) && targetIds.value.length) {
-    void setStatus(targetIds.value, readingStatuses.find((r) => r.key === event.key)?.id);
+  } else if ((event.key === "0" || shelves.some((r) => r.key === event.key)) && targetIds.value.length) {
+    void setShelf(targetIds.value, shelves.find((r) => r.key === event.key)?.id);
   } else if (event.key === "e" && targetIds.value.length) {
     void markDone(targetIds.value);
   } else if (event.key === "o" && selected.value) {
@@ -264,12 +265,12 @@ watch(sentinel, (el) => {
 });
 onBeforeUnmount(() => observer?.disconnect());
 
-async function setStatus(ids: string[], status: Paper["readingStatus"]) {
+async function setShelf(ids: string[], shelf: Shelf | undefined) {
   try {
-    // Choosing a shelf is a decision about the paper, so it also leaves the inbox.
-    for (const id of ids) await updatePaper(id, { readingStatus: status, ...(paperById.value.get(id)?.inbox ? { inbox: undefined } : {}) }, "Change reading status");
-    const label = readingStatuses.find((r) => r.id === status)?.label;
-    toast(`${ids.length === 1 ? "Marked" : `Marked ${ids.length} papers`} ${label ? `“${label}”` : "unread"}.`, { action: undoAction });
+    for (const id of ids) await updatePaper(id, shelfPatch(shelf), "Change reading status");
+    const label = shelves.find((r) => r.id === shelf)?.label;
+    const what = ids.length === 1 ? "" : ` ${ids.length} papers`;
+    toast(shelf === "inbox" ? `Moved${what} to the inbox.` : label ? `Marked${what} “${label}”.` : `Unmarked${what}.`, { action: undoAction });
   } catch (error) {
     toastError(error);
   }
@@ -277,11 +278,11 @@ async function setStatus(ids: string[], status: Paper["readingStatus"]) {
 
 /** Take papers out of the inbox; they stay in the library, unlabeled unless you shelved them. */
 async function markDone(ids: string[]) {
-  const inInbox = ids.filter((id) => paperById.value.get(id)?.inbox);
-  if (!inInbox.length) return;
+  const done = ids.filter((id) => { const p = paperById.value.get(id); return p && inInbox(p); });
+  if (!done.length) return;
   try {
-    for (const id of inInbox) await updatePaper(id, { inbox: undefined }, "Mark done");
-    toast(inInbox.length === 1 ? "Moved out of the inbox." : `Moved ${inInbox.length} papers out of the inbox.`, { action: undoAction });
+    for (const id of done) await updatePaper(id, shelfPatch(undefined), "Mark done");
+    toast(done.length === 1 ? "Moved out of the inbox." : `Moved ${done.length} papers out of the inbox.`, { action: undoAction });
     checked.value = new Set();
   } catch (error) {
     toastError(error);
@@ -399,7 +400,7 @@ const scopeEyebrow = computed(() => (scope.value.kind === "folder" ? "Folder" : 
           </form>
           <button class="btn sm" type="button" @click="copyText(citeCommand(checkedPapers))"><AppIcon name="quote" :size="13" /> \cite</button>
           <button class="btn sm" type="button" :disabled="!!findingPdfs" @click="bulkFindPdfs"><AppIcon name="pdf" :size="13" /> {{ findingPdfs || "Find PDFs" }}</button>
-          <button v-if="checkedPapers.some((p) => p.inbox)" class="btn sm" type="button" title="Move out of the inbox (E)" @click="markDone([...checked])"><AppIcon name="check" :size="13" /> Done</button>
+          <button v-if="checkedPapers.some((p) => inInbox(p))" class="btn sm" type="button" title="Move out of the inbox (E)" @click="markDone([...checked])"><AppIcon name="check" :size="13" /> Done</button>
           <button class="btn sm" type="button" @click="downloadBibtex(checkedPapers)"><AppIcon name="download" :size="13" /> .bib</button>
           <button class="btn sm danger" type="button" @click="removePapers([...checked])"><AppIcon name="trash" :size="13" /> Delete</button>
           <span class="spacer" />
@@ -432,6 +433,8 @@ const scopeEyebrow = computed(() => (scope.value.kind === "folder" ? "Folder" : 
             </select>
           </label>
         </div>
+
+      <AlertsPanel v-if="scope.id === 'inbox' && !searching && loaded" />
 
       <p v-if="loadError" class="notice error">Couldn't load your library: {{ loadError }}</p>
 
@@ -519,7 +522,7 @@ const scopeEyebrow = computed(() => (scope.value.kind === "folder" ? "Folder" : 
             </div>
             <div class="side">
               <span class="marks">
-                <span v-if="paper.inbox && scope.id !== 'inbox'" class="new-dot" title="In the inbox" />
+                <span v-if="inInbox(paper) && scope.id !== 'inbox'" class="new-dot" title="In the inbox" />
                 <span v-if="normalizeReadingStatus(paper.readingStatus)" class="status-mark" :class="normalizeReadingStatus(paper.readingStatus)">{{ statusLabel(paper) }}</span>
                 <AppIcon v-if="paper.notesMarkdown?.trim()" name="note" :size="14" />
                 <AppIcon v-if="paper.pdf" name="pdf" :size="14" class="has-pdf" />
@@ -784,7 +787,7 @@ const scopeEyebrow = computed(() => (scope.value.kind === "folder" ? "Folder" : 
   width: 130px;
 }
 
-/* Bibliography-style entries: year in the margin, a hairline between. */
+/* Bibliography-style entries: year in the margin, title in the serif, a hairline between. */
 .papers {
   margin: 12px -12px 0;
   padding: 0;
@@ -842,10 +845,10 @@ const scopeEyebrow = computed(() => (scope.value.kind === "folder" ? "Folder" : 
 }
 
 .title {
-  font-family: var(--font-ui);
-  font-size: calc(15.5px * var(--text-scale));
-  font-weight: 600;
-  line-height: 1.4;
+  font-family: var(--font-serif);
+  font-size: calc(17px * var(--text-scale));
+  font-weight: 500;
+  line-height: 1.35;
   letter-spacing: -0.005em;
   color: var(--text);
 }

@@ -45,3 +45,92 @@ export function findExistingPaper(candidate: PaperCandidate, papers: Paper[]): D
 
   return { kind: "none" };
 }
+
+// --- Duplicates already in the library -------------------------------------------------------
+
+export interface DuplicateGroup {
+  /** Best record first: the one to keep. */
+  papers: Paper[];
+  reason: string;
+}
+
+const isArxivDoi = (doi?: string) => Boolean(doi && /^10\.48550\/arxiv\./i.test(doi));
+
+/** Rank for which record survives a merge: the published version, then the better-filled one. */
+function keepScore(paper: Paper): number {
+  const published = paper.type !== "preprint" && paper.doi && !isArxivDoi(normalizeDoi(paper.doi)) ? 8 : 0;
+  return published + (paper.pdf ? 4 : 0) + (paper.notesMarkdown?.trim() ? 2 : 0) + (paper.containerTitle ? 1 : 0);
+}
+
+/**
+ * Papers that are the same work: a shared DOI, arXiv ID or PMID, or the same title and first
+ * author in any year (a preprint and its published version). Each group lists the record to keep first.
+ */
+export function findDuplicateGroups(papers: Paper[]): DuplicateGroup[] {
+  const parent = new Map(papers.map((p) => [p.id, p.id]));
+  const reasons = new Map<string, string>();
+  const find = (id: string): string => (parent.get(id) === id ? id : find(parent.get(id)!));
+  const join = (keys: Map<string, Paper>, key: string | undefined, paper: Paper, reason: string) => {
+    if (!key) return;
+    const other = keys.get(key);
+    if (!other) return void keys.set(key, paper);
+    const [a, b] = [find(other.id), find(paper.id)];
+    if (a === b) return;
+    parent.set(b, a);
+    if (!reasons.has(a)) reasons.set(a, reason);
+  };
+  const byDoi = new Map<string, Paper>();
+  const byArxiv = new Map<string, Paper>();
+  const byPmid = new Map<string, Paper>();
+  const byTitle = new Map<string, Paper>();
+  for (const paper of papers) {
+    join(byDoi, normalizeDoi(paper.doi), paper, "Same DOI");
+    join(byArxiv, normalizeArxivId(paper.arxivId), paper, "Same arXiv ID");
+    join(byPmid, normalizeIdentifier(paper.pmid), paper, "Same PubMed ID");
+    const title = normalizeTitleKey(paper.title);
+    const author = firstCreatorFamily(paper.authors).toLowerCase();
+    if (title.length >= 12 && author) join(byTitle, `${title}|${author}`, paper, "Same title and first author");
+  }
+  const groups = new Map<string, Paper[]>();
+  for (const paper of papers) {
+    const root = find(paper.id);
+    groups.set(root, [...(groups.get(root) ?? []), paper]);
+  }
+  return [...groups.entries()]
+    .filter(([, members]) => members.length > 1)
+    .map(([root, members]) => ({
+      papers: [...members].sort((a, b) => keepScore(b) - keepScore(a) || a.createdAt.localeCompare(b.createdAt)),
+      reason: reasons.get(root) ?? "Same work"
+    }));
+}
+
+const FILL_FIELDS = [
+  "editors", "issued", "containerTitle", "shortContainerTitle", "volume", "issue", "pages", "publisher", "publisherPlace",
+  "edition", "doi", "arxivId", "pmid", "pmcid", "semanticScholarId", "isbn", "issn", "url", "openAccessPdfUrl", "abstract", "language", "pdf"
+] as const;
+
+/**
+ * The changes that fold `drop` into `keep`: empty fields filled from `drop`, tags and folders
+ * combined, notes appended, the earlier added date and any shelf kept. `@[dropKey]` links are
+ * the caller's to rewrite (they can live in any note).
+ */
+export function mergePaperPatch(keep: Paper, drop: Paper): Partial<Paper> {
+  const patch: Partial<Paper> = {};
+  const fill = patch as Record<string, unknown>;
+  for (const field of FILL_FIELDS) if (keep[field] === undefined && drop[field] !== undefined) fill[field] = drop[field];
+  if (!keep.authors.length && drop.authors.length) patch.authors = drop.authors;
+  const tags = [...new Set([...keep.tags, ...drop.tags])];
+  if (tags.length !== keep.tags.length) patch.tags = tags;
+  const folderIds = [...new Set([...keep.folderIds, ...drop.folderIds])];
+  if (folderIds.length !== keep.folderIds.length) patch.folderIds = folderIds;
+  const mine = keep.notesMarkdown?.trim() ?? "";
+  const theirs = drop.notesMarkdown?.trim() ?? "";
+  if (theirs && !mine.includes(theirs)) patch.notesMarkdown = mine ? `${mine}\n\n${theirs}` : theirs;
+  if (!keep.readingStatus && drop.readingStatus) patch.readingStatus = drop.readingStatus;
+  if (keep.inbox && !drop.inbox) patch.inbox = undefined;
+  const reasons = [...new Set([keep.savedBecause, drop.savedBecause].filter((r): r is string => Boolean(r?.trim())))];
+  if (reasons.length > 1) patch.savedBecause = reasons.join("; ");
+  else if (!keep.savedBecause && reasons.length) patch.savedBecause = reasons[0];
+  if (drop.createdAt < keep.createdAt) patch.createdAt = drop.createdAt;
+  return patch;
+}

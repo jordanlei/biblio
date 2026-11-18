@@ -12,7 +12,8 @@ export const lazyDialogs = {
   add: () => import("./components/AddPapersDialog.vue"),
   help: () => import("./components/HelpDialog.vue"),
   tour: () => import("./components/GuidedTour.vue"),
-  palette: () => import("./components/CommandPalette.vue")
+  palette: () => import("./components/CommandPalette.vue"),
+  duplicates: () => import("./components/DuplicatesDialog.vue")
 };
 
 /** Warm the chunks a signed-in user is likely to need next. */

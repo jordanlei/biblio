@@ -303,6 +303,21 @@ export async function deletePapers(paperIds: string[], restore?: () => Promise<v
   }
 }
 
+/** Point every `@[oldKey]` link, in paper notes and research notes, at `newKey`. */
+export async function rewriteCitationLinks(oldKey: string, newKey: string, skipPaperId?: string) {
+  const uid = requireUid();
+  const batch = writeBatch(db);
+  for (const other of backlinks.value.get(oldKey) ?? []) {
+    if (other.id === skipPaperId) continue;
+    batch.update(doc(papersCollection(uid), other.id), { notesMarkdown: replaceCitationKey(other.notesMarkdown, oldKey, newKey), updatedAt: now() });
+  }
+  for (const note of researchNotes.value) {
+    const body = replaceCitationKey(note.bodyMarkdown, oldKey, newKey);
+    if (body !== note.bodyMarkdown) await updateResearchNote(note.id, { bodyMarkdown: body }, batch);
+  }
+  await batch.commit();
+}
+
 /** Rename a citation key and, optionally, rewrite `@[old]` references in every note. */
 export async function renameCitationKey(paper: Paper, newKey: string, updateReferences: boolean) {
   const uid = requireUid();

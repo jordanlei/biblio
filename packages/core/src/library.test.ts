@@ -257,6 +257,8 @@ describe("sync engine", () => {
         "biblio.json",
         "library.json",
         "references.bib",
+        "bib/Meta-control.bib",
+        "bib/Planning.bib",
         `notes/${papers[0].citationKey}.md`,
         `papers/${papers[0].citationKey}.pdf`
       ].sort()
@@ -264,6 +266,24 @@ describe("sync engine", () => {
     expect(files.text(`notes/${papers[0].citationKey}.md`)).toContain("Key idea: **self-attention**.");
     expect(files.text("references.bib")).toContain(`@inproceedings{${papers[0].citationKey},`);
     expect(engine.getStatus().phase).toBe("saved");
+  });
+
+  it("keeps one .bib per folder, subfolders included, renamed and removed with the folder", async () => {
+    const { files, view, engine, papers } = setup();
+    await engine.syncNow();
+    expect(files.text("bib/Planning.bib")).toContain(papers[0].citationKey);
+    expect(files.text("bib/Planning.bib")).toContain(papers[1].citationKey);
+    expect(files.text("bib/Meta-control.bib")).not.toContain(papers[1].citationKey);
+
+    view.folders = view.folders.map((f) => (f.id === "fld-meta" ? { ...f, name: "Metacontrol" } : f));
+    await engine.syncNow();
+    expect(files.files.has("bib/Meta-control.bib")).toBe(false);
+    expect(files.text("bib/Metacontrol.bib")).toContain(papers[0].citationKey);
+
+    view.edit(papers[0].id, { folderIds: [] });
+    await engine.syncNow();
+    expect(files.files.has("bib/Metacontrol.bib")).toBe(false);
+    expect(files.text("bib/Planning.bib")).not.toContain(papers[0].citationKey);
   });
 
   it("doesn't rewrite anything when nothing changed", async () => {

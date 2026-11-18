@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { buildPaper, cslToPaper, exportBibtex, extractCitationLinkContexts, findExistingPaper, generateCitationKey, normalizeDoi, paperToCsl, parseBibtex, replaceCitationKey } from "./index";
+import { buildPaper, cslToPaper, exportBibtex, extractCitationLinkContexts, findDuplicateGroups, findExistingPaper, mergePaperPatch, generateCitationKey, normalizeDoi, paperToCsl, parseBibtex, replaceCitationKey } from "./index";
 import type { Paper } from "./types";
 
 const basePaper: Paper = {
@@ -203,5 +203,31 @@ describe("e2e/fixtures/zotero-export.bib (Zotero / Better BibTeX export)", () =>
     expect(sussillo.doi).toBe("10.48550/arxiv.1608.06315");
     expect(pandarinath.doi).toBe("10.1038/s41592-018-0109-9");
     expect(sussillo.tags).toEqual(["Computer Science - Machine Learning", "Statistics - Machine Learning", "Quantitative Biology - Neurons and Cognition"]);
+  });
+});
+
+describe("duplicates in the library", () => {
+  const at = { existingKeys: [] as string[], now: "2026-01-01T00:00:00.000Z" };
+  const preprint = { ...buildPaper({ type: "preprint", title: "Inferring single-trial neural population dynamics", authors: [{ family: "Pandarinath", given: "C." }], issued: { year: 2017 }, arxivId: "1608.06315", tags: ["lfads"], notesMarkdown: "Preprint notes.", readingStatus: "read" }, { ...at, id: "pre" }), createdAt: "2025-01-01T00:00:00.000Z" };
+  const published = buildPaper({ type: "article", title: "Inferring single-trial neural population dynamics.", authors: [{ family: "Pandarinath", given: "Chethan" }], issued: { year: 2018 }, doi: "10.1038/s41592-018-0109-9", containerTitle: "Nature Methods", tags: ["dynamics"], inbox: true }, { ...at, id: "pub" });
+  const other = buildPaper({ title: "Something else entirely", authors: [{ family: "Pandarinath" }], issued: { year: 2018 } }, { ...at, id: "x" });
+
+  it("groups a preprint with its published version and keeps the published one", () => {
+    const groups = findDuplicateGroups([preprint, other, published]);
+    expect(groups).toHaveLength(1);
+    expect(groups[0].papers.map((p) => p.id)).toEqual(["pub", "pre"]);
+    expect(groups[0].reason).toBe("Same title and first author");
+  });
+
+  it("merges fields, tags, notes and shelf into the kept record", () => {
+    const patch = mergePaperPatch(published, preprint);
+    expect(patch.arxivId).toBe("1608.06315");
+    expect(patch.doi).toBeUndefined();
+    expect(patch.tags).toEqual(["dynamics", "lfads"]);
+    expect(patch.notesMarkdown).toBe("Preprint notes.");
+    expect(patch.readingStatus).toBe("read");
+    expect(patch.inbox).toBeUndefined();
+    expect("inbox" in patch).toBe(true);
+    expect(patch.createdAt).toBe("2025-01-01T00:00:00.000Z");
   });
 });

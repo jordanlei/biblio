@@ -11,6 +11,7 @@ import {
   researchNotePath,
   researchNoteToMarkdown,
   serializeLibrary,
+  folderBibliographies,
   type PaperPaths
 } from "./format";
 import {
@@ -328,11 +329,39 @@ export class SyncEngine {
     await put("manifest", LIBRARY_PATHS.manifest, out.manifest, JSON_MIME);
     await put("bibtex", LIBRARY_PATHS.bibtex, out.bibtex, "application/x-bibtex");
     await put("readme", LIBRARY_PATHS.readme, libraryReadme(), MD);
+    await this.syncFolderBibs(state, snap.papers, snap.folders);
 
     state.formatVersion = LIBRARY_FORMAT_VERSION;
     await this.options.state.save(state);
     this.cached = state;
     if (conflicts.length) this.setStatus({ conflicts: [...this.status.conflicts, ...conflicts] });
+  }
+
+  /** bib/<folder>.bib: written when a folder's papers change, renamed with the folder, removed when it empties. */
+  private async syncFolderBibs(state: SyncState, papers: Paper[], folders: Folder[]) {
+    const { files } = this.options;
+    const wanted = folderBibliographies(papers, folders);
+    const known = (state.folderBibs ??= {});
+    if (!wanted.length && !Object.keys(known).length) return;
+    const remote = await files.list(LIBRARY_PATHS.bibDir);
+    const byId = new Map(remote.map((f) => [f.id, f]));
+    const claimed = new Set(Object.values(known).map((entry) => entry.fileId));
+    for (const bib of wanted) {
+      const hash = hashText(bib.bibtex);
+      const entry = known[bib.folderId];
+      const existing = entry ? byId.get(entry.fileId) : undefined;
+      if (entry && existing && entry.hash === hash && entry.path === bib.path && existing.version === entry.version) continue;
+      const unclaimed = remote.find((f) => f.path === bib.path && !claimed.has(f.id));
+      const file = await files.writeText(bib.path, bib.bibtex, "application/x-bibtex", existing ?? unclaimed);
+      known[bib.folderId] = { fileId: file.id, path: bib.path, version: file.version, hash };
+      claimed.add(file.id);
+    }
+    const live = new Set(wanted.map((bib) => bib.folderId));
+    for (const [folderId, entry] of Object.entries(known)) {
+      if (live.has(folderId)) continue;
+      if (byId.has(entry.fileId)) await files.remove(entry.fileId);
+      delete known[folderId];
+    }
   }
 
   /**

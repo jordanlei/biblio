@@ -4,6 +4,7 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue"
 import { RouterLink, useRoute, useRouter } from "vue-router";
 import AppIcon from "../components/AppIcon.vue";
 import BacklinkList from "../components/BacklinkList.vue";
+import CitationLinks from "../components/CitationLinks.vue";
 import { customPaperPanels } from "../custom/index";
 import EditDetailsDialog from "../components/EditDetailsDialog.vue";
 import NotesEditor from "../components/NotesEditor.vue";
@@ -173,6 +174,11 @@ async function removePaper() {
         <section v-if="mentionedIn.length" class="section">
           <h2 class="section-label">Mentioned in notes</h2>
           <BacklinkList :paper="paper" />
+        </section>
+
+        <section class="section">
+          <h2 class="section-label">Citations</h2>
+          <CitationLinks :paper="paper" />
         </section>
 
         <!-- Your own panels (apps/web/src/custom). -->

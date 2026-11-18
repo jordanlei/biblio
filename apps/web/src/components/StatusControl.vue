@@ -1,25 +1,25 @@
 <script setup lang="ts">
-import type { Paper, ReadingStatus } from "@biblio/core";
+import type { Paper } from "@biblio/core";
 import { updatePaper } from "../services/library/library";
-import { normalizeReadingStatus, readingStatuses } from "../services/library/scope";
+import { shelfOf, shelfPatch, shelves, type Shelf } from "../services/library/scope";
 import { toastError } from "../services/ui";
 
+// Inbox / Skim / Read. Clicking the current one unmarks the paper (the default: kept for reference).
 const props = defineProps<{ paper: Paper }>();
 
-function set(status: ReadingStatus) {
-  const next = normalizeReadingStatus(props.paper.readingStatus) === status ? undefined : status;
-  updatePaper(props.paper.id, { readingStatus: next, ...(props.paper.inbox ? { inbox: undefined } : {}) }, "Change reading status").catch(toastError);
+function set(shelf: Shelf) {
+  updatePaper(props.paper.id, shelfPatch(shelfOf(props.paper) === shelf ? undefined : shelf), "Change reading status").catch(toastError);
 }
 </script>
 
 <template>
   <div class="status" role="group" aria-label="Reading status">
     <button
-      v-for="s in readingStatuses"
+      v-for="s in shelves"
       :key="s.id"
       type="button"
-      :class="[s.id, { on: normalizeReadingStatus(paper.readingStatus) === s.id }]"
-      :aria-pressed="normalizeReadingStatus(paper.readingStatus) === s.id"
+      :class="[s.id, { on: shelfOf(paper) === s.id }]"
+      :aria-pressed="shelfOf(paper) === s.id"
       :title="`${s.label} (${s.key})`"
       @click="set(s.id)"
     >

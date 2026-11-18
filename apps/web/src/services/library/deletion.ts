@@ -9,10 +9,11 @@ import { useSession } from "../session";
 // Drive's trash (recoverable for 30 days) and Undo takes them back out.
 
 /** Delete papers with their PDFs and note files. All-or-nothing: if Drive fails, nothing is deleted. */
-export async function deletePapersEverywhere(papers: Paper[]): Promise<{ trashedFiles: number }> {
+export async function deletePapersEverywhere(papers: Paper[], options: { spareFileIds?: string[] } = {}): Promise<{ trashedFiles: number }> {
   const connected = Boolean(useSession().profile.value?.driveRootFolderId);
+  const spare = new Set(options.spareFileIds ?? []);
   const fileIds = connected
-    ? [...new Set([...papers.flatMap((p) => [p.pdf?.driveFileId, syncedNoteFileId(p.id)]), ...(await strayPdfIds(papers))])].filter((id): id is string => Boolean(id))
+    ? [...new Set([...papers.flatMap((p) => [p.pdf?.driveFileId, syncedNoteFileId(p.id)]), ...(await strayPdfIds(papers))])].filter((id): id is string => Boolean(id) && !spare.has(id!))
     : [];
   const trashed: string[] = [];
   try {

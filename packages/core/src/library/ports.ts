@@ -56,6 +56,8 @@ export interface SyncState {
   manifest?: SyncedFile;
   bibtex?: SyncedFile;
   readme?: SyncedFile;
+  /** bib/<folder>.bib files, keyed by folder id. */
+  folderBibs?: Record<string, SyncedFile>;
   /** Keyed by paper id. */
   notes: Record<string, SyncedFile>;
   /** Keyed by research note id. `title` is the title last written, so a retitle renames the file. */

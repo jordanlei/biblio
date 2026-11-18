@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
 import AppIcon from "../components/AppIcon.vue";
 import AppearanceSettings from "../components/AppearanceSettings.vue";
@@ -7,12 +7,15 @@ import LibraryImport from "../components/LibraryImport.vue";
 import { connectDriveFolder, createDriveFolder, DEFAULT_FOLDER_NAME, disconnectDriveFolder, driveFolderUrl, findOwnLibraries, trashLibraryFolder, type DriveFolderSelection, type OwnLibrary } from "../services/drive";
 import { downloadLibraryZip } from "../services/library/transfer";
 import { deleteAllUserMetadata, deleteProfileDoc } from "../services/library/library";
-import { clearLocalCache, deleteCurrentAuthUser, updateProfile, useSession } from "../services/session";
-import { askConfirm, openAdd, toast, toastError } from "../services/ui";
+import { clearLocalCache, deleteCurrentAuthUser, signOut, updateProfile, useSession } from "../services/session";
+import { duplicateGroups } from "../services/library/merge";
+import { askConfirm, openAdd, toast, toastError, ui } from "../services/ui";
 import { connectLibraryFolder, rebuildFromDrive, stopSync, syncNow, syncStatus } from "../sync/librarySync";
 
 const router = useRouter();
 const session = useSession();
+const photo = computed(() => session.user.value?.photoURL ?? session.profile.value?.photoURL ?? null);
+const photoFailed = ref(false);
 const busy = ref("");
 
 async function run(label: string, task: () => Promise<unknown>) {
@@ -81,6 +84,16 @@ async function deleteAccount() {
       <p class="eyebrow">Account</p>
       <h1 class="display">Settings</h1>
     </header>
+
+    <section class="card pad profile">
+      <img v-if="photo && !photoFailed" class="photo" :src="photo" alt="" referrerpolicy="no-referrer" @error="photoFailed = true" />
+      <span v-else class="photo initial">{{ (session.user.value?.displayName ?? session.user.value?.email ?? "?").slice(0, 1).toUpperCase() }}</span>
+      <div class="who">
+        <h2>{{ session.user.value?.displayName ?? "Signed in" }}</h2>
+        <p class="muted small">{{ session.user.value?.email }} · Google account</p>
+      </div>
+      <button class="btn" type="button" @click="signOut()">Sign out</button>
+    </section>
 
     <AppearanceSettings />
 
@@ -155,6 +168,17 @@ async function deleteAccount() {
       </template>
     </section>
 
+
+    <section class="card pad">
+      <div class="head">
+        <AppIcon name="copy" :size="20" />
+        <div>
+          <h2>Duplicates</h2>
+          <p class="muted small">{{ duplicateGroups.length ? `${duplicateGroups.length} set${duplicateGroups.length === 1 ? "" : "s"} of papers look like the same work, such as a preprint and its published version.` : "No duplicates right now." }}</p>
+        </div>
+      </div>
+      <button class="btn" type="button" :disabled="!duplicateGroups.length" @click="ui.duplicatesOpen = true">Review duplicates</button>
+    </section>
 
     <section class="card pad">
       <div class="head">
@@ -244,6 +268,34 @@ h1 {
 .layout code {
   font-family: var(--font-mono);
   font-size: calc(12px * var(--text-scale));
+}
+
+.profile {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.photo {
+  flex: none;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.photo.initial {
+  display: grid;
+  place-items: center;
+  background: var(--accent);
+  color: var(--accent-text);
+  font-size: calc(20px * var(--text-scale));
+  font-weight: 700;
+}
+
+.who {
+  flex: 1;
+  min-width: 0;
 }
 
 .danger-zone {
