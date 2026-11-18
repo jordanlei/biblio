@@ -119,7 +119,7 @@ onMounted(() => {
         <p class="title">Attention Is All You Need</p>
         <p class="meta">Vaswani, Shazeer, Parmar et al. · <em>Advances in Neural Information Processing Systems</em></p>
         <p class="abstract">The dominant sequence transduction models are based on complex recurrent or convolutional neural networks…</p>
-        <p class="tags"><span class="tag"><span class="tag-text">transformers</span></span> <span class="tag"><span class="tag-text">attention</span></span></p>
+        <p class="tags"><span class="tag tone-0"><span class="tag-text">transformers</span></span> <span class="tag tone-2"><span class="tag-text">attention</span></span></p>
       </div>
     </div>
   </section>

@@ -3,6 +3,7 @@ import type { Paper } from "@biblio/core";
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { RouterLink, useRoute, useRouter } from "vue-router";
 import AlertsPanel from "../components/AlertsPanel.vue";
+import { tagTone } from "../services/library/tagTone";
 import AppIcon from "../components/AppIcon.vue";
 import PaperInspector from "../components/PaperInspector.vue";
 import { attachPdf, driveOpenUrl, grabPdf } from "../services/drive";
@@ -514,8 +515,8 @@ const scopeEyebrow = computed(() => (scope.value.kind === "folder" ? "Folder" : 
               <div v-if="paper.tags.length || pdfDropTarget === paper.id" class="tag-list row-tags">
                 <span v-if="pdfDropTarget === paper.id" class="chip accent">Drop to attach PDF</span>
                 <template v-else>
-                  <span v-for="tag in paper.tags.slice(0, 2)" :key="tag" class="tag" :title="tag"><span class="tag-text">{{ tag }}</span></span>
-                  <span v-if="paper.tags.length > 2" class="tag more" :title="paper.tags.slice(2).join(', ')">+{{ paper.tags.length - 2 }}</span>
+                  <span v-for="tag in paper.tags.slice(0, 3)" :key="tag" class="tag" :class="tagTone(tag)" :title="tag"><span class="tag-text">{{ tag }}</span></span>
+                  <span v-if="paper.tags.length > 3" class="tag-overflow" :title="paper.tags.slice(3).join(', ')">+{{ paper.tags.length - 3 }}</span>
                 </template>
               </div>
               <p v-if="paper.savedBecause" class="saved-because">Saved because: {{ paper.savedBecause }}</p>
@@ -872,7 +873,7 @@ const scopeEyebrow = computed(() => (scope.value.kind === "folder" ? "Folder" : 
 }
 
 .row-tags {
-  margin-top: 7px;
+  margin-top: 4px;
 }
 
 .saved-because {

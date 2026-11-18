@@ -412,22 +412,41 @@ kbd {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 4px;
+  gap: 4px 12px;
 }
+
+/* Tags read like a journal's colour key: a small ink dot and the name, no box. */
+.tone-0 { --tag-ink: #3b56a8; }
+.tone-1 { --tag-ink: #a9503a; }
+.tone-2 { --tag-ink: #2c7468; }
+.tone-3 { --tag-ink: #936318; }
+.tone-4 { --tag-ink: #7a4a8c; }
+.tone-5 { --tag-ink: #5c6b2e; }
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .tone-0 { --tag-ink: #8fa6e8; }
+  :root:not([data-theme="light"]) .tone-1 { --tag-ink: #e39a84; }
+  :root:not([data-theme="light"]) .tone-2 { --tag-ink: #7cc3b5; }
+  :root:not([data-theme="light"]) .tone-3 { --tag-ink: #d9b26a; }
+  :root:not([data-theme="light"]) .tone-4 { --tag-ink: #c39ad4; }
+  :root:not([data-theme="light"]) .tone-5 { --tag-ink: #b0c07a; }
+}
+
+:root[data-theme="dark"] .tone-0 { --tag-ink: #8fa6e8; }
+:root[data-theme="dark"] .tone-1 { --tag-ink: #e39a84; }
+:root[data-theme="dark"] .tone-2 { --tag-ink: #7cc3b5; }
+:root[data-theme="dark"] .tone-3 { --tag-ink: #d9b26a; }
+:root[data-theme="dark"] .tone-4 { --tag-ink: #c39ad4; }
+:root[data-theme="dark"] .tone-5 { --tag-ink: #b0c07a; }
 
 .tag {
   display: inline-flex;
   align-items: center;
+  gap: 5px;
   max-width: 16em;
-  height: calc(20px * var(--text-scale));
-  padding: 0 7px;
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  background: var(--surface-2);
   color: var(--text-2);
-  font-size: calc(11.5px * var(--text-scale));
-  font-weight: 500;
-  line-height: 1;
+  font-size: calc(12.5px * var(--text-scale));
+  line-height: 1.4;
   text-decoration: none;
   white-space: nowrap;
 }
@@ -438,18 +457,20 @@ kbd {
 }
 
 .tag::before {
-  content: "#";
-  margin-right: 2px;
-  color: var(--accent-ink);
-  opacity: 0.75;
+  content: "";
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--tag-ink, var(--text-3));
 }
 
-.tag.more::before {
-  content: none;
+.tag-overflow {
+  color: var(--text-3);
+  font-size: calc(12.5px * var(--text-scale));
 }
 
 a.tag:hover {
-  border-color: var(--border-strong);
   color: var(--text);
 }
 

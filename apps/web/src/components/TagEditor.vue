@@ -3,6 +3,7 @@ import type { Paper } from "@biblio/core";
 import { computed, ref } from "vue";
 import { RouterLink } from "vue-router";
 import { setPaperTag, useLibrary } from "../services/library/library";
+import { tagTone } from "../services/library/tagTone";
 import { toastError } from "../services/ui";
 
 const props = defineProps<{ paper: Paper }>();
@@ -20,7 +21,7 @@ async function add() {
 
 <template>
   <div class="tag-list editor">
-    <span v-for="tag in paper.tags" :key="tag" class="tag removable" :title="tag">
+    <span v-for="tag in paper.tags" :key="tag" class="tag removable" :class="tagTone(tag)" :title="tag">
       <RouterLink class="tag-text" :to="{ path: '/library', query: { tag } }">{{ tag }}</RouterLink>
       <button type="button" :aria-label="`Remove tag ${tag}`" @click="setPaperTag([paper.id], tag, false)">×</button>
     </span>
@@ -65,17 +66,22 @@ async function add() {
 /* Fixed width: growing on focus would re-wrap the row and shift everything below it. */
 .tag-input {
   width: 96px;
-  height: calc(20px * var(--text-scale));
-  padding: 0 6px;
-  border: 1px dashed var(--border-strong);
-  border-radius: 4px;
+  height: calc(22px * var(--text-scale));
+  padding: 0 4px;
+  border: 0;
+  border-bottom: 1px solid transparent;
   background: transparent;
-  font-size: calc(11.5px * var(--text-scale));
+  color: var(--text-2);
+  font-size: calc(12.5px * var(--text-scale));
 }
 
+.tag-input::placeholder {
+  color: var(--text-3);
+}
+
+.tag-input:hover,
 .tag-input:focus {
   outline: none;
-  border-style: solid;
-  border-color: var(--accent);
+  border-bottom-color: var(--border-strong);
 }
 </style>

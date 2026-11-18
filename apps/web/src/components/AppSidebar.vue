@@ -5,6 +5,7 @@ import { usingEmulators } from "../firebase";
 import { createFolder, deleteFolder, folderDescendants, setPaperFolders, useLibrary } from "../services/library/library";
 import { customNavItems } from "../custom/index";
 import { alerts } from "../services/alerts";
+import { tagTone } from "../services/library/tagTone";
 import { scopeFromQuery, smartViews } from "../services/library/scope";
 import { signOut, useSession } from "../services/session";
 import { askConfirm, isTypingTarget, openAdd, toast, toastError, ui, undoAction } from "../services/ui";
@@ -240,7 +241,7 @@ onBeforeUnmount(() => window.removeEventListener("keydown", onKey, true));
           :class="{ active: isActive('tag', tag) }"
           :to="{ path: '/library', query: { tag } }"
         >
-          <span class="hash">#</span> <span class="label">{{ tag }}</span> <span class="count tnum">{{ count }}</span>
+          <span class="hash" :class="tagTone(tag)" /> <span class="label">{{ tag }}</span> <span class="count tnum">{{ count }}</span>
         </RouterLink>
         <button v-if="tagCounts.length > 6" class="nav-item more" type="button" @click="showAllTags = !showAllTags">
           {{ showAllTags ? "Show fewer" : `Show all ${tagCounts.length} tags` }}
@@ -444,10 +445,14 @@ onBeforeUnmount(() => window.removeEventListener("keydown", onKey, true));
   color: var(--text-3);
 }
 
+/* The tag's colour key, matching its dot on every card. */
 .hash {
-  width: 16px;
-  text-align: center;
-  color: var(--text-3);
+  flex: none;
+  width: 7px;
+  height: 7px;
+  margin: 0 4.5px;
+  border-radius: 50%;
+  background: var(--tag-ink);
 }
 
 .folder-row {
