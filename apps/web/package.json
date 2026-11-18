@@ -17,6 +17,7 @@
     "dompurify": "latest",
     "fflate": "^0.8.3",
     "firebase": "^12.19.0",
+    "katex": "^0.19.1",
     "marked": "latest",
     "vue": "latest",
     "vue-router": "latest"

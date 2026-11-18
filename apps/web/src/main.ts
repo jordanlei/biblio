@@ -4,6 +4,7 @@ import { usingEmulators } from "./firebase";
 import { prefetchChunks } from "./lazy";
 import { router } from "./router";
 import { useSession } from "./services/session";
+import "katex/dist/katex.min.css";
 import "./styles.css";
 import "./services/appearance";
 import "./sync/librarySync";
