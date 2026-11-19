@@ -2,8 +2,7 @@ import vue from "@vitejs/plugin-vue";
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "vite";
 
-// The project website (static). SITE_BASE is the path it's served under, e.g. "/biblio/" on
-// GitHub Pages (set by .github/workflows/site.yml).
+// The project website is served at the root of its separate Firebase Hosting site.
 export default defineConfig({
   base: process.env.SITE_BASE ?? "/",
   plugins: [vue()],

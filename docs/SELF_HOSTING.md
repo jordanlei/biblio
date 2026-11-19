@@ -4,8 +4,8 @@ Biblio is open-source software you run yourself. There's no Biblio service: ever
 including the people who write it, uses their own copy of the app: their own Firebase project,
 database, Google sign-in, and web address. You can change the code however you like.
 
-- **The project website** (<https://jordanlei.github.io/biblio/>, GitHub Pages) explains
-  Biblio. [How it works](https://jordanlei.github.io/biblio/how-it-works/) shows the architecture. Its [setup tutorial](https://jordanlei.github.io/biblio/setup/) is the friendly
+- **The project website** (<https://bibliograph.web.app/>, Firebase Hosting) explains
+  Biblio. [How it works](https://bibliograph.web.app/#how-it-works) shows the architecture. Its [setup tutorial](https://bibliograph.web.app/setup/) is the friendly
   version of this guide.
 - **Your copy** (`https://<your-id>.web.app`) is just your library behind a sign-in page.
 

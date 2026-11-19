@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// Biblio's home page (GitHub Pages). Biblio isn't a hosted service: this page makes the case,
+// Biblio's project home page (Firebase Hosting). Biblio isn't a hosted service: this page makes the case,
 // shows the features, and sends people to setup/. Captures come from apps/site/scripts/capture.mjs.
 import AppIcon from "../../web/src/components/AppIcon.vue";
 import FaqItem from "./components/FaqItem.vue";

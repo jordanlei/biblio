@@ -71,7 +71,7 @@ Three registries (`customRoutes`, `customNavItems`, `customPaperPanels`) are rea
 
 ## Project website (`apps/site`)
 
-Three static Vue pages published to GitHub Pages (`.github/workflows/site.yml`): the home page (`src/App.vue`: the model in brief, features, the comparison), How it works (`src/HowItWorksPage.vue`, at `how-it-works/`: Biblio is code, not a service, with the architecture diagram; keep it true to `scripts/setup.mjs` and [STORAGE.md](STORAGE.md)), and the setup tutorial (`src/SetupPage.vue`, served at `setup/`; keep it in step with `scripts/setup.mjs`). Captures of the app (`public/landing/`, made by `apps/site/scripts/capture.mjs`, see [CAPTURES.md](CAPTURES.md)),. It has no Firebase and no sign-in. Each person's copy of the app (`apps/web`) is deployed separately, to their own Firebase project; see [CONTRIBUTING.md](../CONTRIBUTING.md) for the rules that keep the two apart. It reuses the app's `styles.css`, `AppIcon`, and `BrandMark` by relative import, so the two look the same.
+The static project website (`apps/site`) is published separately to Firebase Hosting at https://bibliograph.web.app. Its home page, setup tutorial, and privacy page explain Biblio without signing in. Captures in `public/landing/` are made by `apps/site/scripts/capture.mjs` (see [CAPTURES.md](CAPTURES.md)). Each person’s copy of the app (`apps/web`) is deployed separately to their own Firebase project. The website reuses the app’s styles and shared icons.
 
 ## Running a copy (`scripts/setup.mjs`, `biblio.config.json`)
 

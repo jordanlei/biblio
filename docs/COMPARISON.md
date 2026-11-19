@@ -1,6 +1,6 @@
 # Comparison sources
 
-The table on the [home page](https://jordanlei.github.io/biblio/) compares Biblio with Zotero,
+This reference compares Biblio with Zotero,
 EndNote, and Paperpile. Every claim about another product comes from that product's own
 documentation or official support forum, checked **October 2026**. Sources are below so anyone can
 check them, and so they can be rechecked when the products change.

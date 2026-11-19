@@ -3,15 +3,15 @@
 **Finally, a reference manager that's actually yours.** Biblio is open-source software you run yourself: there's no Biblio service to sign up for.
 
 - **You run it.** Your own copy, in your own Firebase project, at your own address. Change any of the code.
-- **Five-minute setup.** `npm install && npm run setup`: [setup tutorial](https://jordanlei.github.io/biblio/setup/).
+- **Five-minute setup.** `npm install && npm run setup`: [setup tutorial](https://bibliograph.web.app/setup/).
 - **Your data is in your Google Drive.** Papers, notes, research notes, PDFs, and the links between them are ordinary files (CSL-JSON, Markdown, BibTeX, PDF), readable without Biblio.
 - **Nothing belongs to anyone else.** No central server, no accounts, no analytics. The people who write Biblio never see your copy or your library.
 
 > Biblio can disappear. Your research cannot.
 
-**Two kinds of site.** This repository's [project website](https://jordanlei.github.io/biblio/) (GitHub Pages, `apps/site`) explains Biblio, [how it works](https://jordanlei.github.io/biblio/how-it-works/), and how to set it up. Each person's own copy of the app (`apps/web`) runs on their own Firebase site and shows just a sign-in page. See [CONTRIBUTING.md](CONTRIBUTING.md) for the rules that keep it that way.
+**Two kinds of site.** This repository's [project website](https://bibliograph.web.app/) (Firebase Hosting, `apps/site`) explains Biblio, [how it works](https://bibliograph.web.app/#how-it-works), and how to set it up. Each person's own copy of the app (`apps/web`) runs on their own Firebase site and shows just a sign-in page. See [CONTRIBUTING.md](CONTRIBUTING.md) for the rules that keep it that way.
 
-- Set up your own copy: [tutorial](https://jordanlei.github.io/biblio/setup/) · full guide [docs/SELF_HOSTING.md](docs/SELF_HOSTING.md)
+- Set up your own copy: [tutorial](https://bibliograph.web.app/setup/) · full guide [docs/SELF_HOSTING.md](docs/SELF_HOSTING.md)
 - Storage architecture (what's canonical, sync, rebuild): [docs/STORAGE.md](docs/STORAGE.md)
 - The on-Drive library format: [docs/LIBRARY_FORMAT.md](docs/LIBRARY_FORMAT.md)
 - How it's built: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
@@ -35,7 +35,7 @@
 | **First run** | A step-by-step spotlight tour with Skip; its Drive step creates or picks your library folder. Replay from Settings. |
 | **Deleting** | Library and Drive stay in sync: deleting a paper (⌫, bulk, or the paper page) moves its PDF and note to the Drive trash after one confirmation; ⌘Z / Undo restores the record and untrashes the files. Deleting your account leaves your Drive library intact unless you tick “also trash my library folder”. |
 | **Appearance** | Settings (click your name → Settings): theme (system/light/dark), 7 accents, 6 reading fonts, 6 interface fonts, 4 text sizes. Saved to your account. |
-| **Two sites** | The **project website** (`apps/site`, GitHub Pages) explains Biblio, compares it, and shows how to run your own copy, using real captures of the app ([how they're made](docs/CAPTURES.md)). **Each copy of the app** (`apps/web`, on its owner's Firebase Hosting) shows only a sign-in page to signed-out visitors. |
+| **Two sites** | The **project website** (`apps/site`, Firebase Hosting) explains Biblio, compares it, and shows how to run your own copy, using real captures of the app ([how they're made](docs/CAPTURES.md)). **Each copy of the app** (`apps/web`, on its owner's Firebase Hosting) shows only a sign-in page to signed-out visitors. |
 | **Data ownership** | The canonical library is a Drive folder: `library.json` (CSL-JSON), `notes/*.md`, `papers/*.pdf`, `references.bib`, `biblio.json` (folders), `README.md`. Edits appear instantly and sync in the background (status in the sidebar; offline edits queue). *Rebuild from Drive* or connect an existing library folder to restore everything. |
 
 ## Repository layout
@@ -83,6 +83,10 @@ npm run test:e2e     # Playwright: new-user journey + data-loss/rebuild, offline
 ```sh
 npm run deploy       # build + deploy hosting and Firestore rules to the project in biblio.config.json
 ```
+
+The public project website is separate from personal Biblio instances. Maintainers with access to
+the `biblio-website` Firebase project can publish it directly with `npm run site:deploy`. This
+targets only the `bibliograph` Hosting site; it does not deploy an app or Firestore rules.
 
 
 ## Google Cloud configuration

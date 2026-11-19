@@ -1,0 +1,12 @@
+{
+  "hosting": {
+    "public": "apps/site/dist",
+    "ignore": [
+      "firebase.site.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "cleanUrls": true,
+    "site": "bibliograph"
+  }
+}

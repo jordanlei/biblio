@@ -6,8 +6,8 @@ Changes are welcome; please keep the rules below true.
 ## Rules that always hold
 
 1. **Two kinds of site, never mixed.**
-   - **The project website** is GitHub Pages, built from `apps/site` in this repository
-     (<https://jordanlei.github.io/biblio/>). It explains Biblio and how to run it:
+   - **The project website** is Firebase Hosting, built from `apps/site` in this repository
+     (<https://bibliograph.web.app/>). It explains Biblio and how to run it:
      features, comparison, How it works (Biblio is code, not a service), the setup tutorial,
      links to the code. It has no sign-in and no user data.
    - **Each person's copy** of the app is `apps/web`, deployed by its owner to their own Firebase
