@@ -26,6 +26,14 @@ Changes are welcome; please keep the rules below true.
 5. **No personal data in the repository.** No real emails, local paths, private libraries, or
    project identifiers in code, docs, fixtures, or captures. Test data is made up; captures use the
    emulator's demo account.
+6. **Shared features stay in sync.** Changes to the owner's Biblio app are shared product changes
+   by default: commit them to this repository and carry them through to the demo, website captures,
+   and setup/builder flow wherever applicable. Only treat a feature as personal and local to one
+   copy when the owner explicitly says so. Before recording a demo or deploying, check that the
+   source includes the relevant current features; do not silently replace a newer deployment with
+   older repository code. If the source and deployed app differ, find and reconcile the newer source
+   first. Inbox is a known example: it exists in the owner's deployed app but is not yet in this
+   checkout.
 
 ## Working on it
 
