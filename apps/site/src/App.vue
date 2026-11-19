@@ -85,7 +85,7 @@ const extras = [
         </div>
       </div>
       <figure class="hero-visual shot">
-        <img :src="`${BASE}landing/library.jpg?v=20261119`" width="2560" height="1600" alt="Biblio's paper library and detail panel, shown with sample papers." />
+        <img :src="`${BASE}landing/library.jpg?v=20261119b`" width="2560" height="1600" alt="Biblio's paper library and detail panel, shown with sample papers." />
       </figure>
     </section>
 
