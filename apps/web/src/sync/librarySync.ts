@@ -75,6 +75,14 @@ document.addEventListener("visibilitychange", () => {
   lastFocusSync = Date.now();
   void engine?.syncNow();
 });
+// And every couple of minutes while the tab is open and visible: retries a write that failed
+// without an error the engine could act on, and picks up edits made on another device or in Drive.
+const PERIODIC_SYNC_MS = 2 * 60_000;
+setInterval(() => {
+  if (document.visibilityState !== "visible" || !ready()) return;
+  if (syncStatus.value.phase === "saving" || syncStatus.value.phase === "needs-auth") return;
+  void engine?.syncNow();
+}, PERIODIC_SYNC_MS);
 window.addEventListener("beforeunload", (event) => {
   // Edits are safe in Firestore either way; only warn while a write is mid-flight.
   if (syncStatus.value.phase === "saving") event.preventDefault();
