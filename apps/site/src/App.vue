@@ -2,7 +2,8 @@
 // Biblio's project home page (Firebase Hosting). Biblio isn't a hosted service: this page makes the case,
 // shows the features, and sends people to setup/. Captures come from apps/site/scripts/capture.mjs.
 import AppIcon from "../../web/src/components/AppIcon.vue";
-import DemoTour from "./components/DemoTour.vue";
+import LandingVideo from "./components/LandingVideo.vue";
+import { features } from "./features";
 import FaqItem from "./components/FaqItem.vue";
 import SiteFooter from "./components/SiteFooter.vue";
 import SiteHeader from "./components/SiteHeader.vue";
@@ -80,16 +81,46 @@ const compareRows: Array<{ label: string; cells: Array<{ mark: Mark; note: strin
       </figure>
     </section>
 
-    <a class="app-strip" href="#install">
-      <AppIcon name="download" :size="18" />
-      <strong>Installable web app</strong>
-      <span>Use the same library on your laptop and phone, each in its own window.</span>
-      <span class="app-strip-go">How to install <AppIcon name="chevron-right" :size="15" /></span>
-    </a>
+    <ul class="highlights">
+      <li><AppIcon name="check" :size="18" /><strong>Free forever</strong><span>No subscription; runs on Google’s free plan</span></li>
+      <li><AppIcon name="drive" :size="18" /><strong>Your Google Drive</strong><span>Plain files you can read without Biblio</span></li>
+      <li><a href="#install"><AppIcon name="download" :size="18" /><strong>Installable app</strong><span>The same library on your laptop and phone</span></a></li>
+      <li><AppIcon name="settings" :size="18" /><strong>Open source</strong><span>MIT license; change any part</span></li>
+    </ul>
 
-    <section class="features" id="features">
-      <h2 class="display">Features</h2>
-      <DemoTour />
+    <section class="pillars" id="features">
+      <div v-for="(f, i) in features" :id="f.id" :key="f.id" class="pillar" :class="{ flip: i % 2 === 1 }">
+        <div class="pillar-copy">
+          <p class="eyebrow">{{ String(i + 1).padStart(2, "0") }} · {{ f.eyebrow }}</p>
+          <h2 class="display">{{ f.title }}</h2>
+          <p class="pillar-text">{{ f.text }}</p>
+          <ul class="checks">
+            <li v-for="point in f.points" :key="point"><AppIcon name="check" :size="16" /> {{ point }}</li>
+          </ul>
+        </div>
+        <figure v-if="f.video" class="shot pillar-media">
+          <LandingVideo :name="f.video.name" :width="f.video.width" :height="f.video.height" :label="f.title" />
+        </figure>
+        <figure v-else class="pillar-media plugin" aria-hidden="true">
+          <div class="browser">
+            <div class="browser-bar"><span class="dots"><i /><i /><i /></span><span class="url">journals.example.org/article/…</span><span class="ext"><AppIcon name="upload" :size="15" /></span></div>
+            <div class="browser-page">
+              <div class="popup"><strong>Saved to Biblio</strong><span>Latent dynamics of motor cortex · PDF attached</span><em>In your Inbox</em></div>
+              <i class="line w80" /><i class="line w60" /><i class="line w90" /><i class="line w70" /><i class="line w85" />
+            </div>
+          </div>
+        </figure>
+      </div>
+    </section>
+
+    <section class="install" id="install">
+      <p class="eyebrow">Installable web app</p>
+      <h2 class="display">Use the same library on your laptop and phone.</h2>
+      <ol class="install-steps">
+        <li><AppIcon name="external" :size="20" /><strong>Open your Biblio</strong><span>In Chrome or Edge on a computer, or Safari on an iPhone.</span></li>
+        <li><AppIcon name="download" :size="20" /><strong>Install it</strong><span>Click the install icon in the address bar, or Share → Add to Home Screen.</span></li>
+        <li><AppIcon name="library" :size="20" /><strong>Open it like an app</strong><span>In its own window, with the same library as every other install.</span></li>
+      </ol>
     </section>
 
     <section id="how-it-works" class="how">
@@ -278,13 +309,13 @@ h1 {
 }
 
 .how,
-.features,
+.install,
 .compare,
 .run,
 .faq-section {
   max-width: var(--max);
   margin: 0 auto;
-  padding: 72px 32px;
+  padding: 96px 40px;
   border-top: 1px solid var(--border);
 }
 
@@ -578,40 +609,244 @@ code {
   white-space: nowrap;
 }
 
-/* The installable app, featured right under the hero. */
-.app-strip {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px 12px;
-  max-width: calc(var(--max) - 64px);
-  margin: 0 auto 56px;
-  padding: 14px 20px;
-  border: 1px solid var(--accent);
-  border-radius: 12px;
-  background: var(--accent-soft);
+/* Under the hero: four short highlights. */
+.highlights {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  max-width: var(--max);
+  margin: 0 auto 40px;
+  padding: 0 40px;
+  list-style: none;
+}
+
+.highlights li > :is(a, span),
+.highlights li {
   color: var(--text);
   text-decoration: none;
 }
 
-.app-strip :deep(svg) {
-  color: var(--accent-ink);
+.highlights li {
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
 }
 
-.app-strip span {
+.highlights li:has(a):hover {
+  border-color: var(--accent);
+}
+
+.highlights li,
+.highlights a {
+  display: grid;
+  gap: 6px;
+  align-content: start;
+}
+
+.highlights :deep(svg) {
+  margin-bottom: 6px;
+  color: var(--accent);
+}
+
+.highlights span {
+  color: var(--text-2);
+  font-size: calc(14px * var(--text-scale));
+  line-height: 1.45;
+}
+
+/* Features: one section each, copy beside its demo, alternating sides, with room to breathe. */
+.pillars {
+  display: grid;
+  gap: 140px;
+  max-width: calc(var(--max) + 80px);
+  margin: 0 auto;
+  padding: 120px 40px;
+  border-top: 1px solid var(--border);
+}
+
+.pillar {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 72px;
+  align-items: center;
+}
+
+.pillar.flip .pillar-copy {
+  order: 2;
+}
+
+.pillar h2 {
+  margin: 12px 0 18px;
+  font-size: calc(clamp(30px, 3.4vw, 44px) * var(--text-scale));
+  line-height: 1.12;
+  letter-spacing: -0.015em;
+}
+
+.pillar-text {
+  max-width: 44ch;
+  margin-bottom: 22px;
+  color: var(--text-2);
+  font-size: calc(18px * var(--text-scale));
+  line-height: 1.55;
+}
+
+.checks {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.checks li {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  color: var(--text);
+  font-size: calc(16px * var(--text-scale));
+  line-height: 1.5;
+}
+
+.checks :deep(svg) {
+  flex: none;
+  position: relative;
+  top: 2px;
+  color: var(--accent);
+}
+
+.pillar-media {
+  margin: 0;
+}
+
+/* The plugin has no recording: a drawn browser with the extension's confirmation. */
+.plugin .browser {
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+}
+
+.browser-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-2);
+}
+
+.dots {
+  display: flex;
+  gap: 6px;
+}
+
+.dots i {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--border-strong);
+}
+
+.url {
+  flex: 1;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text-3);
+  font-size: 13px;
+}
+
+.ext {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: var(--accent);
+  color: var(--accent-text);
+}
+
+.browser-page {
+  position: relative;
+  display: grid;
+  gap: 14px;
+  padding: 120px 40px 48px;
+}
+
+.line {
+  height: 10px;
+  border-radius: 5px;
+  background: var(--surface-3);
+}
+
+.w60 { width: 60%; }
+.w70 { width: 70%; }
+.w80 { width: 80%; }
+.w85 { width: 85%; }
+.w90 { width: 90%; }
+
+.popup {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: grid;
+  gap: 4px;
+  width: 280px;
+  padding: 16px 18px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+  font-size: 14px;
+}
+
+.popup span {
   color: var(--text-2);
 }
 
-.app-strip-go {
-  display: flex;
-  align-items: center;
-  margin-left: auto;
-  color: var(--accent-ink) !important;
+.popup em {
+  color: var(--accent-ink);
+  font-style: normal;
   font-weight: 600;
 }
 
-.app-strip:hover {
-  box-shadow: var(--shadow);
+/* Installing as an app: three steps. */
+.install h2 {
+  margin: 10px 0 32px;
+  font-size: calc(clamp(28px, 3vw, 40px) * var(--text-scale));
+  line-height: 1.15;
+}
+
+.install-steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.install-steps li {
+  display: grid;
+  gap: 8px;
+  align-content: start;
+  padding: 24px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.install-steps :deep(svg) {
+  margin-bottom: 6px;
+  color: var(--accent);
+}
+
+.install-steps span {
+  color: var(--text-2);
+  font-size: calc(15px * var(--text-scale));
+  line-height: 1.5;
 }
 
 /* Comparison: Biblio's column tinted, marks as chips so differences read at a glance. */
@@ -628,7 +863,7 @@ table {
 
 th,
 td {
-  padding: 12px 14px;
+  padding: 18px 20px;
   border-bottom: 1px solid var(--border);
   text-align: left;
   vertical-align: top;
@@ -665,7 +900,6 @@ thead th.us {
   place-items: center;
   width: 22px;
   height: 22px;
-  margin-bottom: 4px;
   border-radius: 50%;
   font-size: 13px;
   font-weight: 700;
@@ -673,7 +907,8 @@ thead th.us {
 
 .note {
   display: block;
-  line-height: 1.45;
+  margin-top: 6px;
+  line-height: 1.5;
 }
 
 .mark.yes {
@@ -692,6 +927,7 @@ thead th.us {
 }
 
 .compare-notes {
+  margin-top: 28px;
   max-width: 72ch;
   margin-top: 22px;
   color: var(--text-2);
@@ -705,6 +941,26 @@ thead th.us {
 }
 
 @media (max-width: 900px) {
+  .highlights {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding: 0 16px;
+  }
+
+  .pillars {
+    gap: 80px;
+    padding: 64px 16px;
+  }
+
+  .pillar,
+  .pillar.flip {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+
+  .pillar.flip .pillar-copy {
+    order: 0;
+  }
+
   .hero,
   .extension,
   .feature,
@@ -720,6 +976,7 @@ thead th.us {
   }
 
    .extras,
+  .install-steps,
   .pair {
     grid-template-columns: 1fr;
   }
