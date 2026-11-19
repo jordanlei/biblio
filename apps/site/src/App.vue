@@ -1088,8 +1088,8 @@ thead th.us {
 }
 
 h1 {
-  max-width: 10ch;
-  font-size: calc(clamp(44px, 5.2vw, 74px) * var(--text-scale));
+  max-width: 14ch;
+  font-size: calc(clamp(42px, 4.2vw, 64px) * var(--text-scale));
   line-height: 1.02;
   letter-spacing: -0.045em;
 }
@@ -1117,6 +1117,20 @@ h1 {
 
 .hero-visual .shot {
   border-radius: 18px;
+}
+
+.hero-visual .phone {
+  right: 4px;
+  bottom: -18px;
+  width: 158px;
+  border: 1px solid var(--border-strong);
+  border-radius: 25px;
+  background: var(--surface);
+  box-shadow: 0 18px 38px rgba(24, 24, 27, 0.18);
+}
+
+.hero-visual .phone img {
+  border-radius: 24px;
 }
 
 .highlights {
@@ -1220,7 +1234,7 @@ h1 {
     max-width: 100%;
   }
 
-  h1 { max-width: 14ch; overflow-wrap: anywhere; }
+  h1 { max-width: 15ch; overflow-wrap: normal; }
   .lede { max-width: 42ch; }
   .highlights { grid-template-columns: 1fr; padding-bottom: 80px; }
   .pillars { padding-top: 100px; padding-bottom: 100px; }
