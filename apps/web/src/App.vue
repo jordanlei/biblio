@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, defineAsyncComponent, onBeforeUnmount, onMounted, ref, watch } from "vue";
-import { RouterView, useRoute } from "vue-router";
+import { RouterLink, RouterView, useRoute } from "vue-router";
 
 import AppIcon from "./components/AppIcon.vue";
 import AppSidebar from "./components/AppSidebar.vue";
@@ -80,6 +80,12 @@ onBeforeUnmount(() => window.removeEventListener("keydown", onKey));
     <main class="shell-main">
       <RouterView />
     </main>
+    <nav class="mobile-nav" aria-label="Primary navigation">
+      <RouterLink to="/library" active-class="active"><AppIcon name="library" :size="19" /><span>Library</span></RouterLink>
+      <RouterLink to="/library?view=inbox" active-class="active"><AppIcon name="inbox" :size="19" /><span>Inbox</span></RouterLink>
+      <RouterLink to="/research-notes" active-class="active"><AppIcon name="note" :size="19" /><span>Notes</span></RouterLink>
+      <RouterLink to="/settings" active-class="active"><AppIcon name="settings" :size="19" /><span>Settings</span></RouterLink>
+    </nav>
     <AddPapersDialog v-if="ui.addOpen" @close="ui.addOpen = false" />
     <HelpDialog v-if="ui.helpOpen" @close="ui.helpOpen = false" />
     <GuidedTour v-if="showTour" @done="endTour" />

@@ -199,8 +199,8 @@ const compareRows: Array<{ label: string; cells: Array<{ mark: Mark; note: strin
 
     <section class="compare" id="compare">
       <p class="eyebrow">If you are choosing a home for your library</p>
-      <h2 class="display">A different set of trade-offs.</h2>
-      <p class="lead compare-intro">Biblio is not trying to replace every part of a mature reference manager. It is for researchers who value ownership, readable files, and a workflow they can change.</p>
+      <h2 class="display">What Biblio does differently.</h2>
+      <p class="lead compare-intro">Biblio puts ownership and readable storage first. Here is how that compares with established reference managers.</p>
       <div class="table-wrap">
         <table>
           <thead>
