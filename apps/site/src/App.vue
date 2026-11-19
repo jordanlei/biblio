@@ -84,9 +84,9 @@ const compareRows: Array<{ label: string; cells: Array<{ mark: Mark; note: strin
 
     <section class="hero">
       <div class="pitch">
-        <p class="eyebrow hero-kicker">A reference manager for actual research</p>
-        <h1 class="display">Make room for the work between papers.</h1>
-        <p class="lede">Biblio is a quiet, open-source library for collecting papers, writing notes, and keeping your research in files you can always reach.</p>
+        <p class="eyebrow hero-kicker">Finally, a reference manager you can call your own.</p>
+        <h1 class="display">The code for a reference manager you host yourself.</h1>
+        <p class="lede">Deploy Biblio to your own Google account. Your papers, PDFs, and notes live in your Drive, while the app gives you a practical way to collect, read, and connect them.</p>
         <div class="cta">
           <div class="row">
             <a class="btn primary lg" :href="SETUP_URL">Set up your own</a>
@@ -105,9 +105,9 @@ const compareRows: Array<{ label: string; cells: Array<{ mark: Mark; note: strin
     </section>
 
     <ul class="highlights">
-      <li><AppIcon name="drive" :size="18" /><strong>Your files, your account</strong><span>Plain files in a Drive folder you control.</span></li>
-      <li><AppIcon name="library" :size="18" /><strong>One library everywhere</strong><span>Use it on a laptop, in a browser, or on your phone.</span></li>
-      <li><AppIcon name="settings" :size="18" /><strong>Open and adaptable</strong><span>MIT-licensed code, readable storage, no lock-in.</span></li>
+      <li><AppIcon name="drive" :size="18" /><strong>Your data is your own</strong><span>Plain files in a Drive folder you control.</span></li>
+      <li><AppIcon name="library" :size="18" /><strong>Mobile- and web-compatible</strong><span>Use the same library on a laptop, in a browser, or on your phone.</span></li>
+      <li><AppIcon name="settings" :size="18" /><strong>Browser extension</strong><span>Save papers from the page you are reading.</span></li>
     </ul>
 
     <section class="pillars" id="features">

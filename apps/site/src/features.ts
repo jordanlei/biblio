@@ -15,8 +15,8 @@ export const features: Feature[] = [
   {
     id: "ownership",
     eyebrow: "01 · Ownership",
-    title: "Your library is a folder, not a subscription.",
-    text: "Biblio keeps the library in your Google Drive as files you can open, move, back up, and keep if the app ever disappears.",
+    title: "Your library is stored in your Google Drive.",
+    text: "Biblio is the code for the app; you deploy your own copy. The library itself is a folder of files you can open, move, back up, and keep if the app ever disappears.",
     points: [
       "Papers as CSL-JSON, notes as Markdown, PDFs, and BibTeX",
       "No central Biblio account or analytics",
@@ -26,8 +26,8 @@ export const features: Feature[] = [
   },
   {
     id: "continuity",
-    eyebrow: "02 · Continuity",
-    title: "A desk-first library that follows you.",
+    eyebrow: "02 · Access",
+    title: "Mobile- and web-compatible.",
     text: "Open the same collection on a laptop, in a browser tab, or from your phone. Install Biblio like an app when you want it close at hand.",
     points: [
       "One library across your devices",
@@ -39,7 +39,7 @@ export const features: Feature[] = [
   {
     id: "workflow",
     eyebrow: "03 · Workflow",
-    title: "A small, legible system for reading.",
+    title: "A straightforward workflow for reading.",
     text: "Biblio gives every paper a place to land, a clear reading status, and notes that stay useful outside the interface.",
     points: [
       "Inbox, Skim, and Read statuses",
@@ -50,8 +50,8 @@ export const features: Feature[] = [
   },
   {
     id: "capture",
-    eyebrow: "04 · Capture",
-    title: "Save a paper at the moment you find it.",
+    eyebrow: "04 · Browser extension",
+    title: "Save papers from the browser.",
     text: "Search, paste an identifier, import BibTeX, or use the browser extension. The paper lands in your Inbox, ready for the next pass.",
     points: [
       "Chrome extension for the page you are reading",
@@ -62,8 +62,8 @@ export const features: Feature[] = [
   },
   {
     id: "links",
-    eyebrow: "A little deeper",
-    title: "Notes that connect your thinking.",
+    eyebrow: "05 · Notes",
+    title: "Markdown notes that connect across papers.",
     text: "Link papers from Markdown notes and see backlinks in context. The files remain yours, even when the interface changes.",
     points: ["Type @[ to link a paper", "Backlinks show the surrounding sentence", "Standalone research notes"],
     image: "still-links"
