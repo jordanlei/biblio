@@ -2,13 +2,31 @@
 // Biblio's project home page (Firebase Hosting). Biblio isn't a hosted service: this page makes the case,
 // shows the features, and sends people to setup/. Captures come from apps/site/scripts/capture.mjs.
 import AppIcon from "../../web/src/components/AppIcon.vue";
-import LandingVideo from "./components/LandingVideo.vue";
 import { features } from "./features";
 import FaqItem from "./components/FaqItem.vue";
 import SiteFooter from "./components/SiteFooter.vue";
 import SiteHeader from "./components/SiteHeader.vue";
 import { BASE, PRIVACY_URL, REPO_URL, SETUP_URL, docUrl } from "./site";
 
+
+// Bump when the captures in public/landing/ are re-recorded, so browsers fetch the new files.
+const CAPTURES = "20261120";
+
+// The library's files as they sit in Drive (docs/LIBRARY_FORMAT.md), with the demo library's names.
+const driveTree = [
+  { depth: 0, dir: true, name: "Biblio Library", icon: "folder", note: "" },
+  { depth: 1, name: "library.json", icon: "note", note: "every paper, as CSL-JSON" },
+  { depth: 1, name: "references.bib", icon: "quote", note: "the same papers, as BibTeX" },
+  { depth: 1, name: "biblio.json", icon: "settings", note: "folders and format version" },
+  { depth: 1, name: "README.md", icon: "note", note: "what this folder is" },
+  { depth: 1, dir: true, name: "bib", icon: "folder", note: "one .bib per folder" },
+  { depth: 1, dir: true, name: "notes", icon: "folder", note: "" },
+  { depth: 2, name: "sussilloLFADSLatentFactor2016.md", icon: "note", note: "notes on a paper" },
+  { depth: 2, name: "Single-trial population dynamics.md", icon: "note", note: "a research note" },
+  { depth: 1, dir: true, name: "papers", icon: "folder", note: "" },
+  { depth: 2, name: "sussilloLFADSLatentFactor2016.pdf", icon: "pdf", note: "" },
+  { depth: 2, name: "vaswaniAttentionNeed2017.pdf", icon: "pdf", note: "" }
+];
 
 // Verified against each product's own documentation, October 2026: docs/COMPARISON.md.
 // Only the rows where Biblio differs; the rest are summarized beneath the table.
@@ -66,26 +84,31 @@ const compareRows: Array<{ label: string; cells: Array<{ mark: Mark; note: strin
 
     <section class="hero">
       <div class="pitch">
-        <h1 class="display">A reference manager that's actually yours.</h1>
-        <p class="lede">Free forever, open-source, and self-hosted. Your papers, notes, and PDFs stay in your Google Drive as plain files.</p>
+        <h1 class="display">An open-source reference manager that stores your library in Google Drive</h1>
+        <p class="lede">Free forever. You run your own copy; your papers, notes, and PDFs are plain files in your Drive.</p>
         <div class="cta">
           <div class="row">
             <a class="btn primary lg" :href="SETUP_URL">Set up your own</a>
-            <a class="btn lg" href="#features">See the features</a>
+            <a class="btn lg" href="#features">Features</a>
             <a class="btn lg quiet" :href="REPO_URL">View the code</a>
           </div>
         </div>
       </div>
-      <figure class="hero-visual shot">
-        <img :src="`${BASE}landing/library.jpg?v=20261119b`" width="2560" height="1600" alt="Biblio's paper library and detail panel, shown with sample papers." />
-      </figure>
+      <div class="hero-visual">
+        <figure class="shot">
+          <img :src="`${BASE}landing/library.jpg?v=${CAPTURES}`" width="2560" height="1600" alt="Biblio's paper library and detail panel, shown with sample papers." />
+        </figure>
+        <figure class="phone">
+          <img :src="`${BASE}landing/phone-library.jpg?v=${CAPTURES}`" width="780" height="1688" alt="The same library in Biblio's installed app on a phone." />
+        </figure>
+      </div>
     </section>
 
     <ul class="highlights">
-      <li><AppIcon name="check" :size="18" /><strong>Free forever</strong><span>No subscription; runs on Google’s free plan</span></li>
-      <li><AppIcon name="drive" :size="18" /><strong>Your Google Drive</strong><span>Plain files you can read without Biblio</span></li>
-      <li><a href="#install"><AppIcon name="download" :size="18" /><strong>Installable app</strong><span>The same library on your laptop and phone</span></a></li>
-      <li><AppIcon name="settings" :size="18" /><strong>Open source</strong><span>MIT license; change any part</span></li>
+      <li><AppIcon name="check" :size="18" /><strong>Free forever</strong><span>Runs on Google’s free Firebase plan</span></li>
+      <li><AppIcon name="drive" :size="18" /><strong>Stored in Google Drive</strong><span>CSL-JSON, Markdown, PDF, and BibTeX files</span></li>
+      <li><a href="#install"><AppIcon name="download" :size="18" /><strong>Installable web app</strong><span>Laptop and phone</span></a></li>
+      <li><AppIcon name="settings" :size="18" /><strong>Open source</strong><span>MIT License</span></li>
     </ul>
 
     <section class="pillars" id="features">
@@ -98,8 +121,15 @@ const compareRows: Array<{ label: string; cells: Array<{ mark: Mark; note: strin
             <li v-for="point in f.points" :key="point"><AppIcon name="check" :size="16" /> {{ point }}</li>
           </ul>
         </div>
-        <figure v-if="f.video" class="shot pillar-media">
-          <LandingVideo :name="f.video.name" :width="f.video.width" :height="f.video.height" :label="f.title" />
+        <figure v-if="f.image" class="shot pillar-media">
+          <img :src="`${BASE}landing/${f.image}.jpg?v=${CAPTURES}`" :alt="f.title" loading="lazy" />
+        </figure>
+        <figure v-else-if="f.visual === 'drive'" class="pillar-media drive" aria-label="The library's files in Google Drive">
+          <ul class="tree">
+            <li v-for="item in driveTree" :key="item.name" :class="{ dir: item.dir }" :style="{ paddingLeft: `${18 + item.depth * 22}px` }">
+              <AppIcon :name="item.dir ? 'folder' : item.icon" :size="16" /> <span>{{ item.name }}</span><small>{{ item.note }}</small>
+            </li>
+          </ul>
         </figure>
         <figure v-else class="pillar-media plugin" aria-hidden="true">
           <div class="browser">
@@ -114,13 +144,19 @@ const compareRows: Array<{ label: string; cells: Array<{ mark: Mark; note: strin
     </section>
 
     <section class="install" id="install">
-      <p class="eyebrow">Installable web app</p>
-      <h2 class="display">Use the same library on your laptop and phone.</h2>
+      <div class="install-grid">
+      <div>
+      <h2 class="display">Installable Web App</h2>
       <ol class="install-steps">
         <li><AppIcon name="external" :size="20" /><strong>Open your Biblio</strong><span>In Chrome or Edge on a computer, or Safari on an iPhone.</span></li>
         <li><AppIcon name="download" :size="20" /><strong>Install it</strong><span>Click the install icon in the address bar, or Share → Add to Home Screen.</span></li>
-        <li><AppIcon name="library" :size="20" /><strong>Open it like an app</strong><span>In its own window, with the same library as every other install.</span></li>
+        <li><AppIcon name="library" :size="20" /><strong>Use it</strong><span>It opens in its own window, with the same library on every device.</span></li>
       </ol>
+      </div>
+      <figure class="phone">
+        <img :src="`${BASE}landing/phone-paper.jpg?v=${CAPTURES}`" width="780" height="1688" alt="A paper's details and notes in Biblio's installed app on a phone." loading="lazy" />
+      </figure>
+      </div>
     </section>
 
     <section id="how-it-works" class="how">
@@ -188,7 +224,7 @@ const compareRows: Array<{ label: string; cells: Array<{ mark: Mark; note: strin
 
     <section class="run">
       <div class="run-head">
-        <h2 class="display">Set up your own Biblio.</h2>
+        <h2 class="display">Setup</h2>
         <p>Needs a Google account, Node.js, and git.</p>
       </div>
       <pre class="terminal">git clone {{ REPO_URL }}.git
@@ -244,7 +280,9 @@ npm run setup</pre>
 
 <style scoped>
 .landing {
-  --max: 1160px;
+  --max: 1080px;
+  /* Side gutters that grow with the window, so content never runs to the edges. */
+  --gutter: clamp(24px, 6vw, 96px);
   min-height: 100vh;
   background: var(--bg);
   overflow-x: hidden;
@@ -255,14 +293,14 @@ npm run setup</pre>
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
   gap: 56px;
   align-items: center;
-  max-width: calc(var(--max) + 160px);
+  max-width: calc(var(--max) + 2 * var(--gutter));
   margin: 0 auto;
-  padding: 40px 32px 88px;
+  padding: 48px var(--gutter) 88px;
 }
 
 h1 {
-  font-size: calc(clamp(36px, 4.4vw, 58px) * var(--text-scale));
-  line-height: 1.04;
+  font-size: calc(clamp(32px, 3.3vw, 46px) * var(--text-scale));
+  line-height: 1.1;
   letter-spacing: -0.025em;
 }
 
@@ -313,9 +351,9 @@ h1 {
 .compare,
 .run,
 .faq-section {
-  max-width: var(--max);
+  max-width: calc(var(--max) + 2 * var(--gutter));
   margin: 0 auto;
-  padding: 96px 40px;
+  padding: 104px var(--gutter);
   border-top: 1px solid var(--border);
 }
 
@@ -614,9 +652,9 @@ code {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 14px;
-  max-width: var(--max);
-  margin: 0 auto 40px;
-  padding: 0 40px;
+  max-width: calc(var(--max) + 2 * var(--gutter));
+  margin: 0 auto 56px;
+  padding: 0 var(--gutter);
   list-style: none;
 }
 
@@ -659,9 +697,9 @@ code {
 .pillars {
   display: grid;
   gap: 140px;
-  max-width: calc(var(--max) + 80px);
+  max-width: calc(var(--max) + 2 * var(--gutter));
   margin: 0 auto;
-  padding: 120px 40px;
+  padding: 120px var(--gutter);
   border-top: 1px solid var(--border);
 }
 
@@ -717,6 +755,90 @@ code {
 
 .pillar-media {
   margin: 0;
+}
+
+.hero-visual {
+  position: relative;
+  margin: 0 0 0 0;
+  padding-bottom: 40px;
+}
+
+/* A phone screenshot in a thin device frame. */
+.phone {
+  width: 220px;
+  margin: 0;
+  overflow: hidden;
+  border: 8px solid #18181b;
+  border-radius: 34px;
+  background: #18181b;
+  box-shadow: var(--shadow-lg);
+}
+
+.phone img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 26px;
+}
+
+.hero-visual .phone {
+  position: absolute;
+  right: -24px;
+  bottom: -8px;
+  width: 170px;
+}
+
+.install-grid .phone {
+  width: 260px;
+}
+
+.install-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 64px;
+  align-items: center;
+}
+
+.install-grid .install-steps {
+  grid-template-columns: 1fr;
+}
+
+/* The Drive section: the library's real file layout. */
+.drive .tree {
+  margin: 0;
+  padding: 14px 0;
+  list-style: none;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+  font-size: calc(14.5px * var(--text-scale));
+}
+
+.drive .tree li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-top: 7px;
+  padding-bottom: 7px;
+  padding-right: 18px;
+}
+
+.drive .tree li.dir span {
+  font-weight: 600;
+}
+
+.drive .tree :deep(svg) {
+  flex: none;
+  color: var(--accent);
+}
+
+.drive .tree small {
+  margin-left: auto;
+  padding-left: 16px;
+  color: var(--text-3);
+  font-size: calc(13px * var(--text-scale));
+  white-space: nowrap;
 }
 
 /* The plugin has no recording: a drawn browser with the extension's confirmation. */
@@ -943,12 +1065,11 @@ thead th.us {
 @media (max-width: 900px) {
   .highlights {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    padding: 0 16px;
   }
 
   .pillars {
     gap: 80px;
-    padding: 64px 16px;
+    padding-block: 64px;
   }
 
   .pillar,
@@ -967,16 +1088,16 @@ thead th.us {
   
   
   .how,
-  .capabilities,
-  .extension,
-  .features,
+  .install,
+  .compare,
   .faq-section,
   .run {
-    padding: 40px 16px;
+    padding-block: 56px;
   }
 
    .extras,
   .install-steps,
+  .install-grid,
   .pair {
     grid-template-columns: 1fr;
   }

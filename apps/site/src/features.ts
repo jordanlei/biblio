@@ -1,11 +1,14 @@
-// The features the homepage highlights, one section each, with its demo (apps/site/scripts/capture.mjs).
+// The features the homepage highlights, one section each, with a still from apps/site/scripts/capture.mjs
+// or a drawn visual.
 export type Feature = {
   id: string;
   eyebrow: string;
   title: string;
   text: string;
   points: string[];
-  video?: { name: string; width: number; height: number };
+  /** A still from capture.mjs in public/landing/, or a drawn visual. */
+  image?: string;
+  visual?: "drive" | "plugin";
 };
 
 export const features: Feature[] = [
@@ -13,83 +16,84 @@ export const features: Feature[] = [
     id: "search",
     eyebrow: "Search and import",
     title: "Paper Search, DOI and arXiv Lookup, and BibTeX Import",
-    text: "Find a paper and save it without leaving your library, with a note on why you saved it.",
+    text: "Add papers from an OpenAlex search, an identifier, or a BibTeX file, with a note on why you saved each one.",
     points: [
       "Search OpenAlex’s 250M works by topic, title, or author",
       "Paste DOIs, arXiv IDs, or PubMed IDs",
       "Import a .bib from Zotero, Mendeley, or Overleaf"
     ],
-    video: { name: "search", width: 600, height: 326 }
+    image: "still-search"
   },
   {
     id: "organize",
     eyebrow: "Organize",
     title: "Hierarchical Inbox and Read Status",
-    text: "New papers wait in an Inbox until you decide what they need.",
+    text: "New papers go to an Inbox. Each paper is marked Inbox, Skim, or Read, or left unmarked as a reference.",
     points: [
       "Keys 1, 2, 3 for Inbox, Skim, and Read; unmarked means kept for reference",
       "Tags for topics, folders for projects",
       "Each folder keeps its own up-to-date .bib"
     ],
-    video: { name: "organize", width: 600, height: 618 }
+    image: "still-organize"
   },
   {
     id: "notes",
     eyebrow: "Notes",
     title: "Markdown Notes that Render Natively",
-    text: "Write about a paper beside its abstract and PDF, and read your notes rendered in place.",
+    text: "Notes on each paper are written in Markdown and shown rendered, beside the abstract and PDF.",
     points: [
       "Markdown, with LaTeX math between $$ … $$",
       "Saves as you type",
       "One Markdown file per paper in your Drive"
     ],
-    video: { name: "review", width: 600, height: 468 }
+    image: "still-notes"
   },
   {
     id: "links",
     eyebrow: "Citations",
     title: "Citation Links and Backlinks Between Papers",
-    text: "Cite one paper from another’s notes, and see everywhere a paper has been cited.",
+    text: "A note can cite any paper in your library, and each paper lists the notes that cite it.",
     points: [
       "Type @[ to link any paper in your library",
       "Links read as citations: Sussillo et al. (2016)",
       "Each paper lists the notes that cite it, with the sentence around the link"
     ],
-    video: { name: "linking", width: 600, height: 468 }
+    image: "still-links"
   },
   {
     id: "research-notes",
     eyebrow: "Research notes",
     title: "Research Notes to Link Across Papers",
-    text: "Notes for a question, a project, or a related-work draft that spans many papers.",
+    text: "Standalone notes for a question or project, linked to the papers they discuss.",
     points: [
       "Freeform Markdown, with @[ links to papers",
       "Every linked paper listed under the note, with its read status",
       "Each note is a Markdown file in your Drive"
     ],
-    video: { name: "research-notes", width: 600, height: 585 }
+    image: "still-research-notes"
   },
   {
     id: "drive",
     eyebrow: "Your files",
     title: "Library Stored as Plain Files in Your Google Drive",
-    text: "Sign in with Google and choose the Drive folder your library lives in.",
+    text: "Your library is a folder in your Google Drive, chosen when you first sign in.",
     points: [
       "Papers as CSL-JSON, notes as Markdown, PDFs, and references.bib",
       "Readable without Biblio; download the whole library as a .zip",
       "Biblio can see only the files it creates"
     ],
-    video: { name: "first-run", width: 1280, height: 800 }
+    visual: "drive"
   },
   {
     id: "extension",
     eyebrow: "Browser plugin",
     title: "Browser Plugin",
-    text: "Save the paper you’re reading, with its PDF, from any publisher’s page in Chrome.",
+    text: "A Chrome extension that adds the paper on the current page to your library, with its PDF.",
     points: [
       "Reads the page with Zotero’s own translators, only when you click",
       "Fetches the PDF when one is available, including subscription PDFs your browser can open",
       "Saved papers land in your Inbox"
-    ]
+    ],
+    visual: "plugin"
   }
 ];

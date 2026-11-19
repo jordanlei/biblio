@@ -48,6 +48,16 @@ async function shot(name) {
   console.log(`✓ ${name}.jpg`);
 }
 
+/** A sharp still of one region (CSS px), for the home page's feature sections: OUT/<name>.jpg. */
+async function still(name, clip) {
+  await noToasts();
+  await page.mouse.move(0, 0);
+  await pause(400);
+  const r = Object.fromEntries(Object.entries(clip).map(([k, v]) => [k, Math.round(v)]));
+  await page.screenshot({ path: join(OUT, `${name}.jpg`), type: "jpeg", quality: 90, clip: r });
+  console.log(`✓ ${name}.jpg`);
+}
+
 /** Pixel width from a JPEG's start-of-frame header. */
 function jpegWidth(buf) {
   for (let i = 2; i < buf.length; ) {
@@ -64,6 +74,13 @@ function jpegWidth(buf) {
  * `crop` ({x, y, width, height} in CSS px) keeps only the part of the screen the demo is about.
  */
 async function record(name, steps, { width = 1180, height = 740, crop } = {}) {
+  // VIDEOS=0 runs the same steps without recording, for a stills-only run.
+  if (process.env.VIDEOS === "0") {
+    await page.setViewportSize({ width, height });
+    await steps();
+    await page.setViewportSize({ width: 1280, height: 800 });
+    return;
+  }
   const frames = mkdtempSync(join(tmpdir(), `biblio-${name}-`));
   await page.setViewportSize({ width, height });
   const region = crop ?? { x: 0, y: 0, width, height };
@@ -228,7 +245,7 @@ async function note(title, parts) {
     } else await area.pressSequentially(part, { delay: 2 });
   }
   await inspector().getByText("Saved", { exact: true }).waitFor();
-  await inspector().getByRole("button", { name: "Done" }).click();
+  await inspector().locator("button.link-btn", { hasText: /^Done$/ }).click();
 }
 await note("LFADS", [
   "Sequential auto-encoder that infers **single-trial** latent dynamics from spikes.\n\n",
@@ -290,6 +307,15 @@ for (const [title, key] of [["Inferring single-trial", "2"], ["LFADS", "3"]]) {
 }
 await noToasts();
 
+// Still: the sidebar's Inbox and the list with each paper's read status.
+await page.keyboard.press("Escape");
+await top();
+// A narrower window, so the whole row fits, including the status label and Inbox dot at its right edge.
+await page.setViewportSize({ width: 1060, height: 700 });
+await top();
+await still("still-organize", { x: 0, y: 0, width: 1060, height: 640 });
+await page.setViewportSize({ width: 1280, height: 800 });
+
 // --- Screenshot --------------------------------------------------------------------------------
 await row("LFADS").click();
 await top();
@@ -323,6 +349,8 @@ await record(
   },
   { width: 1500, height: 900, crop: addPanel }
 );
+await page.setViewportSize({ width: 1500, height: 900 });
+await still("still-search", addPanel);
 await page.keyboard.press("Escape");
 await page.setViewportSize({ width: 1280, height: 800 });
 await noToasts();
@@ -354,12 +382,28 @@ await record(
     await area.pressSequentially("\n\nUse for the multi-region comparison.", { delay: 26 });
     await pause(800);
     await inspector().getByText("Saved", { exact: true }).waitFor();
-    await inspector().getByRole("button", { name: "Done" }).click();
+    await inspector().locator("button.link-btn", { hasText: /^Done$/ }).click();
     await pause(2200);
   },
   { crop: reviewArea }
 );
 await noToasts();
+
+// Still: the same notes with LaTeX math, rendered in place.
+{
+  await inspector().getByRole("button", { name: /Write notes|Edit/ }).click();
+  const area = inspector().locator("textarea");
+  await area.evaluate((el) => el.setSelectionRange(el.value.length, el.value.length));
+  await area.focus();
+  await area.pressSequentially("\n\nEach regime $$z_t$$ has its own linear dynamics:\n\n$$x_{t+1} = A_{z_t} x_t + b_{z_t}$$\n", { delay: 2 });
+  await inspector().getByText("Saved", { exact: true }).waitFor();
+  await inspector().locator("button.link-btn", { hasText: /^Done$/ }).click();
+  const notes = inspector().getByText("Notes", { exact: true }).first();
+  await notes.evaluate((el) => el.scrollIntoView({ block: "start" }));
+  const box = await inspector().evaluate((el) => el.getBoundingClientRect().toJSON());
+  const top = await notes.evaluate((el) => el.getBoundingClientRect().top);
+  await still("still-notes", { x: box.x, y: Math.max(0, top - 24), width: box.width, height: Math.min(460, 800 - Math.max(0, top - 24)) });
+}
 
 // --- Video: write a note that links another paper, then follow the link -----------------------
 await page.goto(`${APP}/library`);
@@ -404,6 +448,8 @@ await record(
   },
   { crop: noteColumn }
 );
+await page.setViewportSize({ width: 1180, height: 740 });
+await still("still-links", noteColumn);
 
 // --- Video: a research note is just Markdown that links papers --------------------------------
 await page.goto(`${APP}/research-notes`);
@@ -447,5 +493,17 @@ await record(
   },
   { width: 1180, height: 800, crop: notePane }
 );
+await page.setViewportSize({ width: 1180, height: 800 });
+await still("still-research-notes", notePane);
+
+// --- Phone: the same app at phone size, for the installable-app section ------------------------
+await page.setViewportSize({ width: 390, height: 844 });
+await page.goto(`${APP}/library`);
+await page.locator(".entry").first().waitFor();
+await pause(800);
+await still("phone-library", { x: 0, y: 0, width: 390, height: 844 });
+await row("LFADS").click();
+await pause(800);
+await still("phone-paper", { x: 0, y: 0, width: 390, height: 844 });
 
 await browser.close();

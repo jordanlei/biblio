@@ -21,9 +21,9 @@ import { BASE, PRIVACY_URL, REPO_URL, SETUP_URL } from "../site";
   display: flex;
   align-items: center;
   gap: 16px;
-  max-width: 1160px;
+  max-width: calc(1080px + 2 * clamp(24px, 6vw, 96px));
   margin: 0 auto;
-  padding: 22px 32px;
+  padding: 22px clamp(24px, 6vw, 96px);
 }
 
 .brand {
@@ -54,7 +54,7 @@ import { BASE, PRIVACY_URL, REPO_URL, SETUP_URL } from "../site";
 
 @media (max-width: 640px) {
   .top {
-    padding: 16px;
+    padding: 16px 24px;
   }
 
   .links a:first-child {
