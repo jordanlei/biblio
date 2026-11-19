@@ -6,6 +6,7 @@ import { onBeforeUnmount, onMounted, ref } from "vue";
 const props = defineProps<{ name: string; label: string; width: number; height: number }>();
 
 const base = import.meta.env.BASE_URL;
+const captureVersion = "20261119";
 const el = ref<HTMLVideoElement | null>(null);
 const src = ref<string | undefined>();
 let observer: IntersectionObserver | null = null;
@@ -14,13 +15,13 @@ onMounted(() => {
   const video = el.value;
   if (!video) return;
   if (!("IntersectionObserver" in window)) {
-    src.value = `${import.meta.env.BASE_URL}landing/${props.name}.webm`;
+    src.value = `${import.meta.env.BASE_URL}landing/${props.name}.webm?v=${captureVersion}`;
     return;
   }
   observer = new IntersectionObserver(
     ([entry]) => {
       if (entry.isIntersecting) {
-        src.value ??= `${import.meta.env.BASE_URL}landing/${props.name}.webm`;
+        src.value ??= `${import.meta.env.BASE_URL}landing/${props.name}.webm?v=${captureVersion}`;
         video.play().catch(() => {});
       } else {
         video.pause();
@@ -35,5 +36,5 @@ onBeforeUnmount(() => observer?.disconnect());
 </script>
 
 <template>
-  <video ref="el" :src="src" :poster="`${base}landing/${name}-poster.jpg`" :width="width" :height="height" muted loop playsinline preload="none" autoplay :aria-label="label" />
+  <video ref="el" :src="src" :poster="`${base}landing/${name}-poster.jpg?v=${captureVersion}`" :width="width" :height="height" muted loop playsinline preload="none" autoplay :aria-label="label" />
 </template>

@@ -6,12 +6,13 @@ Nothing is mocked up by hand. When the UI changes, rerun the script so the page 
 
 ## Prerequisites
 
-- **Java 11+** on `PATH`, for the Firebase emulators. Any JDK works, including an unpacked
+- **Java 21+** on `PATH`, for the current Firebase emulators. A JDK such as an unpacked
   Temurin build: `export JAVA_HOME=…/Contents/Home; export PATH="$JAVA_HOME/bin:$PATH"`.
 - **Playwright Chromium and ffmpeg**: `npx playwright install chromium`. This also installs
   Playwright's bundled ffmpeg (`~/Library/Caches/ms-playwright/ffmpeg-*/`), which the script uses to
   encode video. Set `FFMPEG=/path/to/ffmpeg` to use a different build.
-- Network access. The demo fetches open-access PDFs from arXiv.
+- Network access. The demo fetches open-access PDFs from arXiv and search results from OpenAlex.
+- Build the shared package first: `npm --workspace packages/core run build`.
 
 ## Running it
 
@@ -95,7 +96,9 @@ The organize clip is recorded in a wider 1440×860 window so titles aren't cut o
 badge at the bottom of the region, because a key press is otherwise invisible in a video. It is
 added only during capture, never in the app.
 
-A CSS rule injected at startup hides the "Local" test-mode badge, so captures look like production.
+A CSS rule injected at startup hides the "Local" test-mode badge and applies the deployed app's
+blue-and-white palette to the local demo. Captures use the checked-out app code and demo data;
+update that code and the capture palette when the deployed app changes.
 
 ## How the video encoding works
 

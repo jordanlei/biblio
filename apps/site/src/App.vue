@@ -22,28 +22,28 @@ const features = [
     eyebrow: "Organize",
     title: "Four shelves, one keypress.",
     text: "To Read, Skim, Read, Reference — press 1 to 4. That's the whole reading model; anything more specific is a tag. Folders hold stable projects.",
-    video: { name: "organize", width: 600, height: 602 }
+    video: { name: "organize", width: 600, height: 618 }
   },
   {
     id: "review",
     eyebrow: "Review",
     title: "Notes beside the paper.",
     text: "Write in Markdown next to the abstract and the PDF, without opening another app. Notes save as you type, into your own Drive.",
-    video: { name: "review", width: 600, height: 478 }
+    video: { name: "review", width: 600, height: 468 }
   },
   {
     id: "link",
     eyebrow: "Link",
     title: "Papers that know each other.",
     text: "Type @[ to link a paper from any note. The linked paper then lists every note that mentions it, with the sentence around the link.",
-    video: { name: "linking", width: 600, height: 478 }
+    video: { name: "linking", width: 600, height: 468 }
   },
   {
     id: "write",
     eyebrow: "Write",
     title: "Think across papers.",
     text: "A research note is freeform Markdown for a question or a project. Link the papers that bear on it and they gather themselves.",
-    video: { name: "research-notes", width: 600, height: 604 }
+    video: { name: "research-notes", width: 600, height: 585 }
   }
 ];
 
