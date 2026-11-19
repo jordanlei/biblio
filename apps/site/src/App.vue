@@ -1,17 +1,12 @@
 <script setup lang="ts">
 // Biblio's project home page (Firebase Hosting). Biblio isn't a hosted service: this page makes the case,
 // shows the features, and sends people to setup/. Captures come from apps/site/scripts/capture.mjs.
-import { ref } from "vue";
 import AppIcon from "../../web/src/components/AppIcon.vue";
-import DemoViewer from "./components/DemoViewer.vue";
-import { chapters } from "./demos";
+import DemoTour from "./components/DemoTour.vue";
 import FaqItem from "./components/FaqItem.vue";
 import SiteFooter from "./components/SiteFooter.vue";
 import SiteHeader from "./components/SiteHeader.vue";
 import { BASE, PRIVACY_URL, REPO_URL, SETUP_URL, docUrl } from "./site";
-
-// The demos and their steps live with the viewer; the page lists the same chapters.
-const viewer = ref<InstanceType<typeof DemoViewer> | null>(null);
 
 
 // Verified against each product's own documentation, October 2026: docs/COMPARISON.md.
@@ -75,7 +70,7 @@ const compareRows: Array<{ label: string; cells: Array<{ mark: Mark; note: strin
         <div class="cta">
           <div class="row">
             <a class="btn primary lg" :href="SETUP_URL">Set up your own</a>
-            <button type="button" class="btn lg" @click="viewer?.open(0)">Watch the demos</button>
+            <a class="btn lg" href="#features">See the features</a>
             <a class="btn lg quiet" :href="REPO_URL">View the code</a>
           </div>
         </div>
@@ -85,21 +80,17 @@ const compareRows: Array<{ label: string; cells: Array<{ mark: Mark; note: strin
       </figure>
     </section>
 
+    <a class="app-strip" href="#install">
+      <AppIcon name="download" :size="18" />
+      <strong>Installable web app</strong>
+      <span>Use the same library on your laptop and phone, each in its own window.</span>
+      <span class="app-strip-go">How to install <AppIcon name="chevron-right" :size="15" /></span>
+    </a>
+
     <section class="features" id="features">
       <h2 class="display">Features</h2>
-      <ol class="feature-list">
-        <li v-for="(c, i) in chapters" :key="c.id" :id="c.id">
-          <button type="button" @click="viewer?.open(i)">
-            <span class="num">{{ i + 1 }}</span>
-            <span class="feature-text"><strong>{{ c.title }}</strong></span>
-            <span class="feature-go">{{ c.video ? "Demo" : "Steps" }} <AppIcon name="chevron-right" :size="15" /></span>
-          </button>
-        </li>
-      </ol>
-
+      <DemoTour />
     </section>
-
-    <DemoViewer ref="viewer" />
 
     <section id="how-it-works" class="how">
       <h2 class="display">How it works</h2>
@@ -586,71 +577,40 @@ code {
   white-space: nowrap;
 }
 
-/* Features: one row per demo chapter; each opens the viewer there. */
-.feature-list {
-  display: grid;
-  margin: 0 0 40px;
-  padding: 0;
-  border-top: 1px solid var(--border);
-  list-style: none;
-}
-
-.feature-list button {
-  display: grid;
-  grid-template-columns: 2em minmax(0, 1fr) auto;
-  gap: 16px;
-  align-items: baseline;
-  width: 100%;
-  padding: 16px 8px;
-  border: 0;
-  border-bottom: 1px solid var(--border);
-  background: transparent;
+/* The installable app, featured right under the hero. */
+.app-strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  max-width: calc(var(--max) - 64px);
+  margin: 0 auto 56px;
+  padding: 14px 20px;
+  border: 1px solid var(--accent);
+  border-radius: 12px;
+  background: var(--accent-soft);
   color: var(--text);
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
+  text-decoration: none;
 }
 
-.feature-list button:hover,
-.feature-list button:focus-visible {
-  background: var(--surface-2);
+.app-strip :deep(svg) {
+  color: var(--accent-ink);
 }
 
-.feature-list .num {
-  color: var(--text-3);
-  font-variant-numeric: tabular-nums;
+.app-strip span {
+  color: var(--text-2);
 }
 
-.feature-text {
-  display: grid;
-  gap: 3px;
-}
-
-.feature-text strong {
-  font-family: var(--font-serif);
-  font-size: calc(18px * var(--text-scale));
+.app-strip-go {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+  color: var(--accent-ink) !important;
   font-weight: 600;
 }
 
-.feature-text span {
-  color: var(--text-2);
-  font-size: calc(15px * var(--text-scale));
-  line-height: 1.5;
-}
-
-.feature-go {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  color: var(--accent);
-  font-size: calc(14px * var(--text-scale));
-  white-space: nowrap;
-}
-
-.extras-head {
-  margin: 0 0 4px;
-  font-family: var(--font-serif);
-  font-size: calc(18px * var(--text-scale));
+.app-strip:hover {
+  box-shadow: var(--shadow);
 }
 
 /* Comparison: Biblio's column tinted, marks as chips so differences read at a glance. */
