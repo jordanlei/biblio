@@ -1,0 +1,19 @@
+/* Match the palette of the deployed Biblio app while keeping the site independent. */
+:root {
+  --bg: #fff; --surface: #fff; --surface-2: #f4f4f5; --surface-3: #e9e9ec;
+  --sidebar: #f7f7f8; --border: #e7e7ea; --border-strong: #d2d2d8;
+  --text: #18181b; --text-2: #3f3f46; --text-3: #686872;
+  --accent: #23407a; --accent-hover: #1b3263; --accent-text: #fff;
+  --accent-soft: #e6ebf6; --accent-ink: #23407a; --select: #eef1f8;
+  --shadow: 0 1px 2px #18181b0d, 0 8px 24px #18181b12;
+  --shadow-lg: 0 24px 64px #18181b2e;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #141416; --surface: #1a1a1d; --surface-2: #212125; --surface-3: #2a2a2f;
+    --sidebar: #18181b; --border: #2c2c31; --border-strong: #45454c;
+    --text: #ececef; --text-2: #c4c4cc; --text-3: #9a9aa3;
+    --accent: #8fb0e8; --accent-hover: #a8c2ee; --accent-text: #0f1626;
+    --accent-soft: #1f2a3d; --accent-ink: #a8c2ee; --select: #222833;
+  }
+}
