@@ -28,13 +28,8 @@ const context = await browser.newContext({ viewport: { width: 1280, height: 800 
 await context.addInitScript(() => {
   addEventListener("DOMContentLoaded", () => {
     const style = document.createElement("style");
-    style.textContent = `.brand-row .chip { display: none !important; }
-      :root { --bg:#fff !important; --surface:#fff !important; --surface-2:#f4f4f5 !important;
-        --surface-3:#e9e9ec !important; --sidebar:#f7f7f8 !important; --border:#e7e7ea !important;
-        --border-strong:#d2d2d8 !important; --text:#18181b !important; --text-2:#3f3f46 !important;
-        --text-3:#686872 !important; --accent:#23407a !important; --accent-hover:#1b3263 !important;
-        --accent-text:#fff !important; --accent-soft:#e6ebf6 !important; --accent-ink:#23407a !important;
-        --select:#eef1f8 !important; }`;
+    // Only the badge is hidden: captures show the app's own look, the same as a new copy gets.
+    style.textContent = `.brand-row .chip { display: none !important; }`;
     document.head.appendChild(style);
   });
 });
@@ -267,9 +262,9 @@ await record(
     await pause(900);
     for (const [title, key, label] of [
       ["Attention Is All You Need", "3", "Read"],
-      ["Human-level control", "2", "Skimming"],
-      ["Conflict monitoring", "1", "To read"],
-      ["Recurrent Switching", "1", "To read"]
+      ["Human-level control", "2", "Skim"],
+      ["Conflict monitoring", "1", "Inbox"],
+      ["Recurrent Switching", "1", "Inbox"]
     ]) {
       await row(title).click();
       await pause(450);
@@ -280,9 +275,9 @@ await record(
     await pause(400);
     // Filter down to one shelf, then back.
     await page.locator(".filters").getByRole("button", { name: /Filters/ }).click();
-    await page.locator(".filters").getByRole("button", { name: "To Read", exact: true }).click();
+    await page.locator(".filters").getByRole("button", { name: "Read", exact: true }).click();
     await pause(1600);
-    await page.locator(".filters").getByRole("button", { name: "To Read", exact: true }).click();
+    await page.locator(".filters").getByRole("button", { name: "Read", exact: true }).click();
     await page.locator(".filters").getByRole("button", { name: /Filters/ }).click();
     await pause(1500);
   },

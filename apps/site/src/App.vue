@@ -20,8 +20,8 @@ const features = [
   {
     id: "organize",
     eyebrow: "Organize",
-    title: "Four shelves, one keypress.",
-    text: "To Read, Skim, Read, Reference — press 1 to 4. That's the whole reading model; anything more specific is a tag. Folders hold stable projects.",
+    title: "Three shelves, one keypress.",
+    text: "Inbox, Skim, Read — press 1 to 3. New papers wait in the Inbox until you mark them done; anything unmarked is kept for reference. Anything more specific is a tag. Folders hold stable projects.",
     video: { name: "organize", width: 600, height: 618 }
   },
   {
@@ -55,7 +55,11 @@ const highlights = [
 ];
 
 const extras = [
-  { icon: "quote", text: "references.bib stays current for LaTeX and Overleaf" },
+  { icon: "quote", text: "references.bib, plus one .bib per folder, stays current for LaTeX and Overleaf" },
+  { icon: "link", text: "See which papers in your library cite each other" },
+  { icon: "inbox", text: "Follow authors and topics; new work arrives in the Inbox" },
+  { icon: "copy", text: "Find and merge duplicates, such as a preprint and its published version" },
+  { icon: "note", text: "LaTeX math in notes" },
   { icon: "pdf", text: "Find and attach available PDFs" },
   { icon: "clock", text: "Edits queue offline and sync when you reconnect" },
   { icon: "search", text: "⌘K to jump anywhere" },
@@ -234,8 +238,8 @@ npm run setup</pre>
           Your copy uses your Google account and your own Firebase project. There is no central Biblio service or analytics. Paper lookups go straight from your browser to public catalogs, which see your IP and what you asked
           about — <a :href="PRIVACY_URL">the privacy page</a> spells out exactly what is and isn't private.
         </FaqItem>
-        <FaqItem question="Why only four reading shelves?">
-          Because more shelves become a filing problem of their own. To Read, Skim, Read, and Reference (kept to cite, not to read) cover how much attention a paper needs; everything else, such as a project or topic, can be a tag or folder.
+        <FaqItem question="Why only three reading shelves?">
+          Because more shelves become a filing problem of their own. Inbox, Skim, and Read cover how much attention a paper needs, and an unmarked paper is simply kept for reference; everything else, such as a project or topic, can be a tag or folder.
         </FaqItem>
         <FaqItem question="Can I add my own features?">
           Yes, and keep them through updates. Your code goes in <code>apps/web/src/custom/</code>, which upstream never touches, and can add pages, sidebar links, and panels. See <a :href="docUrl('EXTENDING.md')">EXTENDING.md</a>.

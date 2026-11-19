@@ -32,8 +32,8 @@ Changes are welcome; please keep the rules below true.
    copy when the owner explicitly says so. Before recording a demo or deploying, check that the
    source includes the relevant current features; do not silently replace a newer deployment with
    older repository code. If the source and deployed app differ, find and reconcile the newer source
-   first. Inbox is a known example: it exists in the owner's deployed app but is not yet in this
-   checkout.
+   first. For now the owner's app is the template's basis: there are no owner-only features, and
+   any that are added later go in `apps/web/src/custom/`.
 
 ## Working on it
 
