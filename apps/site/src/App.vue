@@ -3,103 +3,16 @@
 // shows the features, and sends people to setup/. Captures come from apps/site/scripts/capture.mjs.
 import { ref } from "vue";
 import AppIcon from "../../web/src/components/AppIcon.vue";
+import DemoViewer from "./components/DemoViewer.vue";
+import { chapters } from "./demos";
 import FaqItem from "./components/FaqItem.vue";
-import LandingVideo from "./components/LandingVideo.vue";
 import SiteFooter from "./components/SiteFooter.vue";
 import SiteHeader from "./components/SiteHeader.vue";
 import { BASE, PRIVACY_URL, REPO_URL, SETUP_URL, docUrl } from "./site";
 
-// The feature grid: each card opens a dialog with its demo. Captures come from capture.mjs.
-type Feature = {
-  id: string;
-  icon: string;
-  eyebrow: string;
-  title: string;
-  text: string;
-  video?: { name: string; width: number; height: number };
-};
-const features: Feature[] = [
-  {
-    id: "search",
-    icon: "search",
-    eyebrow: "Search",
-    title: "Find papers without leaving.",
-    text: "Search papers by topic, title, or author, and note why you’re saving one. You can also paste DOIs or arXiv IDs, import a .bib, or enter a paper manually.",
-    video: { name: "search", width: 600, height: 326 }
-  },
-  {
-    id: "organize",
-    icon: "library",
-    eyebrow: "Organize",
-    title: "Three shelves, one keypress.",
-    text: "Inbox, Skim, Read — press 1 to 3. New papers wait in the Inbox until you mark them done; anything unmarked is kept for reference. Anything more specific is a tag. Folders hold stable projects.",
-    video: { name: "organize", width: 600, height: 618 }
-  },
-  {
-    id: "review",
-    icon: "note",
-    eyebrow: "Review",
-    title: "Notes beside the paper.",
-    text: "Write in Markdown next to the abstract and the PDF, without opening another app. Notes save as you type, into your own Drive.",
-    video: { name: "review", width: 600, height: 468 }
-  },
-  {
-    id: "link",
-    icon: "link",
-    eyebrow: "Link",
-    title: "Papers that know each other.",
-    text: "Type @[ to link a paper from any note. The linked paper then lists every note that mentions it, with the sentence around the link.",
-    video: { name: "linking", width: 600, height: 468 }
-  },
-  {
-    id: "write",
-    icon: "edit",
-    eyebrow: "Write",
-    title: "Think across papers.",
-    text: "A research note is freeform Markdown for a question or a project. Link the papers that bear on it and they gather themselves.",
-    video: { name: "research-notes", width: 600, height: 585 }
-  },
-  {
-    id: "extension",
-    icon: "upload",
-    eyebrow: "Browser extension",
-    title: "Save papers as you browse.",
-    text: "On a paper page, the Chrome extension reads the paper’s details with Zotero’s translators and opens your Biblio to save it, with the PDF when one is available — including subscription PDFs your browser can already open."
-  }
-];
+// The demos and their steps live with the viewer; the page lists the same chapters.
+const viewer = ref<InstanceType<typeof DemoViewer> | null>(null);
 
-const extensionSteps = [
-  { icon: "search", title: "Find a paper", text: "Open an article or PDF in Chrome." },
-  { icon: "upload", title: "Save to Biblio", text: "Click the extension, or use the page’s right-click menu." },
-  { icon: "drive", title: "It lands in your Inbox", text: "Your app saves the paper, and its PDF, to your Drive." }
-];
-
-const extras = [
-  { icon: "quote", text: "references.bib, plus one .bib per folder, stays current for LaTeX and Overleaf" },
-  { icon: "link", text: "See which papers in your library cite each other" },
-  { icon: "inbox", text: "Follow authors and topics; new work arrives in the Inbox" },
-  { icon: "copy", text: "Find and merge duplicates, such as a preprint and its published version" },
-  { icon: "note", text: "LaTeX math in notes" },
-  { icon: "pdf", text: "Find and attach available PDFs" },
-  { icon: "clock", text: "Edits queue offline and sync when you reconnect" },
-  { icon: "search", text: "⌘K to jump anywhere" },
-  { icon: "upload", text: "Import from Zotero, Mendeley, or a .bib" },
-  { icon: "settings", text: "Themes, fonts, and text size" }
-];
-
-// One feature dialog for the whole grid; open picks which feature it shows.
-const dialog = ref<HTMLDialogElement | null>(null);
-const active = ref(0);
-function openFeature(index: number) {
-  active.value = index;
-  dialog.value?.showModal();
-}
-function step(by: number) {
-  active.value = (active.value + by + features.length) % features.length;
-}
-function closeOnBackdrop(event: MouseEvent) {
-  if (event.target === dialog.value) dialog.value?.close();
-}
 
 // Verified against each product's own documentation, October 2026: docs/COMPARISON.md.
 // Only the rows where Biblio differs; the rest are summarized beneath the table.
@@ -158,13 +71,13 @@ const compareRows: Array<{ label: string; cells: Array<{ mark: Mark; note: strin
     <section class="hero">
       <div class="pitch">
         <h1 class="display">A reference manager that's actually yours.</h1>
-        <p class="lede">Open-source code you run yourself. Your papers, notes, and PDFs stay in your own Google Drive, as files you can read without it.</p>
+        <p class="lede">Free forever, open-source, and self-hosted. Your papers, notes, and PDFs stay in your Google Drive as plain files.</p>
         <div class="cta">
           <div class="row">
             <a class="btn primary lg" :href="SETUP_URL">Set up your own</a>
-            <a class="btn lg" :href="REPO_URL">View the code</a>
+            <button type="button" class="btn lg" @click="viewer?.open(0)">Watch the demos</button>
+            <a class="btn lg quiet" :href="REPO_URL">View the code</a>
           </div>
-          <p class="fine">Self-hosted in your own Google account. Installs as an app on your laptop or phone.</p>
         </div>
       </div>
       <figure class="hero-visual shot">
@@ -173,67 +86,24 @@ const compareRows: Array<{ label: string; cells: Array<{ mark: Mark; note: strin
     </section>
 
     <section class="features" id="features">
-      <p class="eyebrow">What it does</p>
-      <h2 class="display">Collect, read, and connect papers.</h2>
-      <div class="feature-grid">
-        <button v-for="(item, i) in features" :key="item.id" :id="item.id" type="button" class="feature-card" @click="openFeature(i)">
-          <span class="thumb" :class="{ steps: !item.video }">
-            <img v-if="item.video" :src="`${BASE}landing/${item.video.name}-poster.jpg?v=20261119b`" alt="" loading="lazy" />
-            <span v-else class="thumb-steps"><AppIcon v-for="s in extensionSteps" :key="s.title" :name="s.icon" :size="22" /></span>
-          </span>
-          <span class="card-copy">
-            <span class="eyebrow"><AppIcon :name="item.icon" :size="14" /> {{ item.eyebrow }}</span>
-            <strong>{{ item.title }}</strong>
-            <span class="watch">{{ item.video ? "Watch the demo" : "How it works" }} →</span>
-          </span>
-        </button>
-      </div>
+      <h2 class="display">Features</h2>
+      <ol class="feature-list">
+        <li v-for="(c, i) in chapters" :key="c.id" :id="c.id">
+          <button type="button" @click="viewer?.open(i)">
+            <span class="num">{{ i + 1 }}</span>
+            <span class="feature-text"><strong>{{ c.title }}</strong></span>
+            <span class="feature-go">{{ c.video ? "Demo" : "Steps" }} <AppIcon name="chevron-right" :size="15" /></span>
+          </button>
+        </li>
+      </ol>
 
-      <div class="anywhere">
-        <div class="anywhere-copy">
-          <p class="eyebrow"><AppIcon name="download" :size="14" /> Install it as an app</p>
-          <h3 class="display">Your library, anywhere.</h3>
-          <p>Biblio installs from the browser as an app, on a laptop, a tablet, or a phone. It opens in its own window, starts instantly, and every copy reads the same library in your Drive, so a paper you save on one is waiting on the others.</p>
-        </div>
-        <ul class="anywhere-steps">
-          <li><strong>On a computer</strong><span>Open your Biblio in Chrome or Edge and click the install icon in the address bar.</span></li>
-          <li><strong>On a phone</strong><span>Open it in the browser, then Share → Add to Home Screen.</span></li>
-          <li><strong>Stays current</strong><span>Each deploy reaches every installed copy on its next launch.</span></li>
-        </ul>
-      </div>
-
-      <ul class="extras">
-        <li v-for="item in extras" :key="item.text"><AppIcon :name="item.icon" :size="16" /> {{ item.text }}</li>
-      </ul>
     </section>
 
-    <dialog ref="dialog" class="feature-dialog" aria-labelledby="feature-title" @click="closeOnBackdrop">
-      <div class="dialog-body">
-        <div class="dialog-head">
-          <p class="eyebrow">{{ features[active].eyebrow }}</p>
-          <button type="button" class="icon-btn" aria-label="Close" @click="dialog?.close()"><AppIcon name="x" :size="18" /></button>
-        </div>
-        <h3 id="feature-title" class="display">{{ features[active].title }}</h3>
-        <p class="dialog-text">{{ features[active].text }}</p>
-        <figure v-if="features[active].video" class="shot">
-          <LandingVideo :key="features[active].id" :name="features[active].video!.name" :width="features[active].video!.width"
-            :height="features[active].video!.height" :label="features[active].text" />
-        </figure>
-        <ol v-else class="extension-steps">
-          <li v-for="s in extensionSteps" :key="s.title"><AppIcon :name="s.icon" :size="20" /><span><strong>{{ s.title }}</strong><small>{{ s.text }}</small></span></li>
-        </ol>
-        <p v-if="!features[active].video" class="fine">Chrome only. Setup builds it for your address; install it on each computer in developer mode.
-          <a :href="`${SETUP_URL}#another-device`">Install it</a></p>
-        <div class="dialog-nav">
-          <button type="button" class="btn" @click="step(-1)"><AppIcon name="chevron-left" :size="16" /> {{ features[(active + features.length - 1) % features.length].eyebrow }}</button>
-          <button type="button" class="btn" @click="step(1)">{{ features[(active + 1) % features.length].eyebrow }} <AppIcon name="chevron-right" :size="16" /></button>
-        </div>
-      </div>
-    </dialog>
+    <DemoViewer ref="viewer" />
 
     <section id="how-it-works" class="how">
       <h2 class="display">How it works</h2>
-      <p class="lead">Biblio isn't a service you sign up for. It's code that sets up your own reference manager, inside your own Google account.</p>
+      <p class="lead">There is no Biblio service. The code deploys your own copy into your Google account.</p>
 
       <div class="arch">
         <div class="box code">
@@ -267,15 +137,11 @@ const compareRows: Array<{ label: string; cells: Array<{ mark: Mark; note: strin
         </div>
       </div>
 
-      <p class="aside">
-        Paper lookups go to public catalogs from your browser. Your copy uses Firebase for sign-in and its search index, and Google Drive for your library.
-        <a :href="PRIVACY_URL">Read the privacy details</a>
-      </p>
+      <p class="aside"><a :href="PRIVACY_URL">What stays private</a></p>
     </section>
 
     <section class="compare" id="compare">
-      <p class="eyebrow">Compared</p>
-      <h2 class="display">Where Biblio is different.</h2>
+      <h2 class="display">Comparison with Zotero, EndNote, and Paperpile</h2>
       <div class="table-wrap">
         <table>
           <thead>
@@ -288,25 +154,19 @@ const compareRows: Array<{ label: string; cells: Array<{ mark: Mark; note: strin
             <tr v-for="row in compareRows" :key="row.label">
               <th scope="row">{{ row.label }}</th>
               <td v-for="(cell, i) in row.cells" :key="i" :class="{ us: i === 0 }">
-                <span class="mark" :class="cell.mark" :aria-label="markLabel[cell.mark]">{{ markGlyph[cell.mark] }}</span>
-                <span class="note">{{ cell.note }}</span>
+                <span class="mark" :class="cell.mark" :title="cell.note" :aria-label="`${markLabel[cell.mark]}: ${cell.note}`">{{ markGlyph[cell.mark] }}</span>
               </td>
             </tr>
           </tbody>
         </table>
       </div>
-      <div class="compare-notes">
-        <p><strong>The same in all four:</strong> searching for papers, a browser extension for saving them, and BibTeX — though Biblio’s .bib is always current, with no export step.</p>
-        <p class="ahead"><strong>Where the others are ahead:</strong> Word and Google Docs plugins, PDF annotation, and mobile apps.</p>
-        <p class="fine">Checked against each product’s own documentation, October 2026. <a :href="docUrl('COMPARISON.md')">Sources</a></p>
-      </div>
+      <p class="fine compare-notes">The others are ahead on Word and Google Docs plugins, PDF annotation, and mobile apps. Hover a mark for details; <a :href="docUrl('COMPARISON.md')">sources</a>, October 2026.</p>
     </section>
 
     <section class="run">
       <div class="run-head">
-        <p class="eyebrow">Set up your own</p>
         <h2 class="display">Set up your own Biblio.</h2>
-        <p>You need a Google account, Node.js, and git. The setup tutorial walks through creating and deploying your own copy.</p>
+        <p>Needs a Google account, Node.js, and git.</p>
       </div>
       <pre class="terminal">git clone {{ REPO_URL }}.git
 cd biblio
@@ -616,8 +476,7 @@ h1 {
   grid-template-columns: 1fr 1fr;
   gap: 10px 32px;
   margin: 8px 0 0;
-  padding: 24px 0 0;
-  border-top: 1px solid var(--border);
+  padding: 12px 0 0;
   list-style: none;
 }
 
@@ -727,232 +586,71 @@ code {
   white-space: nowrap;
 }
 
-/* What it does: a grid of cards; each opens the feature dialog. */
-.feature-grid {
+/* Features: one row per demo chapter; each opens the viewer there. */
+.feature-list {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 18px;
-  margin-bottom: 36px;
+  margin: 0 0 40px;
+  padding: 0;
+  border-top: 1px solid var(--border);
+  list-style: none;
 }
 
-.feature-card {
+.feature-list button {
   display: grid;
-  grid-template-rows: auto 1fr;
-  padding: 0;
-  overflow: hidden;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  background: var(--surface);
+  grid-template-columns: 2em minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: baseline;
+  width: 100%;
+  padding: 16px 8px;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  background: transparent;
   color: var(--text);
   font: inherit;
   text-align: left;
   cursor: pointer;
-  transition: border-color 0.15s, box-shadow 0.15s;
 }
 
-.feature-card:hover,
-.feature-card:focus-visible {
-  border-color: var(--accent);
-  box-shadow: var(--shadow);
-}
-
-.thumb {
-  display: block;
-  aspect-ratio: 16 / 10;
-  overflow: hidden;
-  border-bottom: 1px solid var(--border);
+.feature-list button:hover,
+.feature-list button:focus-visible {
   background: var(--surface-2);
 }
 
-.thumb img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: top left;
+.feature-list .num {
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
 }
 
-.thumb-steps {
-  display: flex;
-  height: 100%;
-  align-items: center;
-  justify-content: center;
-  gap: 28px;
-  color: var(--accent);
-}
-
-.card-copy {
+.feature-text {
   display: grid;
-  gap: 6px;
-  align-content: start;
-  padding: 16px 18px 18px;
+  gap: 3px;
 }
 
-.card-copy .eyebrow {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.card-copy strong {
+.feature-text strong {
   font-family: var(--font-serif);
   font-size: calc(18px * var(--text-scale));
   font-weight: 600;
-  line-height: 1.3;
 }
 
-.watch {
-  color: var(--accent);
-  font-size: calc(13.5px * var(--text-scale));
+.feature-text span {
+  color: var(--text-2);
+  font-size: calc(15px * var(--text-scale));
+  line-height: 1.5;
 }
 
-.feature-dialog {
-  width: min(760px, calc(100vw - 32px));
-  max-height: calc(100vh - 48px);
-  padding: 0;
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  background: var(--surface);
-  color: var(--text);
-  box-shadow: var(--shadow-lg);
-  overflow: auto;
-}
-
-.feature-dialog .shot :deep(video) {
-  width: auto;
-  max-width: 100%;
-  max-height: 52vh;
-  margin: 0 auto;
-}
-
-.feature-dialog .shot {
-  box-shadow: none;
-}
-
-.feature-dialog::backdrop {
-  background: rgba(24, 24, 27, 0.45);
-}
-
-.dialog-body {
-  display: grid;
-  gap: 14px;
-  padding: 22px 26px 24px;
-}
-
-.dialog-head {
+.feature-go {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-}
-
-.dialog-body h3 {
-  font-size: calc(26px * var(--text-scale));
-  line-height: 1.2;
-}
-
-.dialog-text {
-  max-width: 62ch;
-  color: var(--text-2);
-  font-size: calc(16px * var(--text-scale));
-  line-height: 1.6;
-}
-
-.icon-btn {
-  display: grid;
-  place-items: center;
-  width: 32px;
-  height: 32px;
-  border: 0;
-  border-radius: 8px;
-  background: transparent;
-  color: var(--text-2);
-  cursor: pointer;
-}
-
-.icon-btn:hover {
-  background: var(--surface-2);
-}
-
-.dialog-nav {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 4px;
-}
-
-.extension-steps {
-  display: grid;
-  gap: 10px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.extension-steps li {
-  display: flex;
-  gap: 14px;
-  align-items: flex-start;
-  padding: 14px 16px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-}
-
-.extension-steps :deep(svg) { flex: none; color: var(--accent); }
-.extension-steps span { display: grid; gap: 3px; }
-.extension-steps small { color: var(--text-2); font-size: calc(14px * var(--text-scale)); line-height: 1.45; }
-
-/* The installable app, called out under the feature grid. */
-.anywhere {
-  display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
-  gap: 36px;
-  align-items: center;
-  margin-bottom: 36px;
-  padding: 28px 32px;
-  border: 1px solid var(--accent);
-  border-radius: 14px;
-  background: var(--accent-soft);
-}
-
-.anywhere .eyebrow {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--accent-ink);
-}
-
-.anywhere h3 {
-  margin: 6px 0 10px;
-  font-size: calc(clamp(22px, 2.4vw, 30px) * var(--text-scale));
-  line-height: 1.2;
-}
-
-.anywhere-copy p:not(.eyebrow) {
-  max-width: 52ch;
-  color: var(--text-2);
-  font-size: calc(16px * var(--text-scale));
-  line-height: 1.6;
-}
-
-.anywhere-steps {
-  display: grid;
-  gap: 10px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.anywhere-steps li {
-  display: grid;
   gap: 2px;
-  padding: 12px 16px;
-  border-radius: 10px;
-  background: var(--surface);
+  color: var(--accent);
+  font-size: calc(14px * var(--text-scale));
+  white-space: nowrap;
 }
 
-.anywhere-steps span {
-  color: var(--text-2);
-  font-size: calc(14px * var(--text-scale));
-  line-height: 1.45;
+.extras-head {
+  margin: 0 0 4px;
+  font-family: var(--font-serif);
+  font-size: calc(18px * var(--text-scale));
 }
 
 /* Comparison: Biblio's column tinted, marks as chips so differences read at a glance. */
@@ -962,7 +660,7 @@ code {
 
 table {
   width: 100%;
-  min-width: 760px;
+  min-width: 560px;
   border-collapse: collapse;
   font-size: calc(14px * var(--text-scale));
 }
@@ -1002,11 +700,11 @@ thead th.us {
 }
 
 .mark {
+  cursor: help;
   display: inline-grid;
   place-items: center;
   width: 22px;
   height: 22px;
-  margin-bottom: 6px;
   border-radius: 50%;
   font-size: 13px;
   font-weight: 700;
@@ -1033,8 +731,6 @@ thead th.us {
 }
 
 .compare-notes {
-  display: grid;
-  gap: 10px;
   max-width: 72ch;
   margin-top: 22px;
   color: var(--text-2);
@@ -1042,12 +738,6 @@ thead th.us {
   line-height: 1.55;
 }
 
-.compare-notes .ahead {
-  padding: 12px 16px;
-  border-left: 3px solid var(--text-3);
-  background: var(--surface-2);
-  border-radius: 0 8px 8px 0;
-}
 
 .compare-notes a {
   color: var(--accent);
@@ -1069,7 +759,6 @@ thead th.us {
   }
 
    .extras,
-  .anywhere,
   .pair {
     grid-template-columns: 1fr;
   }
@@ -1077,9 +766,4 @@ thead th.us {
   
 }
 
-@media (max-width: 560px) {
-  .feature-grid {
-    grid-template-columns: 1fr;
-  }
-}
 </style>
