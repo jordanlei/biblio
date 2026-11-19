@@ -13,87 +13,59 @@ export type Feature = {
 
 export const features: Feature[] = [
   {
-    id: "search",
-    eyebrow: "Search and import",
-    title: "Paper Search, DOI and arXiv Lookup, and BibTeX Import",
-    text: "Add papers from an OpenAlex search, an identifier, or a BibTeX file, with a note on why you saved each one.",
+    id: "ownership",
+    eyebrow: "01 · Ownership",
+    title: "Your library is a folder, not a subscription.",
+    text: "Biblio keeps the library in your Google Drive as files you can open, move, back up, and keep if the app ever disappears.",
     points: [
-      "Search OpenAlex’s 250M works by topic, title, or author",
-      "Paste DOIs, arXiv IDs, or PubMed IDs",
-      "Import a .bib from Zotero, Mendeley, or Overleaf"
-    ],
-    image: "still-search"
-  },
-  {
-    id: "organize",
-    eyebrow: "Organize",
-    title: "Hierarchical Inbox and Read Status",
-    text: "New papers go to an Inbox. Each paper is marked Inbox, Skim, or Read, or left unmarked as a reference.",
-    points: [
-      "Keys 1, 2, 3 for Inbox, Skim, and Read; unmarked means kept for reference",
-      "Tags for topics, folders for projects",
-      "Each folder keeps its own up-to-date .bib"
-    ],
-    image: "still-organize"
-  },
-  {
-    id: "notes",
-    eyebrow: "Notes",
-    title: "Markdown Notes that Render Natively",
-    text: "Notes on each paper are written in Markdown and shown rendered, beside the abstract and PDF.",
-    points: [
-      "Markdown, with LaTeX math between $$ … $$",
-      "Saves as you type",
-      "One Markdown file per paper in your Drive"
-    ],
-    image: "still-notes"
-  },
-  {
-    id: "links",
-    eyebrow: "Citations",
-    title: "Citation Links and Backlinks Between Papers",
-    text: "A note can cite any paper in your library, and each paper lists the notes that cite it.",
-    points: [
-      "Type @[ to link any paper in your library",
-      "Links read as citations: Sussillo et al. (2016)",
-      "Each paper lists the notes that cite it, with the sentence around the link"
-    ],
-    image: "still-links"
-  },
-  {
-    id: "research-notes",
-    eyebrow: "Research notes",
-    title: "Research Notes to Link Across Papers",
-    text: "Standalone notes for a question or project, linked to the papers they discuss.",
-    points: [
-      "Freeform Markdown, with @[ links to papers",
-      "Every linked paper listed under the note, with its read status",
-      "Each note is a Markdown file in your Drive"
-    ],
-    image: "still-research-notes"
-  },
-  {
-    id: "drive",
-    eyebrow: "Your files",
-    title: "Library Stored as Plain Files in Your Google Drive",
-    text: "Your library is a folder in your Google Drive, chosen when you first sign in.",
-    points: [
-      "Papers as CSL-JSON, notes as Markdown, PDFs, and references.bib",
-      "Readable without Biblio; download the whole library as a .zip",
-      "Biblio can see only the files it creates"
+      "Papers as CSL-JSON, notes as Markdown, PDFs, and BibTeX",
+      "No central Biblio account or analytics",
+      "Download the whole library as a .zip"
     ],
     visual: "drive"
   },
   {
-    id: "extension",
-    eyebrow: "Browser plugin",
-    title: "Browser Plugin",
-    text: "A Chrome extension that adds the paper on the current page to your library, with its PDF.",
+    id: "continuity",
+    eyebrow: "02 · Continuity",
+    title: "A desk-first library that follows you.",
+    text: "Open the same collection on a laptop, in a browser tab, or from your phone. Install Biblio like an app when you want it close at hand.",
     points: [
-      "Reads the page with Zotero’s own translators, only when you click",
-      "Fetches the PDF when one is available, including subscription PDFs your browser can open",
-      "Saved papers land in your Inbox"
+      "One library across your devices",
+      "Installable web app for laptop and phone",
+      "Your copy runs in your own Google account"
+    ],
+    image: "still-organize"
+  },
+  {
+    id: "workflow",
+    eyebrow: "03 · Workflow",
+    title: "A small, legible system for reading.",
+    text: "Biblio gives every paper a place to land, a clear reading status, and notes that stay useful outside the interface.",
+    points: [
+      "Inbox, Skim, and Read statuses",
+      "Markdown notes with LaTeX math",
+      "Tags for topics, folders for projects"
+    ],
+    image: "still-notes"
+  },
+  {
+    id: "capture",
+    eyebrow: "04 · Capture",
+    title: "Save a paper at the moment you find it.",
+    text: "Search, paste an identifier, import BibTeX, or use the browser extension. The paper lands in your Inbox, ready for the next pass.",
+    points: [
+      "Chrome extension for the page you are reading",
+      "DOI, arXiv, and PubMed lookup",
+      "OpenAlex search across 250M works"
     ],
     visual: "plugin"
+  },
+  {
+    id: "links",
+    eyebrow: "A little deeper",
+    title: "Notes that connect your thinking.",
+    text: "Link papers from Markdown notes and see backlinks in context. The files remain yours, even when the interface changes.",
+    points: ["Type @[ to link a paper", "Backlinks show the surrounding sentence", "Standalone research notes"],
+    image: "still-links"
   }
 ];

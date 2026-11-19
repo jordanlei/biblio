@@ -84,13 +84,13 @@ const compareRows: Array<{ label: string; cells: Array<{ mark: Mark; note: strin
 
     <section class="hero">
       <div class="pitch">
-        <h1 class="display">An open-source reference manager that stores your library in Google Drive</h1>
-        <p class="lede">Free forever. You run your own copy; your papers, notes, and PDFs are plain files in your Drive.</p>
+        <p class="eyebrow hero-kicker">A reference manager for actual research</p>
+        <h1 class="display">Make room for the work between papers.</h1>
+        <p class="lede">Biblio is a quiet, open-source library for collecting papers, writing notes, and keeping your research in files you can always reach.</p>
         <div class="cta">
           <div class="row">
             <a class="btn primary lg" :href="SETUP_URL">Set up your own</a>
-            <a class="btn lg" href="#features">Features</a>
-            <a class="btn lg quiet" :href="REPO_URL">View the code</a>
+            <a class="text-link" href="#features">See what it does</a>
           </div>
         </div>
       </div>
@@ -105,16 +105,15 @@ const compareRows: Array<{ label: string; cells: Array<{ mark: Mark; note: strin
     </section>
 
     <ul class="highlights">
-      <li><AppIcon name="check" :size="18" /><strong>Free forever</strong><span>Runs on Google’s free Firebase plan</span></li>
-      <li><AppIcon name="drive" :size="18" /><strong>Stored in Google Drive</strong><span>CSL-JSON, Markdown, PDF, and BibTeX files</span></li>
-      <li><a href="#install"><AppIcon name="download" :size="18" /><strong>Installable web app</strong><span>Laptop and phone</span></a></li>
-      <li><AppIcon name="settings" :size="18" /><strong>Open source</strong><span>MIT License</span></li>
+      <li><AppIcon name="drive" :size="18" /><strong>Your files, your account</strong><span>Plain files in a Drive folder you control.</span></li>
+      <li><AppIcon name="library" :size="18" /><strong>One library everywhere</strong><span>Use it on a laptop, in a browser, or on your phone.</span></li>
+      <li><AppIcon name="settings" :size="18" /><strong>Open and adaptable</strong><span>MIT-licensed code, readable storage, no lock-in.</span></li>
     </ul>
 
     <section class="pillars" id="features">
       <div v-for="(f, i) in features" :id="f.id" :key="f.id" class="pillar" :class="{ flip: i % 2 === 1 }">
         <div class="pillar-copy">
-          <p class="eyebrow">{{ String(i + 1).padStart(2, "0") }} · {{ f.eyebrow }}</p>
+          <p class="eyebrow">{{ f.eyebrow }}</p>
           <h2 class="display">{{ f.title }}</h2>
           <p class="pillar-text">{{ f.text }}</p>
           <ul class="checks">
@@ -199,7 +198,9 @@ const compareRows: Array<{ label: string; cells: Array<{ mark: Mark; note: strin
     </section>
 
     <section class="compare" id="compare">
-      <h2 class="display">Comparison with Zotero, EndNote, and Paperpile</h2>
+      <p class="eyebrow">If you are choosing a home for your library</p>
+      <h2 class="display">A different set of trade-offs.</h2>
+      <p class="lead compare-intro">Biblio is not trying to replace every part of a mature reference manager. It is for researchers who value ownership, readable files, and a workflow they can change.</p>
       <div class="table-wrap">
         <table>
           <thead>
@@ -209,7 +210,7 @@ const compareRows: Array<{ label: string; cells: Array<{ mark: Mark; note: strin
             </tr>
           </thead>
           <tbody>
-            <tr v-for="row in compareRows" :key="row.label">
+            <tr v-for="row in compareRows.slice(0, 5)" :key="row.label">
               <th scope="row">{{ row.label }}</th>
               <td v-for="(cell, i) in row.cells" :key="i" :class="{ us: i === 0 }">
                 <span class="mark" :class="cell.mark" :aria-label="markLabel[cell.mark]">{{ markGlyph[cell.mark] }}</span>
@@ -219,7 +220,7 @@ const compareRows: Array<{ label: string; cells: Array<{ mark: Mark; note: strin
           </tbody>
         </table>
       </div>
-      <p class="fine compare-notes">The others are ahead on Word and Google Docs plugins, PDF annotation, and mobile apps. <a :href="docUrl('COMPARISON.md')">Sources</a>: each product's own documentation, October 2026 (Zotero's storage rechecked November 2026).</p>
+      <p class="fine compare-notes">This is the short version: ownership and storage are where Biblio is most different. The others are ahead on Word and Google Docs plugins, PDF annotation, and mature mobile apps. <a :href="docUrl('COMPARISON.md')">See the sourced notes</a> for the full comparison and caveats.</p>
     </section>
 
     <section class="run">
@@ -1060,6 +1061,112 @@ thead th.us {
 
 .compare-notes a {
   color: var(--accent);
+}
+
+/* Landing-page rhythm: fewer edges, longer pauses, and a little more editorial contrast. */
+.landing {
+  --max: 1160px;
+  --gutter: clamp(28px, 7vw, 112px);
+  background: #fbfaf8;
+}
+
+.top {
+  padding-top: 30px;
+  padding-bottom: 30px;
+}
+
+.hero {
+  grid-template-columns: minmax(0, .86fr) minmax(0, 1.14fr);
+  gap: clamp(64px, 9vw, 128px);
+  padding-top: clamp(80px, 12vw, 150px);
+  padding-bottom: clamp(120px, 15vw, 190px);
+}
+
+.hero-kicker {
+  margin-bottom: 22px;
+  color: var(--accent-ink);
+}
+
+h1 {
+  max-width: 10ch;
+  font-size: calc(clamp(44px, 5.2vw, 74px) * var(--text-scale));
+  line-height: 1.02;
+  letter-spacing: -0.045em;
+}
+
+.lede {
+  max-width: 35ch;
+  margin-top: 30px;
+  font-size: calc(21px * var(--text-scale));
+  line-height: 1.58;
+}
+
+.cta {
+  margin-top: 38px;
+}
+
+.text-link {
+  align-self: center;
+  color: var(--accent-ink);
+  font-size: calc(15px * var(--text-scale));
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.text-link:hover { text-decoration: underline; }
+
+.hero-visual .shot {
+  border-radius: 18px;
+}
+
+.highlights {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 28px;
+  margin-bottom: 0;
+  padding-bottom: 116px;
+}
+
+.highlights li {
+  min-height: 124px;
+  padding: 25px 2px 0;
+  border-width: 1px 0 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.pillars {
+  gap: clamp(150px, 16vw, 240px);
+  padding-top: clamp(140px, 16vw, 220px);
+  padding-bottom: clamp(140px, 16vw, 220px);
+  background: #f2f4f8;
+}
+
+.pillar {
+  grid-template-columns: minmax(0, .84fr) minmax(0, 1.16fr);
+  gap: clamp(68px, 9vw, 130px);
+}
+
+.pillar h2 {
+  max-width: 12ch;
+  font-size: calc(clamp(34px, 4vw, 56px) * var(--text-scale));
+  letter-spacing: -0.035em;
+}
+
+.pillar-text { font-size: calc(19px * var(--text-scale)); }
+
+.how, .install, .compare, .run, .faq-section {
+  padding-top: clamp(120px, 14vw, 190px);
+  padding-bottom: clamp(120px, 14vw, 190px);
+}
+
+.compare { background: #fbfaf8; }
+.compare-intro { max-width: 52ch; margin-bottom: 44px; }
+.compare h2 { max-width: 12ch; font-size: calc(clamp(34px, 4vw, 52px) * var(--text-scale)); }
+
+@media (max-width: 900px) {
+  .hero { gap: 56px; padding-top: 72px; }
+  .highlights { grid-template-columns: 1fr; padding-bottom: 80px; }
+  .pillars { padding-top: 100px; padding-bottom: 100px; }
 }
 
 @media (max-width: 900px) {
