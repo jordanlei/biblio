@@ -2,7 +2,7 @@
 
 This reference compares Biblio with Zotero,
 EndNote, and Paperpile. Every claim about another product comes from that product's own
-documentation or official support forum, checked **October 2026**. Sources are below so anyone can
+documentation or official support forum, checked **October 2026** (Zotero's storage rechecked November 2026). Sources are below so anyone can
 check them, and so they can be rechecked when the products change.
 
 Rules for this table:
@@ -26,7 +26,8 @@ Rules for this table:
 | Open source, AGPL | [zotero/zotero on GitHub](https://github.com/zotero/zotero) |
 | Free; paid storage above 300 MB | [Zotero storage](https://www.zotero.org/storage) |
 | Library is local; sync is Zotero's service | [Zotero sync](https://www.zotero.org/support/sync) |
-| Attachments stored under random 8-character keys | [The Zotero data directory](https://www.zotero.org/support/zotero_data) |
+| Metadata and notes in a SQLite database (`zotero.sqlite`: "item metadata, notes, tags, etc.") | [The Zotero data directory](https://www.zotero.org/support/zotero_data) |
+| Attachments in `storage/` subfolders "named with a random 8-character string"; the files themselves are renamed from the item's metadata | [Attaching files](https://www.zotero.org/support/attaching_files) · [The Zotero data directory](https://www.zotero.org/support/zotero_data) |
 | "Related" links between items and notes | [Related items](https://www.zotero.org/support/related) · [forum thread on inline links](https://forums.zotero.org/discussion/78829/feature-request-links-to-library-items-in-a-note) |
 | Searches databases in-app and via the connector | [Zotero Connector](https://www.zotero.org/support/adding_items_to_zotero) |
 | Exports BibTeX, RIS, CSL-JSON | [Exporting](https://www.zotero.org/support/kb/exporting) |
@@ -41,7 +42,7 @@ has, not what it lacks.
 
 | Claim | Source |
 | --- | --- |
-| Not open source; paid licence | [EndNote pricing](https://endnote.com/buy) |
+| Not open source; paid license | [EndNote pricing](https://endnote.com/buy) |
 | Local `.enl` library | [EndNote library structure](https://support.clarivate.com/Endnote/s/article/EndNote-Library-Structure) |
 | Citing articles via Web of Science | [EndNote 2025 features](https://endnote.com/product-details) |
 | Online search of subscribed databases | [EndNote online search](https://support.clarivate.com/Endnote/s/article/EndNote-Online-Search) |

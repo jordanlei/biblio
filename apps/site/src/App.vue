@@ -24,7 +24,7 @@ const compareRows: Array<{ label: string; cells: Array<{ mark: Mark; note: strin
   { label: "Free", cells: [
     { mark: "yes", note: "You host it, so there’s nobody to bill you" },
     { mark: "partly", note: "Paid storage above 300 MB" },
-    { mark: "no", note: "Paid licence" },
+    { mark: "no", note: "Paid license" },
     { mark: "no", note: "Paid subscription" } ] },
   { label: "You run the app", cells: [
     { mark: "yes", note: "Deployed to your own project; change any part" },
@@ -43,7 +43,7 @@ const compareRows: Array<{ label: string; cells: Array<{ mark: Mark; note: strin
     { mark: "no", note: "Library lives on Paperpile’s servers" } ] },
   { label: "Readable storage", cells: [
     { mark: "yes", note: "Plain files named for what they are" },
-    { mark: "partly", note: "SQLite; attachments under random keys" },
+    { mark: "no", note: "Metadata and notes in a SQLite database; PDFs in folders with random 8-character names" },
     { mark: "no", note: "Proprietary .enl library" },
     { mark: "no", note: "Cloud records, reached through the app" } ] },
   { label: "Links between notes", cells: [
@@ -145,13 +145,14 @@ const compareRows: Array<{ label: string; cells: Array<{ mark: Mark; note: strin
             <tr v-for="row in compareRows" :key="row.label">
               <th scope="row">{{ row.label }}</th>
               <td v-for="(cell, i) in row.cells" :key="i" :class="{ us: i === 0 }">
-                <span class="mark" :class="cell.mark" :title="cell.note" :aria-label="`${markLabel[cell.mark]}: ${cell.note}`">{{ markGlyph[cell.mark] }}</span>
+                <span class="mark" :class="cell.mark" :aria-label="markLabel[cell.mark]">{{ markGlyph[cell.mark] }}</span>
+                <span class="note">{{ cell.note }}</span>
               </td>
             </tr>
           </tbody>
         </table>
       </div>
-      <p class="fine compare-notes">The others are ahead on Word and Google Docs plugins, PDF annotation, and mobile apps. Hover a mark for details; <a :href="docUrl('COMPARISON.md')">sources</a>, October 2026.</p>
+      <p class="fine compare-notes">The others are ahead on Word and Google Docs plugins, PDF annotation, and mobile apps. <a :href="docUrl('COMPARISON.md')">Sources</a>: each product's own documentation, October 2026 (Zotero's storage rechecked November 2026).</p>
     </section>
 
     <section class="run">
@@ -620,7 +621,7 @@ code {
 
 table {
   width: 100%;
-  min-width: 560px;
+  min-width: 760px;
   border-collapse: collapse;
   font-size: calc(14px * var(--text-scale));
 }
@@ -660,11 +661,11 @@ thead th.us {
 }
 
 .mark {
-  cursor: help;
   display: inline-grid;
   place-items: center;
   width: 22px;
   height: 22px;
+  margin-bottom: 4px;
   border-radius: 50%;
   font-size: 13px;
   font-weight: 700;

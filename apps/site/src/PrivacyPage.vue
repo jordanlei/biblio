@@ -137,7 +137,7 @@ const leaves = [
           Expected for self-hosted software: your copy is a brand-new sign-in client that Google hasn't reviewed. It's your own app asking your own permission.
         </FaqItem>
         <FaqItem question="Biblio hasn't had a third-party audit">
-          It's been reviewed adversarially during development and security-relevant behaviour is covered by automated tests, but no outside firm has examined it. The code is
+          It's been reviewed adversarially during development and security-relevant behavior is covered by automated tests, but no outside firm has examined it. The code is
           public if you'd like to look, or to have someone look for you.
         </FaqItem>
       </div>

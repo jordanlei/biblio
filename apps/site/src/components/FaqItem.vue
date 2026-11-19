@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// One question. <details> gives us the open/close behaviour, keyboard support, and
+// One question. <details> gives us the open/close behavior, keyboard support, and
 // find-in-page for free; the marker is replaced with our own chevron.
 defineProps<{ question: string }>();
 </script>
