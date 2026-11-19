@@ -5,6 +5,7 @@
 - **You run it.** Your own copy, in your own Firebase project, at your own address. Change any of the code.
 - **Five-minute setup.** `npm install && npm run setup`: [setup tutorial](https://bibliograph.web.app/setup/).
 - **Your data is in your Google Drive.** Papers, notes, research notes, PDFs, and the links between them are ordinary files (CSL-JSON, Markdown, BibTeX, PDF), readable without Biblio.
+- **Use it anywhere.** Your copy installs as an app on a laptop, tablet, or phone (a progressive web app). Every install reads the same library, so what you save on one is on the others.
 - **Nothing belongs to anyone else.** No central server, no accounts, no analytics. The people who write Biblio never see your copy or your library.
 
 > Biblio can disappear. Your research cannot.

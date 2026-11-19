@@ -164,7 +164,7 @@ const compareRows: Array<{ label: string; cells: Array<{ mark: Mark; note: strin
             <a class="btn primary lg" :href="SETUP_URL">Set up your own</a>
             <a class="btn lg" :href="REPO_URL">View the code</a>
           </div>
-          <p class="fine">Self-hosted in your own Google account.</p>
+          <p class="fine">Self-hosted in your own Google account. Installs as an app on your laptop or phone.</p>
         </div>
       </div>
       <figure class="hero-visual shot">
@@ -187,6 +187,19 @@ const compareRows: Array<{ label: string; cells: Array<{ mark: Mark; note: strin
             <span class="watch">{{ item.video ? "Watch the demo" : "How it works" }} →</span>
           </span>
         </button>
+      </div>
+
+      <div class="anywhere">
+        <div class="anywhere-copy">
+          <p class="eyebrow"><AppIcon name="download" :size="14" /> Install it as an app</p>
+          <h3 class="display">Your library, anywhere.</h3>
+          <p>Biblio installs from the browser as an app, on a laptop, a tablet, or a phone. It opens in its own window, starts instantly, and every copy reads the same library in your Drive, so a paper you save on one is waiting on the others.</p>
+        </div>
+        <ul class="anywhere-steps">
+          <li><strong>On a computer</strong><span>Open your Biblio in Chrome or Edge and click the install icon in the address bar.</span></li>
+          <li><strong>On a phone</strong><span>Open it in the browser, then Share → Add to Home Screen.</span></li>
+          <li><strong>Stays current</strong><span>Each deploy reaches every installed copy on its next launch.</span></li>
+        </ul>
       </div>
 
       <ul class="extras">
@@ -337,7 +350,7 @@ npm run setup</pre>
           Yes, for Chrome. On a paper page it reads the paper’s details with Zotero’s own translators and opens your Biblio to save it, with the PDF when one is available. It reads a page only when you click it. Setup builds it for your copy’s address; install it on each computer in developer mode (<a :href="`${SETUP_URL}#another-device`">how</a>).
         </FaqItem>
         <FaqItem question="Can I use it on my phone?">
-          It's a web app, so it opens on a phone, but it's built for a desk. There's no mobile app, and no PDF annotation or Word plugin yet.
+          Yes. Install it from the browser (Share → Add to Home Screen) and it opens like an app, with the same library as your computer. It's designed for a desk first, though: there's no PDF annotation or Word plugin yet.
         </FaqItem>
       </div>
     </section>
@@ -887,6 +900,61 @@ code {
 .extension-steps span { display: grid; gap: 3px; }
 .extension-steps small { color: var(--text-2); font-size: calc(14px * var(--text-scale)); line-height: 1.45; }
 
+/* The installable app, called out under the feature grid. */
+.anywhere {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  gap: 36px;
+  align-items: center;
+  margin-bottom: 36px;
+  padding: 28px 32px;
+  border: 1px solid var(--accent);
+  border-radius: 14px;
+  background: var(--accent-soft);
+}
+
+.anywhere .eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--accent-ink);
+}
+
+.anywhere h3 {
+  margin: 6px 0 10px;
+  font-size: calc(clamp(22px, 2.4vw, 30px) * var(--text-scale));
+  line-height: 1.2;
+}
+
+.anywhere-copy p:not(.eyebrow) {
+  max-width: 52ch;
+  color: var(--text-2);
+  font-size: calc(16px * var(--text-scale));
+  line-height: 1.6;
+}
+
+.anywhere-steps {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.anywhere-steps li {
+  display: grid;
+  gap: 2px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  background: var(--surface);
+}
+
+.anywhere-steps span {
+  color: var(--text-2);
+  font-size: calc(14px * var(--text-scale));
+  line-height: 1.45;
+}
+
 /* Comparison: Biblio's column tinted, marks as chips so differences read at a glance. */
 .table-wrap {
   overflow-x: auto;
@@ -1001,6 +1069,7 @@ thead th.us {
   }
 
    .extras,
+  .anywhere,
   .pair {
     grid-template-columns: 1fr;
   }
