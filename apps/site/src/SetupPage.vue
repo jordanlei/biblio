@@ -208,20 +208,20 @@ npm run build:extension -- --app-url https://your-id.web.app</pre>
 
 .intro,
 .block {
-  max-width: 760px;
+  max-width: 720px;
   margin: 0 auto;
   padding: 0 32px;
 }
 
 .tutorial {
-  max-width: 1100px;
+  max-width: 980px;
   margin: 0 auto;
   padding: 0 32px;
 }
 
 .intro {
-  padding-top: 40px;
-  padding-bottom: 32px;
+  padding-top: clamp(72px, 9vw, 120px);
+  padding-bottom: clamp(64px, 8vw, 104px);
 }
 
 .intro h1 {
@@ -274,8 +274,8 @@ kbd {
 }
 
 .block {
-  padding-top: 28px;
-  padding-bottom: 28px;
+  padding-top: 64px;
+  padding-bottom: 64px;
 }
 
 .own {
@@ -289,11 +289,13 @@ kbd {
 .own li {
   display: flex;
   gap: 14px;
-  padding: 14px 16px;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  background: var(--surface);
+  padding: 16px 0;
+  border-top: 1px solid var(--border);
+  border-radius: 0;
+  background: transparent;
 }
+
+.own li:last-child { border-bottom: 1px solid var(--border); }
 
 .own :deep(svg) {
   flex: none;
@@ -338,9 +340,9 @@ kbd {
   counter-reset: step;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 40px;
-  margin-top: 20px;
-  margin-bottom: 40px;
+  gap: 96px;
+  margin-top: 24px;
+  margin-bottom: 72px;
   list-style: none;
 }
 
@@ -348,11 +350,13 @@ kbd {
 .tutorial > li {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
-  gap: 32px;
+  grid-template-columns: minmax(0, .78fr) minmax(0, 1.22fr);
+  gap: clamp(48px, 7vw, 96px);
   align-items: start;
   min-width: 0;
-  padding-left: 52px;
+  padding-left: 56px;
+  padding-top: 6px;
+  border-top: 1px solid var(--border);
   counter-increment: step;
 }
 
@@ -370,7 +374,7 @@ kbd {
   margin: 0;
   overflow: hidden;
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: 8px;
   box-shadow: var(--shadow);
 }
 
@@ -403,7 +407,7 @@ kbd {
   background: #1f1c17;
   color: #ece6d8;
   font-family: var(--font-mono);
-  font-size: calc(13px * var(--text-scale));
+  font-size: calc(12.5px * var(--text-scale));
   line-height: 1.65;
   white-space: pre;
 }
@@ -462,5 +466,11 @@ kbd {
     padding-left: 0;
     padding-top: 44px;
   }
+
+  .intro { padding-top: 56px; padding-bottom: 64px; }
+  .block { padding-top: 48px; padding-bottom: 48px; }
+  .tutorial { gap: 64px; margin-bottom: 48px; }
+  .tutorial > li::before { top: 4px; }
+  .terminal { padding: 14px 15px; font-size: 11.5px; }
 }
 </style>

@@ -29,7 +29,7 @@ await context.addInitScript(() => {
   addEventListener("DOMContentLoaded", () => {
     const style = document.createElement("style");
     // Only the badge is hidden: captures show the app's own look, the same as a new copy gets.
-    style.textContent = `.brand-row .chip { display: none !important; }`;
+    style.textContent = `.brand-row .chip, .toasts { display: none !important; }`;
     document.head.appendChild(style);
   });
 });

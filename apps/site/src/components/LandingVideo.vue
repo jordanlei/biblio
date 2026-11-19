@@ -6,7 +6,7 @@ import { onBeforeUnmount, onMounted, ref } from "vue";
 const props = defineProps<{ name: string; label: string; width: number; height: number }>();
 
 const base = import.meta.env.BASE_URL;
-const captureVersion = "20261119b";
+const captureVersion = "20261119c";
 const el = ref<HTMLVideoElement | null>(null);
 const src = ref<string | undefined>();
 let observer: IntersectionObserver | null = null;
