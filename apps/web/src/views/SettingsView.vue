@@ -11,6 +11,7 @@ import { clearLocalCache, deleteCurrentAuthUser, signOut, updateProfile, useSess
 import { duplicateGroups } from "../services/library/merge";
 import { askConfirm, openAdd, toast, toastError, ui } from "../services/ui";
 import { connectLibraryFolder, rebuildFromDrive, stopSync, syncNow, syncStatus } from "../sync/librarySync";
+import { builtAt, reloadApp } from "../services/update";
 
 const router = useRouter();
 const session = useSession();
@@ -189,6 +190,17 @@ async function deleteAccount() {
         </div>
       </div>
       <button class="btn" type="button" @click="updateProfile({ onboardingCompleted: false }).then(() => router.push('/library'))">Replay tour</button>
+    </section>
+
+    <section class="card pad">
+      <div class="head">
+        <AppIcon name="download" :size="20" />
+        <div>
+          <h2>App</h2>
+          <p class="muted small">Install Biblio from your browser's address bar (or Share → Add to Home Screen on iPhone) to open it in its own window. This version was built {{ builtAt }}.</p>
+        </div>
+      </div>
+      <button class="btn" type="button" @click="reloadApp">Reload to update</button>
     </section>
 
     <section class="card pad danger-zone">

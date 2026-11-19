@@ -15,3 +15,14 @@ void router.isReady().then(() => {
 });
 
 if (usingEmulators) void import("./services/emulatorHooks").then((hooks) => hooks.installEmulatorHooks());
+
+// Installable app (see public/sw.js). Not in dev or local test mode, where it would cache stale code.
+if ("serviceWorker" in navigator && import.meta.env.PROD && !usingEmulators) {
+  navigator.serviceWorker
+    .register("/sw.js")
+    .then((reg) => {
+      // Check for a new version whenever the app comes back to the foreground.
+      document.addEventListener("visibilitychange", () => document.visibilityState === "visible" && void reg.update().catch(() => {}));
+    })
+    .catch(() => {});
+}

@@ -6,3 +6,6 @@ declare const __BIBLIO_CONFIG__: {
   appUrl: string;
   firebase: { apiKey: string; authDomain: string; projectId: string; storageBucket?: string; messagingSenderId: string; appId: string };
 } | null;
+
+/** When this build was made, as an ISO timestamp. See vite.config.ts. */
+declare const __BUILT_AT__: string;

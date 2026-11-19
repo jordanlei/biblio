@@ -17,7 +17,8 @@ function biblioConfig(mode: string) {
 export default defineConfig(({ mode }) => ({
   plugins: [vue()],
   define: {
-    __BIBLIO_CONFIG__: JSON.stringify(biblioConfig(mode))
+    __BIBLIO_CONFIG__: JSON.stringify(biblioConfig(mode)),
+    __BUILT_AT__: JSON.stringify(new Date().toISOString())
   },
   server: {
     port: 5173
