@@ -50,11 +50,11 @@ const compareRows: Array<{ label: string; cells: Array<{ mark: Mark; note: strin
     { mark: "partly", note: "Source is open; sync is Zotero’s service" },
     { mark: "no", note: "Vendor-run" },
     { mark: "no", note: "Vendor-run" } ] },
-  { label: "You own the data", cells: [
-    { mark: "yes", note: "Papers, notes, tags, links — all in your Drive" },
-    { mark: "partly", note: "Files and database on your machine" },
-    { mark: "partly", note: "Files and database on your machine" },
-    { mark: "no", note: "PDFs in your Drive; the rest is Paperpile’s" } ] },
+  { label: "Drive sync", cells: [
+    { mark: "yes", note: "The whole library is canonical in your Drive" },
+    { mark: "partly", note: "Optional sync through Zotero; local library remains on your computer" },
+    { mark: "no", note: "Local .enl library" },
+    { mark: "partly", note: "PDFs sync to Drive; metadata stays on Paperpile’s servers" } ] },
   { label: "Survives its vendor", cells: [
     { mark: "yes", note: "Files stay in Drive; rebuild a copy from a .zip" },
     { mark: "partly", note: "Local library, but sync needs Zotero’s servers" },
@@ -153,7 +153,7 @@ const compareRows: Array<{ label: string; cells: Array<{ mark: Mark; note: strin
       </ol>
       </div>
       <figure class="phone">
-        <img :src="`${BASE}landing/phone-paper.jpg?v=${CAPTURES}`" width="780" height="1688" alt="A paper's details and notes in Biblio's installed app on a phone." loading="lazy" />
+        <img :src="`${BASE}landing/phone-paper.jpg?v=${CAPTURES}`" width="780" height="1688" alt="A paper's details and notes in Biblio's installed app on a phone." loading="eager" />
       </figure>
       </div>
     </section>
@@ -220,7 +220,7 @@ const compareRows: Array<{ label: string; cells: Array<{ mark: Mark; note: strin
           </tbody>
         </table>
       </div>
-      <p class="fine compare-notes">This is the short version: ownership and storage are where Biblio is most different. The others are ahead on Word and Google Docs plugins, PDF annotation, and mature mobile apps. <a :href="docUrl('COMPARISON.md')">See the sourced notes</a> for the full comparison and caveats.</p>
+      <p class="fine compare-notes">This is the short version: Drive storage and deployment are where Biblio is most different. The others are ahead on Word and Google Docs plugins, PDF annotation, and mature mobile apps. <a :href="docUrl('COMPARISON.md')">See the sourced notes</a> for the full comparison and caveats.</p>
     </section>
 
     <section class="run">
@@ -769,17 +769,17 @@ code {
   width: 220px;
   margin: 0;
   overflow: hidden;
-  border: 8px solid #18181b;
-  border-radius: 34px;
-  background: #18181b;
-  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--border-strong);
+  border-radius: 28px;
+  background: var(--surface);
+  box-shadow: 0 18px 38px rgba(24, 24, 27, 0.18);
 }
 
 .phone img {
   display: block;
   width: 100%;
   height: auto;
-  border-radius: 26px;
+  border-radius: 27px;
 }
 
 .hero-visual .phone {
