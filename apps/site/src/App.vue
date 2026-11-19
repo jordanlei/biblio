@@ -6,7 +6,7 @@ import FaqItem from "./components/FaqItem.vue";
 import LandingVideo from "./components/LandingVideo.vue";
 import SiteFooter from "./components/SiteFooter.vue";
 import SiteHeader from "./components/SiteHeader.vue";
-import { PRIVACY_URL, REPO_URL, SETUP_URL, docUrl } from "./site";
+import { BASE, PRIVACY_URL, REPO_URL, SETUP_URL, docUrl } from "./site";
 
 // Each one has a demo below.
 const features = [
@@ -80,26 +80,9 @@ const extras = [
           <p class="fine">Self-hosted in your own Google account.</p>
         </div>
       </div>
-      <div class="library-preview" aria-label="An illustration of a Biblio library">
-        <aside class="preview-sidebar">
-          <strong>Biblio</strong>
-          <span class="preview-add">+ Add papers</span>
-          <span class="preview-active">All papers</span>
-          <span>Recently added</span>
-          <small>LIBRARY</small>
-          <span>Research notes</span>
-          <span>Folders &amp; tags</span>
-        </aside>
-        <div class="preview-main">
-          <span class="preview-label">LIBRARY</span>
-          <h2>All papers</h2>
-          <div class="preview-search">Search by title, author, or keyword</div>
-          <div class="preview-filters"><span>To read</span><span>Skim</span><span>Read</span><span>Reference</span></div>
-          <div class="preview-paper"><small>2017</small><div><strong>Attention Is All You Need</strong><p>Vaswani and colleagues</p></div></div>
-          <div class="preview-paper"><small>2016</small><div><strong>Latent Factor Analysis via Dynamical Systems</strong><p>Pandarinath and colleagues</p></div></div>
-          <div class="preview-paper"><small>2015</small><div><strong>Human-level control through deep reinforcement learning</strong><p>Mnih and colleagues</p></div></div>
-        </div>
-      </div>
+      <figure class="hero-visual shot">
+        <img :src="`${BASE}landing/library.jpg?v=20261119`" width="2560" height="1600" alt="Biblio's paper library and detail panel, shown with sample papers." />
+      </figure>
     </section>
 
     <nav class="highlights" aria-label="Explore Biblio's features">
@@ -332,8 +315,7 @@ h1 {
 
 .hero-visual {
   position: relative;
-  margin: 0 0 0 0;
-  padding-bottom: 48px;
+  margin: 0;
 }
 
 .tree {
@@ -754,24 +736,6 @@ code {
 .capability-card li:last-child { border: 0; padding-bottom: 0; }
 .capability-card li span { color: var(--text-2); font-size: calc(15px * var(--text-scale)); line-height: 1.5; }
 
-
-.library-preview { display: grid; grid-template-columns: 170px minmax(0, 1fr); min-height: 370px; overflow: hidden; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); box-shadow: var(--shadow); }
-.preview-sidebar { display: flex; flex-direction: column; gap: 12px; padding: 20px 14px; background: var(--sidebar); border-right: 1px solid var(--border); color: var(--text-2); font-size: 12px; }
-.preview-sidebar strong { color: var(--text); font-family: var(--font-serif); font-size: 18px; }
-.preview-sidebar small { margin-top: 12px; color: var(--text-3); letter-spacing: .08em; }
-.preview-add { padding: 8px; border-radius: 5px; background: var(--accent); color: var(--accent-text); }
-.preview-active { padding: 7px 8px; border-radius: 5px; background: var(--surface); color: var(--text); border: 1px solid var(--border); }
-.preview-main { padding: 26px; min-width: 0; }
-.preview-label { font-size: 10px; letter-spacing: .1em; color: var(--text-3); }
-.preview-main h2 { margin: 4px 0 16px; font-family: var(--font-serif); font-size: 25px; }
-.preview-search { border: 1px solid var(--border-strong); border-radius: 5px; padding: 9px 11px; font-size: 12px; color: var(--text-3); }
-.preview-filters { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0 8px; }
-.preview-filters span { padding: 4px 7px; border-radius: 4px; background: var(--surface-2); color: var(--text-2); font-size: 11px; }
-.preview-paper { display: grid; grid-template-columns: 40px 1fr; gap: 10px; padding: 15px 0; border-bottom: 1px solid var(--border); }
-.preview-paper small { color: var(--text-3); font-size: 11px; }
-.preview-paper strong { font-family: var(--font-serif); font-size: 13px; line-height: 1.35; }
-.preview-paper p { margin: 3px 0 0; color: var(--text-3); font-size: 11px; }
-@media (max-width: 520px) { .library-preview { grid-template-columns: 110px minmax(0, 1fr); } .preview-sidebar { padding: 14px 9px; } .preview-main { padding: 16px; } }
 
 .extension {
   display: grid;
