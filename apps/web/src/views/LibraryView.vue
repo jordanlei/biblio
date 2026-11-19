@@ -1001,16 +1001,18 @@ const scopeEyebrow = computed(() => (scope.value.kind === "folder" ? "Folder" : 
     grid-template-columns: 34px minmax(0, 1fr);
     gap: 12px;
     align-items: start;
-    margin: 0 0 8px;
-    padding: 15px 12px;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    background: var(--surface);
-    box-shadow: var(--shadow-subtle);
+    margin: 0;
+    padding: 15px 4px;
+    border: 0;
+    border-bottom: 1px solid var(--border);
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
   }
 
   .entry.selected {
-    box-shadow: inset 3px 0 0 var(--accent), var(--shadow-subtle);
+    box-shadow: inset 3px 0 0 var(--accent);
+    background: var(--accent-soft);
   }
 
   .entry .year {
@@ -1020,8 +1022,8 @@ const scopeEyebrow = computed(() => (scope.value.kind === "folder" ? "Folder" : 
   }
 
   .entry .body { min-width: 0; }
-  .entry .title { font-size: calc(16px * var(--text-scale)); }
-  .entry .meta { display: block; line-height: 1.45; }
+  .entry .title { font-size: calc(15px * var(--text-scale)); line-height: 1.3; }
+  .entry .meta { display: block; font-size: calc(13px * var(--text-scale)); line-height: 1.4; }
   .entry .venue { display: block; margin-top: 2px; }
   .entry .check { display: none; }
 
@@ -1035,5 +1037,6 @@ const scopeEyebrow = computed(() => (scope.value.kind === "folder" ? "Folder" : 
   .sort { display: none; }
   .toolbar { gap: 8px; }
   .search { flex-basis: calc(100% - 44px); min-width: 0; }
+  .papers { margin: 12px 0 0; }
 }
 </style>

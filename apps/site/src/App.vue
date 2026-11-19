@@ -1159,12 +1159,69 @@ h1 {
   padding-bottom: clamp(120px, 14vw, 190px);
 }
 
+.how,
+.compare,
+.faq-section {
+  max-width: calc(920px + 2 * var(--gutter));
+}
+
+.run {
+  max-width: calc(820px + 2 * var(--gutter));
+}
+
+.run .terminal {
+  max-width: 680px;
+}
+
+.run-cta {
+  max-width: 680px;
+}
+
+.install {
+  padding-top: 104px;
+  padding-bottom: 112px;
+}
+
+.how {
+  padding-top: 120px;
+  padding-bottom: 120px;
+}
+
+.compare {
+  padding-top: 96px;
+  padding-bottom: 104px;
+}
+
+.run {
+  padding-top: 88px;
+  padding-bottom: 96px;
+}
+
+.faq-section {
+  padding-top: 96px;
+  padding-bottom: 112px;
+}
+
 .compare { background: #fbfaf8; }
 .compare-intro { max-width: 52ch; margin-bottom: 44px; }
 .compare h2 { max-width: 12ch; font-size: calc(clamp(34px, 4vw, 52px) * var(--text-scale)); }
 
 @media (max-width: 900px) {
-  .hero { gap: 56px; padding-top: 72px; }
+  .hero {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 56px;
+    padding-top: 72px;
+  }
+
+  .pitch,
+  .hero-visual,
+  .hero-visual .shot {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  h1 { max-width: 14ch; overflow-wrap: anywhere; }
+  .lede { max-width: 42ch; }
   .highlights { grid-template-columns: 1fr; padding-bottom: 80px; }
   .pillars { padding-top: 100px; padding-bottom: 100px; }
 }
