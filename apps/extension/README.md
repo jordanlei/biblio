@@ -15,6 +15,22 @@ After pulling changes or editing `biblio.config.json`, run `npm run build:extens
 click **Reload** on Biblio's card in `chrome://extensions`. Chrome may warn about developer-mode
 extensions when it starts; that is expected for a self-hosted install.
 
+## Another computer or a missing config
+
+Use your existing Biblio address and sign in to the same app; there is no need to run setup or
+create another Firebase project. Install Node.js and git, clone this repository, and run:
+
+```sh
+cd biblio
+npm run build:extension -- --app-url https://your-id.web.app
+```
+
+Replace the example with the origin of your existing Biblio, including a custom domain if you use
+one. In `chrome://extensions`, enable Developer mode and load `apps/extension/build` unpacked.
+Re-run the same command and reload the extension after updating the code. If Chrome reports that
+`app-url.js` failed to load, rebuild and check that it loads the `build` folder, not `src` or an
+old extension folder. This command does not create `biblio.config.json` or deploy the app.
+
 ## Use
 
 On an article page (a journal, PubMed, PMC, arXiv, a PDF tab…), click the Biblio button or

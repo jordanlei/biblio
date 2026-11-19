@@ -167,6 +167,17 @@ npm run deploy     <span class="faint"># publish it</span></pre>
       </li>
     </ol>
 
+    <section class="block" id="another-device">
+      <h2>Install the extension on another computer</h2>
+      <p>Already have a Biblio? Use the same app and library on each computer. Sign in at your existing Biblio address; you don't need another Firebase project or library.</p>
+      <p>On the new computer, install Node.js and git, then clone your Biblio repository (or the original repository) and build the extension with your existing app's address:</p>
+      <pre class="terminal">git clone {{ REPO_URL }}.git
+cd biblio
+npm run build:extension -- --app-url https://your-id.web.app</pre>
+      <p>Replace the example address with the address you use to open your Biblio. In Chrome, open <code>chrome://extensions</code>, enable <strong>Developer mode</strong>, choose <strong>Load unpacked</strong>, and select the <code>biblio/apps/extension/build</code> folder. Pin Biblio and sign in to your existing app.</p>
+      <p>After updating the code, run the build command again and click <strong>Reload</strong> on the extension's card. If Chrome reports that <code>app-url.js</code> failed to load, rebuild and make sure Chrome loads the <code>build</code> folder.</p>
+    </section>
+
     <section class="block">
       <h2>Good to know</h2>
       <dl class="faq">

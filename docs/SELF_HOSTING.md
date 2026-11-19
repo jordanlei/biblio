@@ -56,6 +56,22 @@ For steps 4, 6, and 8, setup calls Google's APIs as the account you signed in to
 with, on your machine. If any call fails (for example, an organization policy), setup prints the
 console page to do that step by hand and carries on.
 
+## Install the extension on another computer
+
+You can use the same app and library on another computer without creating a new Firebase project.
+Install Node.js and git, clone this repository or your fork, and from the repository directory run:
+
+```sh
+npm run build:extension -- --app-url https://your-id.web.app
+```
+
+Replace the example with your existing Biblio address. In `chrome://extensions`, enable Developer
+mode, choose **Load unpacked**, and select `apps/extension/build`. Sign in to your existing app.
+After pulling updates, run the command again and reload the extension in Chrome. If `app-url.js`
+fails to load, rebuild and verify Chrome is loading the `build` folder. This does not require
+`biblio.config.json` and does not deploy or modify your Firebase project. See the
+[extension README](../apps/extension/README.md) for details.
+
 ## Change it
 
 ```sh
@@ -107,8 +123,8 @@ The service account can deploy hosting and Firestore rules, and nothing else. To
   treats that as low-risk, so there's no "unverified app" warning and nothing to get verified.
 - **Your own domain.** Add it under *Hosting* in the Firebase console, then add it to
   *Authentication → Settings → Authorized domains*.
-- **The Chrome extension:** setup configures it for your address in `apps/extension`
-  (`npm run build:extension` to refresh it). Load that folder unpacked (see its README).
+- **The Chrome extension:** setup builds it for your address in `apps/extension/build`
+  (`npm run build:extension` to refresh it). Load the `build` folder unpacked (see its README).
 - **Moving between copies.** Your copy only sees the Drive files it created, so a library moves as
   files: in the old copy, *Settings → Download library (.zip)*; in the new one, *Import a library*.
   No app at hand (say you deleted the old Firebase project)? Download the library folder from Google

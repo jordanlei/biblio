@@ -5,7 +5,7 @@ import { PRIVACY_URL, REPO_URL, SETUP_URL } from "../site";
 
 <template>
   <footer class="foot">
-    <BrandMark :size="18" /> Biblio · open source (MIT) · · <a :href="SETUP_URL">Setup tutorial</a> · <a :href="PRIVACY_URL">Privacy</a> · <a :href="REPO_URL">GitHub</a>
+    <BrandMark :size="18" /> Biblio · open source · <a :href="SETUP_URL">Setup tutorial</a> · <a :href="PRIVACY_URL">Privacy</a> · <a :href="REPO_URL">GitHub</a>
   </footer>
 </template>
 

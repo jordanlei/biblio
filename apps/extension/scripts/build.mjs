@@ -6,13 +6,22 @@ import { cpSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } f
 import { fileURLToPath } from "node:url";
 import { requireConfig } from "../../../scripts/lib/config.mjs";
 
-const { appUrl, firebase } = requireConfig();
+const args = process.argv.slice(2);
+if (args.length && (args.length !== 2 || args[0] !== "--app-url")) {
+  throw new Error("Usage: npm run build:extension -- [--app-url https://your-copy.web.app]");
+}
+const config = args.length ? null : requireConfig();
+const appUrl = args.length ? args[1] : config.appUrl;
+const parsedUrl = new URL(appUrl);
+if (!["http:", "https:"].includes(parsedUrl.protocol) || parsedUrl.username || parsedUrl.password || parsedUrl.pathname !== "/" || parsedUrl.search || parsedUrl.hash) {
+  throw new Error("The app URL must be an HTTP(S) origin, such as https://your-copy.web.app.");
+}
 const src = fileURLToPath(new URL("../src/", import.meta.url));
 const root = fileURLToPath(new URL("../build/", import.meta.url));
 rmSync(root, { recursive: true, force: true });
 mkdirSync(root);
 for (const name of ["background.js", "bridge.js", "icons"]) cpSync(`${src}${name}`, `${root}${name}`, { recursive: true });
-const origin = new URL(appUrl).origin;
+const origin = parsedUrl.origin;
 
 const zoteroRoot = fileURLToPath(new URL("../vendor/zotero/", import.meta.url));
 const zoteroFiles = [
@@ -235,7 +244,7 @@ writeFileSync(
 const manifest = JSON.parse(readFileSync(`${src}manifest.json`, "utf8"));
 const bridge = manifest.content_scripts.find((entry) => entry.js.includes("bridge.js"));
 // Replace, never union: a real install must not let a localhost page talk to its worker.
-bridge.matches = [...new Set([`${origin}/*`, `https://${firebase.authDomain}/*`])];
+bridge.matches = [...new Set([`${origin}/*`, ...(config ? [`https://${config.firebase.authDomain}/*`] : [])])];
 writeFileSync(`${root}manifest.json`, `${JSON.stringify(manifest, null, 2)}\n`);
 
 console.log(`Extension built for ${origin}: load apps/extension/build in chrome://extensions (Developer mode → Load unpacked).`);
