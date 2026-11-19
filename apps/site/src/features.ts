@@ -34,7 +34,7 @@ export const features: Feature[] = [
       "Installable web app for laptop and phone",
       "Your copy runs in your own Google account"
     ],
-    image: "still-organize"
+    image: "phone-library"
   },
   {
     id: "workflow",
