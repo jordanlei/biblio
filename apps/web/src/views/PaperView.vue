@@ -412,5 +412,16 @@ async function removePaper() {
     padding: 8px 16px;
     flex-wrap: wrap;
   }
+
+  .cols { display: block; }
+  .main { min-width: 0; }
+  .main .title { font-size: calc(28px * var(--text-scale)); }
+  .side {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-top: 28px;
+  }
+  .side .card { padding: 16px; }
 }
 </style>

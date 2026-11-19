@@ -254,4 +254,28 @@ function followCite(event: MouseEvent) {
   line-height: 1.65;
 }
 
+@media (max-width: 820px) {
+  .inspector {
+    top: 52px;
+    right: 0;
+    bottom: 0;
+    width: 100vw;
+    height: calc(100dvh - 52px);
+    border-top: 1px solid var(--border-strong);
+    border-left: 0;
+    border-radius: 14px 14px 0 0;
+    box-shadow: 0 -12px 36px rgba(24, 24, 27, 0.16);
+  }
+
+  .ins-head {
+    min-height: 54px;
+    padding: 8px 12px;
+  }
+
+  .ins-head .btn.sm:not(.quiet) { padding-inline: 9px; }
+  .ins-scroll { padding: 20px 18px 40px; }
+  .title { font-size: calc(23px * var(--text-scale)); }
+  .block { margin-top: 24px; }
+}
+
 </style>

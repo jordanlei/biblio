@@ -84,9 +84,9 @@ const compareRows: Array<{ label: string; cells: Array<{ mark: Mark; note: strin
 
     <section class="hero">
       <div class="pitch">
-        <p class="eyebrow hero-kicker">Finally, a reference manager you can call your own.</p>
-        <h1 class="display">The code for a reference manager you host yourself.</h1>
-        <p class="lede">Deploy Biblio to your own Google account. Your papers, PDFs, and notes live in your Drive, while the app gives you a practical way to collect, read, and connect them.</p>
+        <p class="eyebrow hero-kicker">Introducing Biblio</p>
+        <h1 class="display">Finally, a Reference Manager You Can Call Your Own.</h1>
+        <p class="lede">Biblio is the code for a reference manager you deploy to your own Google account. Your papers, PDFs, and notes live in your Drive, while the app gives you a practical way to collect, read, and connect them.</p>
         <div class="cta">
           <div class="row">
             <a class="btn primary lg" :href="SETUP_URL">Set up your own</a>

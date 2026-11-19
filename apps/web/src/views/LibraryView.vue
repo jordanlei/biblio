@@ -975,7 +975,20 @@ const scopeEyebrow = computed(() => (scope.value.kind === "folder" ? "Folder" : 
 
 @media (max-width: 820px) {
   .list-pane {
-    padding: 16px;
+    padding: 20px 16px 48px;
+  }
+
+  .list-head {
+    align-items: center;
+    margin-bottom: 14px;
+  }
+
+  .list-head h1 {
+    font-size: calc(28px * var(--text-scale));
+  }
+
+  .list-head .btn.icon {
+    display: inline-flex;
   }
 
   .toolbar {
@@ -985,13 +998,42 @@ const scopeEyebrow = computed(() => (scope.value.kind === "folder" ? "Folder" : 
   }
 
   .entry {
-    grid-template-columns: 0 40px minmax(0, 1fr);
-    gap: 10px;
+    grid-template-columns: 34px minmax(0, 1fr);
+    gap: 12px;
+    align-items: start;
+    margin: 0 0 8px;
+    padding: 15px 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface);
+    box-shadow: var(--shadow-subtle);
   }
 
-  .side,
-  .filters {
+  .entry.selected {
+    box-shadow: inset 3px 0 0 var(--accent), var(--shadow-subtle);
+  }
+
+  .entry .year {
+    padding-top: 2px;
+    text-align: left;
+    font-size: calc(12px * var(--text-scale));
+  }
+
+  .entry .body { min-width: 0; }
+  .entry .title { font-size: calc(16px * var(--text-scale)); }
+  .entry .meta { display: block; line-height: 1.45; }
+  .entry .venue { display: block; margin-top: 2px; }
+  .entry .check { display: none; }
+
+  .side {
     display: none;
   }
+
+  .filters { display: flex; }
+  .filters .toolbar-control { width: 34px; padding: 0; justify-content: center; font-size: 0; }
+  .filters .toolbar-control .control-count { font-size: 10px; }
+  .sort { display: none; }
+  .toolbar { gap: 8px; }
+  .search { flex-basis: calc(100% - 44px); min-width: 0; }
 }
 </style>
